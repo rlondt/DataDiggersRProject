@@ -3,9 +3,12 @@ setwd('D:/datafiles')
 packages <- c("elastic"
               ,"tidyverse"
               ,"dplyr"
+              ,"caret"
+              ,"doSNOW"
               ,"sf"
               ,"futile.logger"
               ,"lubridate"
+              ,"openxlsx"
 #              ,"RJDBC"
               ,"shiny")
 
@@ -23,6 +26,13 @@ for (p in packages){
   )
 }
 
+# Gebruik meerdere CPU's
+cl <- makeCluster(4, type = "SOCK")
+registerDoSNOW(cl)
+
+
+
+
 
 medewerkersDF <- read.csv2("Medewerkers.csv")
 ordersDF      <- read.csv2("Orders.csv")
@@ -30,23 +40,62 @@ roosterdienstenDF <- read.csv2("Roosterdiensten.csv")
 tijdschrijvenDF <- read.csv2("Tijdschrijven.csv") 
 workflowDF <- rbind(read.csv2("Workflow 1.csv"),read.csv2("Workflow 2.csv"))
 
-colnames(medewerkersDF)
 
-colnames(ordersDF)
+# eerste bewerking
+# omzetten factoren naar echte waardes
+# omzetten e
+medewerkersDF <- medewerkersDF %>%
+  mutate(MDWID = as.character(MDWID)) 
 
-colnames(roosterdienstenDF)
+ordersDF <- ordersDF %>%
+  mutate(Ordernummer = as.character(Ordernummer)) %>%
+  mutate(CreationDate = convertToDateTime(CreationDate)) %>%
+  mutate(Uiterstehersteltijd = convertToDateTime(Uiterstehersteltijd)) %>%
+  mutate(GeplandeTG = convertToDateTime(GeplandeTG)) %>%
+  mutate(ModifiedOn = convertToDateTime(ModifiedOn))
 
-colnames(workflowDF)
+roosterdienstenDF <- roosterdienstenDF %>%
+  mutate(DienstID = as.character(DienstID)) %>%
+  mutate(MDWID = as.character(MDWID)) %>%
+  mutate(Starttijd = convertToDateTime(Starttijd))%>%
+  mutate(Eindtijd = convertToDateTime(Eindtijd))%>%
+  mutate(ShiftDate = convertToDate(ShiftDate))
+  
+tijdschrijvenDF <- tijdschrijvenDF %>%
+  mutate(DienstID = as.character(DienstID)) %>%
+  mutate(MDWID = as.character(MDWID)) %>%
+  mutate(ERPID = as.character(ERPID)) %>%
+  mutate(CreatedOn = convertToDateTime(CreatedOn)) %>%
+  mutate(ModifiedOn = convertToDateTime(ModifiedOn)) %>%
+  mutate(StartDate = convertToDateTime(StartDate)) %>%
+  mutate(EndDate = convertToDateTime(EndDate))
+  
+workflowDF <- workflowDF %>%
+  mutate(RecordGewijzigd = convertToDateTime(RecordGewijzigd)) %>%
+  mutate(Ordernummer = as.character(Ordernummer)) %>%
+  mutate(GeplandeEindtijd = convertToDateTime(GeplandeEindtijd)) %>%
+  mutate(WerkelijkeEindtijd = convertToDateTime(WerkelijkeEindtijd)) %>%
+  mutate(Starttijd = convertToDateTime(Starttijd))
 
-head(workflowDF)
-head(ordersDF)
+
+
+
+# colnames(medewerkersDF)
+# 
+# colnames(ordersDF)
+# 
+# colnames(roosterdienstenDF)
+# 
+# colnames(workflowDF)
+# 
+# head(workflowDF)
+# head(ordersDF)
 
 write_rds(medewerkersDF, "medewerkers.rds")
 write_rds(ordersDF, "orders.rds")
 write_rds(roosterdienstenDF, "roosterdiensten.rds")
 write_rds(tijdschrijvenDF, "tijdschrijven.rds")
 write_rds(workflowDF, "workflow.rds")
-
 
 
 
