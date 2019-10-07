@@ -112,10 +112,3 @@ dienstMedewerkersDF <- left_join(roosterdienstenDF, medewerkersDF)
 # tijdschrijven met diensten en medewerkers
 tijdschrijvenDienstMedewerkersDF <- left_join(tijdschrijvenDF, dienstMedewerkersDF)
 ordersTijdschrijvenDF <- left_join(ordersDF, tijdschrijvenDienstMedewerkersDF, by=c("Ordernummer" = "ERPID"))
-
-
-
-
-
-
-
