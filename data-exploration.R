@@ -99,14 +99,23 @@ write_rds(workflowDF, "workflow.rds")
 
 
 
-# joins
-## Diensten met medewerkers
-dienstMedewerkersDF <- left_join(roosterdienstenDF, medewerkersDF)
-## tijdschrijven met diensten en medewerkers
-tijdschrijvenDienstMedewerkersDF <- left_join(tijdschrijvenDF, dienstMedewerkersDF)
-## workflow actifiteiten met orders
-workflowOrdersDF <- left_join(workflowDF, ordersDF)
+##
+# Backoffice data = workflow 
+# workflow actifiteiten met orders
+ordersWorkflowDF <- left_join(ordersDF, workflowDF)
+
 
 ##
-workflowDienstMedewerkersDF <- left_join(workflowDF, dienstMedewerkersDF)
+# joins operations = tijdschrijven
+# Diensten met medewerkers
+dienstMedewerkersDF <- left_join(roosterdienstenDF, medewerkersDF)
+# tijdschrijven met diensten en medewerkers
+tijdschrijvenDienstMedewerkersDF <- left_join(tijdschrijvenDF, dienstMedewerkersDF)
+ordersTijdschrijvenDF <- left_join(ordersDF, tijdschrijvenDienstMedewerkersDF, by=c("Ordernummer" = "ERPID"))
+
+
+
+
+
+
 
