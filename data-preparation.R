@@ -1,5 +1,6 @@
-source('./init.R')
-do.call("init",list())
+if (file.exists('./init.R')){
+  source('./init.R')
+}
 
 medewerkersDF <- read.csv2("Medewerkers.csv")
 ordersDF      <- read.csv2("Orders.csv")

@@ -2,7 +2,7 @@
 # Generic file to set the environment
 init <- function(){
   werkdir <- "D:/datafiles"
-  if( werkdir == getwd()){
+  if( werkdir != getwd()){
     
     setwd('D:/datafiles')
     
@@ -37,3 +37,7 @@ init <- function(){
     registerDoSNOW(cl)
   }
 }
+
+do.call("init",list())
+
+rm(init)
