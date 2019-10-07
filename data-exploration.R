@@ -107,6 +107,6 @@ tijdschrijvenDienstMedewerkersDF <- left_join(tijdschrijvenDF, dienstMedewerkers
 ## workflow actifiteiten met orders
 workflowOrdersDF <- left_join(workflowDF, ordersDF)
 
-## 
+##
 workflowDienstMedewerkersDF <- left_join(workflowDF, dienstMedewerkersDF)
 
