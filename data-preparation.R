@@ -141,7 +141,7 @@ write_rds(ordersTijdschrijvenDF, "ordersTijdschrijvenDF.rds")
 
 summary(ordersTijdschrijvenDF)
 
-summarizeOrderTijdschrijvenByOrder <- ordersTijdschrijvenDF %>%
+summarizeOrderTijdschrijvenByOrderDF <- ordersTijdschrijvenDF %>%
   group_by(Ordernummer) %>%
   summarise( VerschillendeDagen       = n_distinct(ShiftDate)
   , AantalTijdschrijven               = n()
@@ -162,27 +162,6 @@ summarizeOrderTijdschrijvenByOrder <- ordersTijdschrijvenDF %>%
 # 
 # summarizeOrderTijdschrijvenByOrder <- left_join(summarizeOrderTijdschrijvenByOrder, summarizeOrderTijdschrijvenByOrder2)
 
+write_rds(summarizeOrderTijdschrijvenByOrderDF, "summarizeOrderTijdschrijvenByOrderDF.rds")           
 
-write_rds(summarizeOrderTijdschrijvenByOrder, "summarizeOrderTijdschrijvenByOrder")           
 
-hist(as.numeric(summarizeOrderTijdschrijvenByOrder$OverschreidingUitersteHersteltijd, units = "hours"))
-
-qplot(as.numeric(summarizeOrderTijdschrijvenByOrder$OverschreidingUitersteHersteltijd, units = "days"),
-      geom="histogram",
-      binwidth = 1,  
-      main = "Histogram for overschreiding", 
-      xlab = "Overschrijding in uren",  
-      fill=I("blue"), 
-      col=I("red"), 
-      alpha=I(.2),
-      xlim=c(-40,40)
-      )
-
-qplot(as.numeric(TotaleSchrijftijdReis, units="hours"), data = summarizeOrderTijdschrijvenByOrder,
-      geom="histogram",
-      binwidth = 1)
-
-qplot(as.numeric(TotaleSchrijftijdWerk, units="hours"), data = summarizeOrderTijdschrijvenByOrder,
-      geom="histogram",
-      binwidth = 1,
-      xlim=c(0, 100))
