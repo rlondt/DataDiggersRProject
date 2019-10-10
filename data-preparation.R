@@ -197,29 +197,6 @@ workflowDF2 <- workflowDF %>%
         , "GeplandeEindtijd"
         , "WerkelijkeEindtijd") 
 
-# 
-# temp <- aggregate(cbind(Ordernummer, Taakomschrijving) 
-#                   ~ Starttijd + NormDoorlooptijd+GeplandeEindtijd+WerkelijkeEindtijd, 
-#                   workflowDF2[0:200, ], mean)
-# 
-# temp <- aggregate(cbind(Ordernummer, Starttijd, NormDoorlooptijd, GeplandeEindtijd, WerkelijkeEindtijd) 
-#                   ~ Taakomschrijving, 
-#                   workflowDF2[0:200, ], mean)
-# 
-# temp2 <- reshape(temp, direction = "wide", 
-#                  idvar = "Ordernummer", timevar = "Taakomschrijving")
-# 
-# 
-# class(Sys.time())
-# 
-# unclass(Sys.time())
-# class(unclass(Sys.time()))
-# 
-# as.POSIXct(unclass(Sys.time()),origin="1970-01-01")
-# t<- workflowDF %>%
-#   group_by(Ordernummer,Taakomschrijving) %>%
-#   summarise(aantal=n(), min_sort = min(Sortering))%>%
-#   filter(aantal>1)
 
 workflowDF21 <- melt(workflowDF2, measure.vars = c("Starttijd"
                                                   , "NormDoorlooptijd"
@@ -237,14 +214,10 @@ for (i in names(summarizedWorkflowDF)){
   }
 }
 
-
-# summarizedWorkflowDF <- lapply(summarizedWorkflowDF, function(x) if(is.numeric(x)) as.POSIXct(x, origin="1970-01-01") else x) 
-# 
-# 
-# 
-# summarizedWorkflowDF <- as.data.frame(do.call(rbind, summarizedWorkflowDF))
-# 
-# 
-# 
-# summarise(summarizedWorkflowDF)
 write_rds(summarizedWorkflowDF, "summarizedWorkflow.rds")
+
+
+summarizedWorflowTijdschrijvenDF <- full_join(summarizedWorkflowDF, summarizeOrderTijdschrijvenByOrderDF)
+
+write_rds(summarizedWorflowTijdschrijvenDF, "summarizedWorflowTijdschrijven.rds")
+
