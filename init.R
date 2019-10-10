@@ -16,7 +16,11 @@ init <- function(){
                   ,"lubridate"
                   ,"openxlsx"
                   #              ,"RJDBC"
-                  ,"shiny")
+                  ,"anomalize"
+                  ,"VIM"
+                  , "reshape2"
+                  ,"shiny"
+                  )
     
     ## Installeer packages
     for (p in packages) {
@@ -35,6 +39,10 @@ init <- function(){
     # Gebruik meerdere CPU's
     cl <- makeCluster(4, type = "SOCK")
     registerDoSNOW(cl)
+    
+    # no scientific notation
+    options(scipen = 999)
+    
   }
 }
 

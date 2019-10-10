@@ -2,8 +2,6 @@ if (file.exists('./init.R')){
   source('./init.R')
 }
 
-# no scientific notation
-options(scipen = 999)
 
 ordersWorkflowDF <- read_rds("ordersWorkflowDF.rds")
 ordersTijdschrijvenDF <- read_rds("ordersTijdschrijvenDF.rds")
