@@ -2,6 +2,8 @@ if (file.exists('./init.R')){
   source('./init.R')
 }
 
+library(VIM)
+
 # no scientific notation
 options(scipen = 999)
 
@@ -15,16 +17,22 @@ ordersTijdschrijvenDF <- read_rds("ordersTijdschrijvenDF.rds")
 # 2.1.1 medewerker
 # replace empty strings with 'NA'
 medewerkersDF[medewerkersDF==""]<-NA
-library(VIM)
 aggr_plot <- aggr(medewerkersDF, col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(medewerkersDF), cex.axis=.8, 
                   gap=2, 
                   ylab=c("Missing data Medewerker","Combinatie"))
 
+# 2.1.2 Order
+# replace empty strings with 'NA'
+aggr_plot <- aggr(ordersDF, col=c('lightblue','red'), 
+                  numbers=TRUE, sortVars=TRUE, prop=FALSE,
+                  labels=names(ordersDF), cex.axis=.8, 
+                  gap=2, cex.numbers=.5,
+                  ylab=c("Missing data Order","Combinatie"))
+
 
 # 2.1.2 anomaly detection
-library(tidyverse)
 library(anomalize)
 
 dfAnomalize <- summarizeOrderTijdschrijvenByOrderDF[,c("OverschreidingUitersteHersteltijd", "EindtijdTijdschrijven")]
