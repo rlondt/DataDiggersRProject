@@ -12,6 +12,7 @@ ordersTijdschrijvenDF <- read_rds("ordersTijdschrijvenDF.rds")
 # 2.1 empty values
 # 2.1.1 medewerker
 # replace empty strings with 'NA'
+medewerkersDF[medewerkersDF==""]<-NA
 library(VIM)
 aggr_plot <- aggr(medewerkersDF, col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
@@ -29,7 +30,6 @@ dfAnomalize2 <- dfAnomalize[complete.cases(dfAnomalize), ]
 
 # implement the “anomalize” (anomaly detection) workflow
 #https://www.r-bloggers.com/anomalize-tidy-anomaly-detection/
-
 dfAnomalize2 %>%
   time_decompose(OverschreidingUitersteHersteltijd) %>%
   anomalize(remainder) %>%
