@@ -180,11 +180,54 @@ workflowDF <- read_rds("workflow.rds")
 
 summary(workflowDF)
 
+
+workflowStappen <- c("dummy"
+                     # , "Opstellen POD"
+                     # , "V&G plan"
+                     # , "Opheffen dienst_Gepland"
+                     # , "Kostenindicatie bewaken_Gepland"
+                     # , "Kostenindicatie bewaken"
+                     # , "Kostenindicatie maken"
+                     # , "Vervallen opdracht analyse/terugwerken"
+                     # , "Bewaken opheffen Dienst"
+                     # , "Site Survey / TPO"
+                     # , "Site Survey / TPO tbv offerte"
+                     # , "Verwerken revisie VWT"
+                     # , "Vervuilde grond"
+                      # , "Dossier sluiten"
+                      # , "Beoordelen opheffen dienst"
+                     # , "Gereedmelden KPN systemen (AWO)"
+                     # , "Werkvoorbereiding VWT"
+                      , "Vergunning aanvraag langlopend"
+                     # , "DSQ - lengtebepaling t.b.v. offerte"
+                      , "Offerte bewaking"
+                      , "Werkvoorbereiding HLD tbv Offerte"
+                     # , "Vervallen opdracht afwikkelen"
+                     # , "Gereedmelden Netwerkadministratie (Kanvas)"
+                     # , "Verwerken Schadedossier"
+                      , "Klantafspraak controleren met klant"
+                      , "Werkvoorbereiding last minute"
+                      , "Klantafspraak  maken"
+                      , "Afmelden vergunning verlenende instanties"
+                      , "Werkvoorbereiding India"
+                      , "Verwerken revisie India"
+                     , "Uiterste hersteltijd"
+                     , "Afstemming facturatie"
+                     , "TAG gereed"
+                     , "Beoordelen opgeleverde werkmap"
+                     , "Uitvoering"
+                     , "Cleanbeoordeling"
+)
+
+
+
+
 # levels(workflowDF$Taakomschrijving)
 # levels(workflowDF$Status)
 
 workflowDF2 <- workflowDF %>%
   filter(Status == "Gereed") %>%
+  filter(Taakomschrijving %in% workflowStappen )%>%
   mutate( Starttijd = unclass(Starttijd)
          #,NormDoorlooptijd = NormDoorlooptijd
          ,GeplandeEindtijd = unclass(GeplandeEindtijd)
@@ -198,10 +241,12 @@ workflowDF2 <- workflowDF %>%
         , "WerkelijkeEindtijd") 
 
 
-workflowDF21 <- melt(workflowDF2, measure.vars = c("Starttijd"
-                                                  , "NormDoorlooptijd"
-                                                  , "GeplandeEindtijd"
-                                                  , "WerkelijkeEindtijd"))
+workflowDF20 <- melt(workflowDF2, measure.vars = c( "Starttijd"))
+
+workflowDF21 <- melt(workflowDF2, measure.vars = c( "Starttijd"
+                                                    , "NormDoorlooptijd"
+                                                    , "GeplandeEindtijd"
+                                                    , "WerkelijkeEindtijd"))
 
 summarizedWorkflowDF <- dcast(workflowDF21, Ordernummer ~ Taakomschrijving + variable, value.var = "value")
 
@@ -221,3 +266,9 @@ summarizedWorflowTijdschrijvenDF <- full_join(summarizedWorkflowDF, summarizeOrd
 
 write_rds(summarizedWorflowTijdschrijvenDF, "summarizedWorflowTijdschrijven.rds")
 
+
+summary(summarizedWorflowTijdschrijvenDF)
+
+
+temp <- workflowDF %>% filter(Taakomschrijving == "Uitvoering")
+summary(temp)
