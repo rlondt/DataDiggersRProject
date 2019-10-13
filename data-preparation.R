@@ -2,62 +2,73 @@ if (file.exists('./init.R')){
   source('./init.R')
 }
 
+
 flog.info(msg = "Inlezen bronbestanden")
-
-medewerkersDF <- read.csv2("Medewerkers.csv")
-ordersDF      <- read.csv2("Orders.csv")
-roosterdienstenDF <- read.csv2("Roosterdiensten.csv")
-tijdschrijvenDF <- read.csv2("Tijdschrijven.csv") 
-workflowDF <- rbind(read.csv2("Workflow 1.csv"),read.csv2("Workflow 2.csv"))
-
-
-# eerste bewerking
-# omzetten factoren naar echte waardes
-# omzetten datums naar R-datums
-
-flog.info(msg = "Omzetten factoren en datums")
-
-medewerkersDF <- medewerkersDF %>%
-  mutate(MDWID = as.character(MDWID)) 
-
-ordersDF <- ordersDF %>%
-  mutate(Ordernummer = as.character(Ordernummer)) %>%
-  mutate(CreationDate = convertToDateTime(CreationDate)) %>%
-  mutate(Uiterstehersteltijd = convertToDateTime(Uiterstehersteltijd)) %>%
-  mutate(GeplandeTG = convertToDateTime(GeplandeTG)) %>%
-  mutate(ModifiedOn = convertToDateTime(ModifiedOn))
-
-roosterdienstenDF <- roosterdienstenDF %>%
-  mutate(DienstID = as.character(DienstID)) %>%
-  mutate(MDWID = as.character(MDWID)) %>%
-  mutate(Starttijd = convertToDateTime(Starttijd))%>%
-  mutate(Eindtijd = convertToDateTime(Eindtijd))%>%
-  mutate(ShiftDate = convertToDate(ShiftDate))
+if(!file.exists("medewerkers.rds")){
+  medewerkersDF <- read.csv2("Medewerkers.csv")
+  ordersDF      <- read.csv2("Orders.csv")
+  roosterdienstenDF <- read.csv2("Roosterdiensten.csv")
+  tijdschrijvenDF <- read.csv2("Tijdschrijven.csv") 
+  workflowDF <- rbind(read.csv2("Workflow 1.csv"),read.csv2("Workflow 2.csv"))
   
-tijdschrijvenDF <- tijdschrijvenDF %>%
-  mutate(DienstID = as.character(DienstID)) %>%
-  mutate(MDWID = as.character(MDWID)) %>%
-  mutate(ERPID = as.character(ERPID)) %>%
-  mutate(CreatedOn = convertToDateTime(CreatedOn)) %>%
-  mutate(ModifiedOn = convertToDateTime(ModifiedOn)) %>%
-  mutate(StartDate = convertToDateTime(StartDate)) %>%
-  mutate(EndDate = convertToDateTime(EndDate))
   
-workflowDF <- workflowDF %>%
-  mutate(RecordGewijzigd = convertToDateTime(RecordGewijzigd)) %>%
-  mutate(Ordernummer = as.character(Ordernummer)) %>%
-  mutate(GeplandeEindtijd = convertToDateTime(GeplandeEindtijd)) %>%
-  mutate(WerkelijkeEindtijd = convertToDateTime(WerkelijkeEindtijd)) %>%
-  mutate(Starttijd = convertToDateTime(Starttijd))
+  # eerste bewerking
+  # omzetten factoren naar echte waardes
+  # omzetten datums naar R-datums
+  
+  flog.info(msg = "Omzetten factoren en datums")
+  
+  medewerkersDF <- medewerkersDF %>%
+    mutate(MDWID = as.character(MDWID)) 
+  
+  ordersDF <- ordersDF %>%
+    mutate(Ordernummer = as.character(Ordernummer)) %>%
+    mutate(CreationDate = convertToDateTime(CreationDate)) %>%
+    mutate(Uiterstehersteltijd = convertToDateTime(Uiterstehersteltijd)) %>%
+    mutate(GeplandeTG = convertToDateTime(GeplandeTG)) %>%
+    mutate(ModifiedOn = convertToDateTime(ModifiedOn))
+  
+  roosterdienstenDF <- roosterdienstenDF %>%
+    mutate(DienstID = as.character(DienstID)) %>%
+    mutate(MDWID = as.character(MDWID)) %>%
+    mutate(Starttijd = convertToDateTime(Starttijd))%>%
+    mutate(Eindtijd = convertToDateTime(Eindtijd))%>%
+    mutate(ShiftDate = convertToDate(ShiftDate))
+  
+  tijdschrijvenDF <- tijdschrijvenDF %>%
+    mutate(DienstID = as.character(DienstID)) %>%
+    mutate(MDWID = as.character(MDWID)) %>%
+    mutate(ERPID = as.character(ERPID)) %>%
+    mutate(CreatedOn = convertToDateTime(CreatedOn)) %>%
+    mutate(ModifiedOn = convertToDateTime(ModifiedOn)) %>%
+    mutate(StartDate = convertToDateTime(StartDate)) %>%
+    mutate(EndDate = convertToDateTime(EndDate))
+  
+  workflowDF <- workflowDF %>%
+    mutate(RecordGewijzigd = convertToDateTime(RecordGewijzigd)) %>%
+    mutate(Ordernummer = as.character(Ordernummer)) %>%
+    mutate(GeplandeEindtijd = convertToDateTime(GeplandeEindtijd)) %>%
+    mutate(WerkelijkeEindtijd = convertToDateTime(WerkelijkeEindtijd)) %>%
+    mutate(Starttijd = convertToDateTime(Starttijd))
+  
+  
+  flog.info(msg = "Tussenresultaten opslaan")
+  
+  write_rds(medewerkersDF, "medewerkers.rds")
+  write_rds(ordersDF, "orders.rds")
+  write_rds(roosterdienstenDF, "roosterdiensten.rds")
+  write_rds(tijdschrijvenDF, "tijdschrijven.rds")
+  write_rds(workflowDF, "workflow.rds")
+} else {
+  medewerkersDF <- read_rds( "medewerkers.rds")
+  ordersDF <- read_rds( "orders.rds")
+  roosterdienstenDF <- read_rds( "roosterdiensten.rds")
+  tijdschrijvenDF <- read_rds( "tijdschrijven.rds")
+  workflowDF <- read_rds( "workflow.rds")
+}
 
 
-flog.info(msg = "Tussenresultaten opslaan")
 
-write_rds(medewerkersDF, "medewerkers.rds")
-write_rds(ordersDF, "orders.rds")
-write_rds(roosterdienstenDF, "roosterdiensten.rds")
-write_rds(tijdschrijvenDF, "tijdschrijven.rds")
-write_rds(workflowDF, "workflow.rds")
 
 
 ##
@@ -65,7 +76,7 @@ write_rds(workflowDF, "workflow.rds")
 # workflow actifiteiten met orders
 flog.info(msg = "Workflow actifiteiten met orders")
 ordersWorkflowDF <- left_join(ordersDF, workflowDF)
-write_rds(ordersWorkflowDF, "ordersWorkflowDF.rds")
+write_rds(ordersWorkflowDF, "ordersWorkflow.rds")
 
 
 
@@ -74,6 +85,7 @@ write_rds(ordersWorkflowDF, "ordersWorkflowDF.rds")
 # Diensten met medewerkers
 flog.info(msg = "Combineren dienst, medewerkers en tijdschrijven")
 
+if (!file.exists("ordersTijdschrijven.rds")){
 dienstMedewerkersDF <- left_join(roosterdienstenDF, medewerkersDF)
 # tijdschrijven met diensten en medewerkers
 tijdschrijvenDienstMedewerkersDF <- left_join(tijdschrijvenDF, dienstMedewerkersDF)
@@ -143,43 +155,41 @@ ordersTijdschrijvenDF <- left_join(ordersDF, tijdschrijvenDienstMedewerkersDF, b
     #, "Verwerkingsstatus"  # filter Akkoord of "Vrijgegeven ERP"
     #, "OpdrachtVervalt"    # filter ONWAAR 
   )
-  
-  
-write_rds(ordersTijdschrijvenDF, "ordersTijdschrijvenDF.rds")
+  write_rds(ordersTijdschrijvenDF, "ordersTijdschrijven.rds")
+} else {
+  ordersTijdschrijvenDF <- read_rds("ordersTijdschrijven.rds")
+}
 
-summary(ordersTijdschrijvenDF)
+flog.info(msg = "Tijdschrijven summary")
 
-summarizeOrderTijdschrijvenByOrderDF <- ordersTijdschrijvenDF %>%
-  group_by(Ordernummer) %>%
-  summarise( VerschillendeDagen       = n_distinct(ShiftDate)
-  , AantalTijdschrijven               = n()
-  , OverschreidingUitersteHersteltijd = max(VerschilUitersteHerstelEindeTijdschrijvenInSeconden)
-  , TotaleSchrijftijdReis             = sum(replace_na(DuurTijdschrijvenInSeconden[Type == "Reis" ], 0) )
-  , TotaleSchrijftijdWerk             = sum(replace_na(DuurTijdschrijvenInSeconden[Type != "Reis" ], 0)  )
-  , TotaleDoorlooptijdVanuitKlant     = replace_na(max(EndDate[Type != "Reis" ]),max(EndDate)) - replace_na(min(StartDate[Type != "Reis" ], min(StartDate)))
-  , TotaleDoorlooptijdVanuitVWT       = max(EndDate) - min(StartDate)
-  , StarttijdTijdschrijven            = min(StartDate)
-  , EindtijdTijdschrijven             = max(EndDate)
-  , Uiterstehersteltijd               = mean(Uiterstehersteltijd)
-  )
+if(!file.exists("summarizeOrderTijdschrijvenByOrder.rds")){
+  flog.info(msg = "maken summarizeOrderTijdschrijvenByOrderDF.rds")
+  summarizeOrderTijdschrijvenByOrderDF <- ordersTijdschrijvenDF %>%
+    group_by(Ordernummer) %>%
+    summarise( VerschillendeDagen       = n_distinct(ShiftDate)
+               , AantalTijdschrijven               = n()
+               , OverschreidingUitersteHersteltijd = max(VerschilUitersteHerstelEindeTijdschrijvenInSeconden)
+               , TotaleSchrijftijdReis             = sum(replace_na(DuurTijdschrijvenInSeconden[Type == "Reis" ], 0) )
+               , TotaleSchrijftijdWerk             = sum(replace_na(DuurTijdschrijvenInSeconden[Type != "Reis" ], 0)  )
+               , TotaleDoorlooptijdVanuitKlant     = replace_na(max(EndDate[Type != "Reis" ]),max(EndDate)) - replace_na(min(StartDate[Type != "Reis" ], min(StartDate)))
+               , TotaleDoorlooptijdVanuitVWT       = max(EndDate) - min(StartDate)
+               , StarttijdTijdschrijven            = min(StartDate)
+               , EindtijdTijdschrijven             = max(EndDate)
+               , Uiterstehersteltijd               = mean(Uiterstehersteltijd)
+    )
+  write_rds(summarizeOrderTijdschrijvenByOrderDF, "summarizeOrderTijdschrijvenByOrder.rds")           
+} else {
+  flog.info(msg = "Lezen summarizeOrderTijdschrijvenByOrderDF.rds")
+  summarizeOrderTijdschrijvenByOrderDF <- read_rds("summarizeOrderTijdschrijvenByOrder.rds")           
+}
 
-# summarizeOrderTijdschrijvenByOrder2 <- ordersTijdschrijvenDF %>%
-#   group_by(Ordernummer) %>%
-#   summarise(  Uiterstehersteltijd               = mean(Uiterstehersteltijd)
-#   )
-# 
-# summarizeOrderTijdschrijvenByOrder <- left_join(summarizeOrderTijdschrijvenByOrder, summarizeOrderTijdschrijvenByOrder2)
-
-write_rds(summarizeOrderTijdschrijvenByOrderDF, "summarizeOrderTijdschrijvenByOrderDF.rds")           
 
 
 
 flog.info(msg = "Workflow summary")
-
-workflowDF <- read_rds("workflow.rds")
-
-summary(workflowDF)
-
+if(is.null(workflowDF)){
+  workflowDF <- read_rds("workflow.rds")
+}
 
 workflowStappen <- c("dummy"
                      # , "Opstellen POD"
@@ -220,55 +230,40 @@ workflowStappen <- c("dummy"
 )
 
 
+# workflowStappen <- c("dummy"
+#                      , "Afstemming facturatie"
+#                      , "TAG gereed"
+#                      , "Beoordelen opgeleverde werkmap"
+#                      , "Uitvoering"
+#                      , "Cleanbeoordeling"
+# )
 
 
-# levels(workflowDF$Taakomschrijving)
-# levels(workflowDF$Status)
-
-workflowDF2 <- workflowDF %>%
+summarizedWorkflowDF <- workflowDF %>%
   filter(Status == "Gereed") %>%
   filter(Taakomschrijving %in% workflowStappen )%>%
   mutate( Starttijd = unclass(Starttijd)
-         #,NormDoorlooptijd = NormDoorlooptijd
-         ,GeplandeEindtijd = unclass(GeplandeEindtijd)
-         ,WerkelijkeEindtijd = unclass(WerkelijkeEindtijd)
-          ) %>%
+          #,NormDoorlooptijd = NormDoorlooptijd
+          ,GeplandeEindtijd = unclass(GeplandeEindtijd)
+          ,WerkelijkeEindtijd = unclass(WerkelijkeEindtijd)
+  ) %>%
   select( "Ordernummer"
-        , "Taakomschrijving"
-        , "Starttijd"
-        , "NormDoorlooptijd"
-        , "GeplandeEindtijd"
-        , "WerkelijkeEindtijd") 
-
-
-workflowDF20 <- melt(workflowDF2, measure.vars = c( "Starttijd"))
-
-workflowDF21 <- melt(workflowDF2, measure.vars = c( "Starttijd"
-                                                    , "NormDoorlooptijd"
-                                                    , "GeplandeEindtijd"
-                                                    , "WerkelijkeEindtijd"))
-
-summarizedWorkflowDF <- dcast(workflowDF21, Ordernummer ~ Taakomschrijving + variable, value.var = "value")
-
-for (i in names(summarizedWorkflowDF)){
-  if(is.numeric(summarizedWorkflowDF[,i])){
-    if(!str_detect(i, "NormDoorlooptijd")){
-      flog.debug(i)
-      summarizedWorkflowDF[,i] = as.POSIXct(summarizedWorkflowDF[,i], origin="1970-01-01")
-    }
-  }
-}
+          , "Taakomschrijving"
+          , "Starttijd"
+          , "NormDoorlooptijd"
+          , "GeplandeEindtijd"
+          , "WerkelijkeEindtijd") %>%
+  transposeWorkflowDataFrame(  c( "Starttijd"
+                                , "NormDoorlooptijd"
+                                , "GeplandeEindtijd"
+                                , "WerkelijkeEindtijd"
+                               )
+                            ,  Ordernummer ~ Taakomschrijving
+                            )
 
 write_rds(summarizedWorkflowDF, "summarizedWorkflow.rds")
 
-
+flog.info("summarizedWorflowTijdschrijvenDF")
 summarizedWorflowTijdschrijvenDF <- full_join(summarizedWorkflowDF, summarizeOrderTijdschrijvenByOrderDF)
-
 write_rds(summarizedWorflowTijdschrijvenDF, "summarizedWorflowTijdschrijven.rds")
 
-
-summary(summarizedWorflowTijdschrijvenDF)
-
-
-temp <- workflowDF %>% filter(Taakomschrijving == "Uitvoering")
-summary(temp)
