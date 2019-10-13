@@ -13,18 +13,19 @@ ordersTijdschrijvenDF <- read_rds("ordersTijdschrijvenDF.rds")
 # 2.1.1 medewerker
 # replace empty strings with 'NA'
 medewerkersDF[medewerkersDF==""]<-NA
-library(VIM)
 aggr_plot <- aggr(medewerkersDF, col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(medewerkersDF), cex.axis=.8, 
                   gap=2, 
                   ylab=c("Missing data Medewerker","Combinatie"))
 
+aggr_plot <- aggr(summarizedWorflowTijdschrijvenDF, col=c('lightblue','red'), 
+                  numbers=TRUE, sortVars=TRUE, prop=FALSE,
+                  labels=names(summarizedWorflowTijdschrijvenDF), cex.axis=.8, 
+                  gap=2, 
+                  ylab=c("Missing data order","Combinatie"))
 
 # 2.1.2 anomaly detection
-library(tidyverse)
-library(anomalize)
-
 dfAnomalize <- summarizeOrderTijdschrijvenByOrderDF[,c("OverschreidingUitersteHersteltijd", "EindtijdTijdschrijven")]
 dfAnomalize2 <- dfAnomalize[complete.cases(dfAnomalize), ]
 
@@ -47,14 +48,12 @@ dfAnomalize2 %>%
 
 
 #Install the devtools package then github packages
-install.packages('anomalize')
-library(dplyr)
-library(anomalize) #tidy anomaly detectiom
 btc_ts <- 
   time_decompose(as_tibble(summarizeOrderTijdschrijvenByOrderDF$EindtijdTijdschrijven)) %>%
   anomalize(summarizeOrderTijdschrijvenByOrderDF$OverschreidingUitersteHersteltijd) %>%
   time_recompose() %>%
   plot_anomalies(time_recomposed = TRUE, ncol = 3, alpha_dots = 0.5)
+
 
 # 3. conformity
 
