@@ -21,7 +21,8 @@ join.ordersWorkflowDF <- read_rds("ordersWorkflow.rds")
 join.ordersTijdschrijvenDF <- read_rds("ordersTijdschrijven.rds")
 
 # summarized dataframes
-summarized.OrderTijdschrijvenByOrderDF <- read_rds("summarizeOrderTijdschrijvenByOrder.rds")summarized.WorkflowDF <- read_rds("summarizedWorkflow.rds")           
+summarized.OrderTijdschrijvenByOrderDF <- read_rds("summarizeOrderTijdschrijvenByOrder.rds")
+summarized.WorkflowDF <- read_rds("summarizedWorkflow.rds")           
 summarized.WorflowTijdschrijvenDF <- read_rds("summarizedWorflowTijdschrijven.rds")
 
 
