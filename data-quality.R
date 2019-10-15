@@ -2,9 +2,27 @@ if (file.exists('./init.R')){
   source('./init.R')
 }
 
-ordersWorkflowDF <- read_rds("ordersWorkflowDF.rds")
-ordersTijdschrijvenDF <- read_rds("ordersTijdschrijvenDF.rds")
+# Beschikbare bestanden "plat" inlezen
+org.medewerkersDF <- read.csv2("Medewerkers.csv")
+org.ordersDF      <- read.csv2("Orders.csv")
+org.roosterdienstenDF <- read.csv2("Roosterdiensten.csv")
+org.tijdschrijvenDF <- read.csv2("Tijdschrijven.csv") 
+org.workflowDF <- rbind(read.csv2("Workflow 1.csv"),read.csv2("Workflow 2.csv"))
 
+# Bewerkte bestanden inlezen (factoren en datums)
+prep.medewerkersDF <- read_rds( "medewerkers.rds")
+prep.ordersDF <- read_rds( "orders.rds")
+prep.roosterdienstenDF <- read_rds( "roosterdiensten.rds")
+prep.tijdschrijvenDF <- read_rds( "tijdschrijven.rds")
+prep.workflowDF <- read_rds( "workflow.rds")
+
+# combinatie bestanden inlezen
+join.ordersWorkflowDF <- read_rds("ordersWorkflow.rds")
+join.ordersTijdschrijvenDF <- read_rds("ordersTijdschrijven.rds")
+
+# summarized dataframes
+summarized.OrderTijdschrijvenByOrderDF <- read_rds("summarizeOrderTijdschrijvenByOrder.rds")summarized.WorkflowDF <- read_rds("summarizedWorkflow.rds")           
+summarized.WorflowTijdschrijvenDF <- read_rds("summarizedWorflowTijdschrijven.rds")
 
 
 # Compleetheid
