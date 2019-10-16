@@ -5,11 +5,11 @@ if (file.exists('./init.R')){
 
 flog.info(msg = "Inlezen bronbestanden")
 if(!file.exists("medewerkers.rds")){
-  medewerkersDF <- read.csv2("Medewerkers.csv")
-  ordersDF      <- read.csv2("Orders.csv")
-  roosterdienstenDF <- read.csv2("Roosterdiensten.csv")
-  tijdschrijvenDF <- read.csv2("Tijdschrijven.csv") 
-  workflowDF <- rbind(read.csv2("Workflow 1.csv"),read.csv2("Workflow 2.csv"))
+  medewerkersDF <- read.csv2("Medewerkers.csv", na.strings=c("","NA"," "))
+  ordersDF      <- read.csv2("Orders.csv", na.strings=c("","NA"," "))
+  roosterdienstenDF <- read.csv2("Roosterdiensten.csv", na.strings=c("","NA"," "))
+  tijdschrijvenDF <- read.csv2("Tijdschrijven.csv", na.strings=c("","NA"," ")) 
+  workflowDF <- rbind(read.csv2("Workflow 1.csv",na.strings=c("","NA"," ")),read.csv2("Workflow 2.csv", na.strings=c("","NA"," ")))
   
   
   # eerste bewerking
