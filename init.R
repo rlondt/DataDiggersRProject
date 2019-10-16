@@ -23,6 +23,9 @@ init <- function(){
                   ,"VIM"
                   , "reshape2"
                   ,"shiny"
+                  ,"naniar"
+                  , "ggplot2"
+                  , "tidyquant"
                   )
     
     ## Installeer packages
@@ -37,6 +40,9 @@ init <- function(){
       suppressPackageStartupMessages(
         library(p, quietly = TRUE, character.only = TRUE ) 
       )
+    }
+    if (is.na(calendarHeat)){
+      source("https://raw.githubusercontent.com/iascchen/VisHealth/master/R/calendarHeat.R")
     }
     
     # Gebruik meerdere CPU's

@@ -141,6 +141,38 @@ btc_ts <-
 # 
 # Accuraatheid
 # 1. Verdeling aantal orders per over de tijd uitgezet.(Heatmap timeline )
+
+tempDF <- summarized.WorkflowDF%>%
+  filter(!is.na.POSIXlt(Uitvoering_Starttijd))%>%
+  mutate(Uitvoering_Starttijd = as.Date(Uitvoering_Starttijd))%>%
+  group_by(Uitvoering_Starttijd) %>%
+  summarise(aantal = n())
+
+#r2g <- c("#D61818", "#FFAE63", "#FFFFBD", "#B5E384") 
+calendarHeat(tempDF$Uitvoering_Starttijd
+             , tempDF$aantal
+             , ncolors = 99
+             , color = "w2b"
+             , varname="Starttijd orders uitvoering")
+
+tempDF <- summarized.WorkflowDF%>%
+  filter(!is.na.POSIXlt(Uitvoering_WerkelijkeEindtijd))%>%
+  mutate(Uitvoering_WerkelijkeEindtijd = as.Date(Uitvoering_WerkelijkeEindtijd))%>%
+  group_by(Uitvoering_WerkelijkeEindtijd) %>%
+  summarise(aantal = n())
+
+#r2g <- c("#D61818", "#FFAE63", "#FFFFBD", "#B5E384") 
+calendarHeat(tempDF$Uitvoering_WerkelijkeEindtijd
+             , tempDF$aantal
+             , ncolors = 99
+             , color = "w2b"
+             , varname="Werkelijke eindtijd uitvoering")
+
+hist(summarized.WorkflowDF$Uitvoering_Starttijd
+#          , tempDF$aantal
+, "days"
+          )
+
 # 
 # Analyses voor normtijden
 # 1. Reistijd tussen verschillende orders met zelfde plaats 
