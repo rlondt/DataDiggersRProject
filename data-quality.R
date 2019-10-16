@@ -31,20 +31,43 @@ summarized.WorflowTijdschrijvenDF <- read_rds("summarizedWorflowTijdschrijven.rd
 # 2. Zijn alle onderdelen van VWT-data vertegenwoordigd
 # 3. Missing values analyse
 # 3.1 Medewerker
-# replace empty strings with 'NA'
-medewerkersDF[medewerkersDF==""]<-NA
-aggr_plot <- aggr(medewerkersDF, col=c('lightblue','red'), 
+aggr_plot <- aggr(medewerkersDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(medewerkersDF), cex.axis=.8, 
                   gap=2, 
-                  ylab=c("Missing data Medewerker","Combinatie"))
+                  ylab=c("Missing values Medewerker","Combinatie"))
 
 # 3.2 Order
-aggr_plot <- aggr(ordersDF, col=c('lightblue','red'), 
-                  numbers=TRUE, sortVars=TRUE, prop=FALSE,
+aggr_plot <- aggr(ordersDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+                  numbers=TRUE, sortVars=TRUE, prop=FALSE,combined = TRUE,
                   labels=names(ordersDF), cex.axis=.8, 
                   gap=2, cex.numbers=.5,
-                  ylab=c("Missing data Order","Combinatie"))
+                  ylab=c("Missing values Order","Combinatie"))
+
+# alternative
+naniar::gg_miss_var(ordersDF)
+
+
+# 3.3 Roosterdiensten
+aggr_plot <- aggr(roosterdienstenDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+                  numbers=TRUE, sortVars=TRUE, prop=FALSE,
+                  labels=names(roosterdienstenDF), cex.axis=.8, 
+                  gap=2, cex.numbers=.5,
+                  ylab=c("Missing values Roosterdiensten","Combinatie"))
+
+# 3.4 Tijdschrijven
+aggr_plot <- aggr(tijdschrijvenDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+                  numbers=TRUE, sortVars=TRUE, prop=FALSE,
+                  labels=names(tijdschrijvenDF), cex.axis=.8, 
+                  gap=2, cex.numbers=.5,
+                  ylab=c("Missing values Tijdschrijven","Combinatie"))
+
+# 3.5 Workflow
+aggr_plot <- aggr(workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+                  numbers=TRUE, sortVars=TRUE, prop=FALSE,
+                  labels=names(workflowDF), cex.axis=.8, 
+                  gap=2, cex.numbers=.5,
+                  ylab=c("Missing values Workflow","Combinatie"))
 
 # 3.3
 # 4. Overcompleetheid, dataoverload

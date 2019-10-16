@@ -10,6 +10,7 @@ init <- function(){
     
     packages <- c("elastic"
                   ,"tidyverse"
+                  ,"naniar"
                   ,"dplyr"
                   ,"caret"
                   ,"doSNOW"
