@@ -29,7 +29,24 @@ summarized.WorflowTijdschrijvenDF <- read_rds("summarizedWorflowTijdschrijven.rd
 # Compleetheid
 # 1. Mogelijkheden voor kruistellingen
 # 2. Zijn alle onderdelen van VWT-data vertegenwoordigd
-# 3. Missing values analyse 
+# 3. Missing values analyse
+# 3.1 Medewerker
+# replace empty strings with 'NA'
+medewerkersDF[medewerkersDF==""]<-NA
+aggr_plot <- aggr(medewerkersDF, col=c('lightblue','red'), 
+                  numbers=TRUE, sortVars=TRUE, prop=FALSE,
+                  labels=names(medewerkersDF), cex.axis=.8, 
+                  gap=2, 
+                  ylab=c("Missing data Medewerker","Combinatie"))
+
+# 3.2 Order
+aggr_plot <- aggr(ordersDF, col=c('lightblue','red'), 
+                  numbers=TRUE, sortVars=TRUE, prop=FALSE,
+                  labels=names(ordersDF), cex.axis=.8, 
+                  gap=2, cex.numbers=.5,
+                  ylab=c("Missing data Order","Combinatie"))
+
+# 3.3
 # 4. Overcompleetheid, dataoverload
 # 5. Komen alle features voor die nodig zijn om een analyse te doen
 # ..
@@ -62,55 +79,6 @@ summarized.WorflowTijdschrijvenDF <- read_rds("summarizedWorflowTijdschrijven.rd
 # 1. Is er daarbinnen nog verschil tussen werk en reistijd? Hoe gaan we om met overwerk?
 # 2. Vervallen orders waar wel geakkoordeerd is tijdgeschreven
 # 3. Anomaly detection/outlier verklaring.. 
-# 4. Inventarisatie business rules
-# 5. Heeft medewerker altijd een woonplaats
-# 6. Heeft elke order een plaats
-# 7. Orders die binnen een periode 'x' (vb een minuut) zijn uitgevoerd
-# 8. Verdeling van de reistijd over de medewerkers
-# 9. Aantal tijdschrijvers per order
-# 10. Verhouding aantal tijdschrijvers tov normtijd (outlier??)
-# 11. Tijdschrijvers ten opzichte van het order-klantteam (klantenteams VWT NOC geen tijdschrijvers??)
-# 
-# 
-# 
-# Accuraatheid
-# 1. Verdeling aantal orders per over de tijd uitgezet.(Heatmap timeline )
-# 
-# Analyses voor normtijden
-# 1. Reistijd tussen verschillende orders met zelfde plaats 
-# 2. Gezien door de tijd
-# 3. Zelfde woonplaats medewerker en order plaats
-# 4. Meetbaar datakwaliteit
-# 5. Score opstellen a.d.v. bovenstaande bolletjes
-# 6. Verschil AP/EP (ander personeel/eigen personeel)
-# 
-
-
-
-
-# 1. completeness
-
-# 2. consistency
-# 2.1 empty values
-# 2.1.1 medewerker
-# replace empty strings with 'NA'
-medewerkersDF[medewerkersDF==""]<-NA
-aggr_plot <- aggr(medewerkersDF, col=c('lightblue','red'), 
-                  numbers=TRUE, sortVars=TRUE, prop=FALSE,
-                  labels=names(medewerkersDF), cex.axis=.8, 
-                  gap=2, 
-                  ylab=c("Missing data Medewerker","Combinatie"))
-
-# 2.1.2 Order
-aggr_plot <- aggr(ordersDF, col=c('lightblue','red'), 
-                  numbers=TRUE, sortVars=TRUE, prop=FALSE,
-                  labels=names(ordersDF), cex.axis=.8, 
-                  gap=2, cex.numbers=.5,
-                  ylab=c("Missing data Order","Combinatie"))
-
-
-# 2.1.2 anomaly detection
-
 dfAnomalize <- summarizeOrderTijdschrijvenByOrderDF[,c("OverschreidingUitersteHersteltijd", "EindtijdTijdschrijven")]
 dfAnomalizeCompleteCases <- dfAnomalize[complete.cases(dfAnomalize), ]
 
@@ -137,12 +105,26 @@ btc_ts <-
   anomalize(summarizeOrderTijdschrijvenByOrderDF$OverschreidingUitersteHersteltijd) %>%
   time_recompose() %>%
   plot_anomalies(time_recomposed = TRUE, ncol = 3, alpha_dots = 0.5)
-
-# 3. conformity
-
-# 4. accuracy
-
-# 5. integrity
-
-# 6. timeliness
+# 4. Inventarisatie business rules
+# 5. Heeft medewerker altijd een woonplaats
+# 6. Heeft elke order een plaats
+# 7. Orders die binnen een periode 'x' (vb een minuut) zijn uitgevoerd
+# 8. Verdeling van de reistijd over de medewerkers
+# 9. Aantal tijdschrijvers per order
+# 10. Verhouding aantal tijdschrijvers tov normtijd (outlier??)
+# 11. Tijdschrijvers ten opzichte van het order-klantteam (klantenteams VWT NOC geen tijdschrijvers??)
+# 
+# 
+# 
+# Accuraatheid
+# 1. Verdeling aantal orders per over de tijd uitgezet.(Heatmap timeline )
+# 
+# Analyses voor normtijden
+# 1. Reistijd tussen verschillende orders met zelfde plaats 
+# 2. Gezien door de tijd
+# 3. Zelfde woonplaats medewerker en order plaats
+# 4. Meetbaar datakwaliteit
+# 5. Score opstellen a.d.v. bovenstaande bolletjes
+# 6. Verschil AP/EP (ander personeel/eigen personeel)
+# 
 
