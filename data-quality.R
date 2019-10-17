@@ -94,9 +94,64 @@ aggr_plot <- aggr(workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'),
 # ..
 # Uniqueness
 # 1. Geen dubbele records
-# 2. Zijn er medewerkers die tegelijkertijd aan meerdere orders werken ?
+# 2. Zijn er medewerkers die tegelijkertijd aan meerdere orders werken?
+  t1DF <- prep.tijdschrijvenDF %>%
+    mutate(StartDate = unclass(StartDate))%>%
+    mutate(EndDate = unclass(EndDate))%>%
+    filter(Type == "Werk")%>%
+    select(MDWID, ERPID, StartDate, EndDate)
+
+  t2DF <- sqldf("select * 
+                from t1DF t1
+                ,    t1DF t2 
+                on t1.MDWID = t2.MDWID 
+                and t1.StartDate > t2.StartDate 
+                and t1.StartDate <= t2.EndDate-1
+               ")
+  # 29 voorkomens
+
+  
 # 3. Zijn er medewerkers die tegelijkertijd voor meerdere orders reizen?
+  t1DF <- prep.tijdschrijvenDF %>%
+    mutate(StartDate = unclass(StartDate))%>%
+    mutate(EndDate = unclass(EndDate))%>%
+    filter(Type != "Werk")%>%
+    select(MDWID, ERPID, StartDate, EndDate)
+  
+  t2DF <- sqldf("select * 
+                from t1DF t1
+                ,    t1DF t2 
+                on t1.MDWID = t2.MDWID 
+                and t1.StartDate > t2.StartDate 
+                and t1.StartDate <= t2.EndDate-1
+               ")
+  # 8 voorkomens  
+  
 # 4. Overlappen de workflowstappen (kan zijn hoor)
+  levels(prep.workflowDF$Status)
+  t1DF <- prep.workflowDF %>%
+    filter(Status != "Geannuleerd")%>%
+    mutate(Starttijd = unclass(Starttijd))%>%
+    mutate(Eindtijd  = unclass(WerkelijkeEindtijd))%>%
+    select(Ordernummer, Taakomschrijving, Starttijd, Eindtijd)
+    
+  overlappendeWorkflowstappenDF <- sqldf("select t1.Ordernummer
+                , t1.taakomschrijving taakomschrijving_1
+                , t2.taakomschrijving taakomschrijving_2
+                , t1.Starttijd starttijd_1
+                , t1.Eindtijd  eindtijd_1
+                , t2.Starttijd starttijd_2
+                , t2.Eindtijd  eindtijd_2
+                from t1DF t1
+                ,    t1DF t2 
+                on t1.Ordernummer = t2.Ordernummer 
+                and t1.Starttijd > t2.Starttijd 
+                and t1.Starttijd <= t2.Eindtijd-1
+               ")
+  
+  write_rds(overlappendeWorkflowstappenDF, "overlappendeWorkflowstappen.rds")
+  # 397654 voorkomens
+  
 # ..
 # Validiteit (plausibiliteit/business rules)
 # 1. Is er daarbinnen nog verschil tussen werk en reistijd? Hoe gaan we om met overwerk?
