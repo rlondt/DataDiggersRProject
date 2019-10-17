@@ -26,7 +26,8 @@ init <- function(){
                   ,"naniar"
                   , "ggplot2"
                   , "tidyquant"
-                  )
+                  , "sqldf"
+    )
     
     ## Installeer packages
     for (p in packages) {
