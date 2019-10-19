@@ -1,3 +1,5 @@
+install.packages("DataDiggersPackage", dependencies = TRUE, repos = 'http://cran.us.r-project.org')
+
 #
 # Generic file to set the environment
 init <- function(){
@@ -10,7 +12,7 @@ init <- function(){
     #install.packages("DataDiggersPackage")
     library(DataDiggersPackage)
     initializeDQScoringFramework()
-    addScoreToDQFramework(CONSISTENTIE, 4, 5)
+    addScoreToDQFramework(2, 4, 5)
     
     futile.logger::flog.threshold(futile.logger::DEBUG)
     
@@ -45,9 +47,11 @@ init <- function(){
     ## Installeer packages
     for (p in packages) {
       if (p %in% rownames(installed.packages()) == FALSE) {
-        install.packages(p, repos = 'http://cran.us.r-project.org')
+        install.packages(p, dependencies = TRUE, repos = 'http://cran.us.r-project.org')
       }
     }
+    
+  
     
     ## Laad the packages
     for (p in packages){

@@ -21,9 +21,9 @@ initializeDQScoringFramework <- function(){
 #' A Function to transpose a data based on some parameters
 #'
 #' This function blablablabla
-#' @param category
-#' @param waarde
-#' @param weging
+#' @param categorie categorie
+#' @param waarde waarde 1-5
+#' @param weging weging van het item
 #' @keywords melt dcast transposed
 #' @export
 #' @examples

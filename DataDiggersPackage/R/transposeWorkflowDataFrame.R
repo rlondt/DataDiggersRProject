@@ -1,21 +1,29 @@
-werkdir <- "D:/datafiles"
-
-
-
-
-
-
-#' A Function to transpose a data based on some parameters
+#'  A Function to transpose a data based on some parameters
 #'
 #' This function blablablabla
-#' @param the dataframe that has to be transposed
-#' @param a list of measured values
-#' @param the formula that is used to transpose via dcast
+#' @param data the dataframe that has to be transposed
+#' @param meaureVars a list of measured values
+#' @param dcastFormula the formula that is used to transpose via dcast
 #' @keywords melt dcast transposed
 #' @export
+#' @import tidyverse
+#' @import naniar
+#' @import dplyr
+#' @import caret
+#' @import doSNOW
+#' @import sf
+#' @import futile.logger
+#' @import openxlsx
+#' @import anomalize
+#' @import VIM
+#' @import reshape2
+#' @import shiny
+#' @import naniar
+#' @import ggplot2
+#' @import tidyquant
+#' @import sqldf
 #' @examples
 #' transposeWorkflowDataFrame( workflowDF, c("measure1", "measure2"),)
-
 transposeWorkflowDataFrame <- function (data, measureVars, dcastFormula){
   # converteren posix naar numeric
   for (i in names(data)){

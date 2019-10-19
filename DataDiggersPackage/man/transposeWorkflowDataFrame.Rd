@@ -7,11 +7,11 @@
 transposeWorkflowDataFrame(data, measureVars, dcastFormula)
 }
 \arguments{
-\item{the}{dataframe that has to be transposed}
+\item{data}{the dataframe that has to be transposed}
 
-\item{a}{list of measured values}
+\item{dcastFormula}{the formula that is used to transpose via dcast}
 
-\item{the}{formula that is used to transpose via dcast}
+\item{meaureVars}{a list of measured values}
 }
 \description{
 This function blablablabla

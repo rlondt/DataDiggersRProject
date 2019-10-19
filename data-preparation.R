@@ -2,14 +2,20 @@ if (file.exists('./init.R')){
   source('./init.R')
 }
 
+zetWerkdir("D:/datafiles")
+medewerkersDF <- leesCSV("Workflow 1.csv", na.strings=c("","NA"," "))
+medewerkersDF2 <- leesCSV("Workflow 1.csv")
+medewerkersDF <- leesCSV( "medewerkers.rds")
+
+
 
 flog.info(msg = "Inlezen bronbestanden")
 if(!file.exists("medewerkers.rds")){
-  medewerkersDF <- read.csv2("Medewerkers.csv", na.strings=c("","NA"," "))
-  ordersDF      <- read.csv2("Orders.csv", na.strings=c("","NA"," "))
-  roosterdienstenDF <- read.csv2("Roosterdiensten.csv", na.strings=c("","NA"," "))
-  tijdschrijvenDF <- read.csv2("Tijdschrijven.csv", na.strings=c("","NA"," ")) 
-  workflowDF <- rbind(read.csv2("Workflow 1.csv",na.strings=c("","NA"," ")),read.csv2("Workflow 2.csv", na.strings=c("","NA"," ")))
+  medewerkersDF <- leesCSV("Medewerkers.csv", na.strings=c("","NA"," "))
+  ordersDF      <- leesCSV("Orders.csv", na.strings=c("","NA"," "))
+  roosterdienstenDF <- leesCSV("Roosterdiensten.csv", na.strings=c("","NA"," "))
+  tijdschrijvenDF <- leesCSV("Tijdschrijven.csv", na.strings=c("","NA"," ")) 
+  workflowDF <- rbind(leesCSV("Workflow 1.csv",na.strings=c("","NA"," ")),leesCSV("Workflow 2.csv", na.strings=c("","NA"," ")))
   
   
   # eerste bewerking
@@ -54,17 +60,17 @@ if(!file.exists("medewerkers.rds")){
   
   flog.info(msg = "Tussenresultaten opslaan")
   
-  write_rds(medewerkersDF, "medewerkers.rds")
-  write_rds(ordersDF, "orders.rds")
-  write_rds(roosterdienstenDF, "roosterdiensten.rds")
-  write_rds(tijdschrijvenDF, "tijdschrijven.rds")
-  write_rds(workflowDF, "workflow.rds")
+  schrijfRDS(medewerkersDF, "medewerkers.rds")
+  schrijfRDS(ordersDF, "orders.rds")
+  schrijfRDS(roosterdienstenDF, "roosterdiensten.rds")
+  schrijfRDS(tijdschrijvenDF, "tijdschrijven.rds")
+  schrijfRDS(workflowDF, "workflow.rds")
 } else {
-  medewerkersDF <- read_rds( "medewerkers.rds")
-  ordersDF <- read_rds( "orders.rds")
-  roosterdienstenDF <- read_rds( "roosterdiensten.rds")
-  tijdschrijvenDF <- read_rds( "tijdschrijven.rds")
-  workflowDF <- read_rds( "workflow.rds")
+  medewerkersDF <- leesRDS( "medewerkers.rds")
+  ordersDF <- leesRDS( "orders.rds")
+  roosterdienstenDF <- leesRDS( "roosterdiensten.rds")
+  tijdschrijvenDF <- leesRDS( "tijdschrijven.rds")
+  workflowDF <- leesRDS( "workflow.rds")
 }
 
 
@@ -76,7 +82,7 @@ if(!file.exists("medewerkers.rds")){
 # workflow actifiteiten met orders
 flog.info(msg = "Workflow actifiteiten met orders")
 ordersWorkflowDF <- left_join(ordersDF, workflowDF)
-write_rds(ordersWorkflowDF, "ordersWorkflow.rds")
+schrijfRDS(ordersWorkflowDF, "ordersWorkflow.rds")
 
 
 
@@ -155,9 +161,9 @@ ordersTijdschrijvenDF <- left_join(ordersDF, tijdschrijvenDienstMedewerkersDF, b
     #, "Verwerkingsstatus"  # filter Akkoord of "Vrijgegeven ERP"
     #, "OpdrachtVervalt"    # filter ONWAAR 
   )
-  write_rds(ordersTijdschrijvenDF, "ordersTijdschrijven.rds")
+  schrijfRDS(ordersTijdschrijvenDF, "ordersTijdschrijven.rds")
 } else {
-  ordersTijdschrijvenDF <- read_rds("ordersTijdschrijven.rds")
+  ordersTijdschrijvenDF <- leesRDS("ordersTijdschrijven.rds")
 }
 
 flog.info(msg = "Tijdschrijven summary")
@@ -177,10 +183,10 @@ if(!file.exists("summarizeOrderTijdschrijvenByOrder.rds")){
                , EindtijdTijdschrijven             = max(EndDate)
                , Uiterstehersteltijd               = mean(Uiterstehersteltijd)
     )
-  write_rds(summarizeOrderTijdschrijvenByOrderDF, "summarizeOrderTijdschrijvenByOrder.rds")           
+  schrijfRDS(summarizeOrderTijdschrijvenByOrderDF, "summarizeOrderTijdschrijvenByOrder.rds")           
 } else {
   flog.info(msg = "Lezen summarizeOrderTijdschrijvenByOrderDF.rds")
-  summarizeOrderTijdschrijvenByOrderDF <- read_rds("summarizeOrderTijdschrijvenByOrder.rds")           
+  summarizeOrderTijdschrijvenByOrderDF <- leesRDS("summarizeOrderTijdschrijvenByOrder.rds")           
 }
 
 
@@ -188,7 +194,7 @@ if(!file.exists("summarizeOrderTijdschrijvenByOrder.rds")){
 
 flog.info(msg = "Workflow summary")
 if(is.null(workflowDF)){
-  workflowDF <- read_rds("workflow.rds")
+  workflowDF <- leesRDS("workflow.rds")
 }
 
 workflowStappen <- c("dummy"
@@ -261,9 +267,9 @@ summarizedWorkflowDF <- workflowDF %>%
                             ,  Ordernummer ~ Taakomschrijving
                             )
 
-write_rds(summarizedWorkflowDF, "summarizedWorkflow.rds")
+schrijfRDS(summarizedWorkflowDF, "summarizedWorkflow.rds")
 
 flog.info("summarizedWorflowTijdschrijvenDF")
 summarizedWorflowTijdschrijvenDF <- full_join(summarizedWorkflowDF, summarizeOrderTijdschrijvenByOrderDF)
-write_rds(summarizedWorflowTijdschrijvenDF, "summarizedWorflowTijdschrijven.rds")
+schrijfRDS(summarizedWorflowTijdschrijvenDF, "summarizedWorflowTijdschrijven.rds")
 
