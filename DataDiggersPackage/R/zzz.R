@@ -1,3 +1,4 @@
+
 .DataDiggersPackageOptions <- new.env()
 # zzz.r
 # initializing package variables

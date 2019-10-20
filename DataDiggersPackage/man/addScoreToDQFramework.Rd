@@ -6,6 +6,13 @@
 \usage{
 addScoreToDQFramework(categorie, waarde, weging)
 }
+\arguments{
+\item{categorie}{categorie}
+
+\item{waarde}{waarde 1-5}
+
+\item{weging}{weging van het item}
+}
 \description{
 This function blablablabla
 }
