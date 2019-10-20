@@ -156,6 +156,7 @@ aggr_plot <- aggr(workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'),
 # Validiteit (plausibiliteit/business rules)
 # 1. Is er daarbinnen nog verschil tussen werk en reistijd? Hoe gaan we om met overwerk?
 # 2. Vervallen orders waar wel geakkoordeerd is tijdgeschreven
+  
 # 3. Anomaly detection/outlier verklaring.. 
 dfAnomalize <- summarizeOrderTijdschrijvenByOrderDF[,c("OverschreidingUitersteHersteltijd", "EindtijdTijdschrijven")]
 dfAnomalizeCompleteCases <- dfAnomalize[complete.cases(dfAnomalize), ]
@@ -167,16 +168,6 @@ dfAnomalizeCompleteCases %>%
   anomalize(remainder) %>%
   time_recompose() %>%
   plot_anomalies(time_recomposed = TRUE, ncol = 3, alpha_dots = 0.5)
-
-dfAnomalizeCompleteCases %>%
-  time_decompose(OverschreidingUitersteHersteltijd, method = "stl", frequency = "auto", trend = "auto") %>%
-  anomalize(remainder, method = "iqr", alpha = 0.05, max_anoms = 0.2) %>%
-  time_recompose() %>%
-  # Plot Anomaly Decomposition
-  plot_anomalies(time_recomposed = TRUE) +
-  ggtitle("Anomalies gedetecteerd in UitersteHersteltijd")
-
-
 
 btc_ts <- 
   time_decompose(as_tibble(summarizeOrderTijdschrijvenByOrderDF$EindtijdTijdschrijven)) %>%
@@ -206,13 +197,14 @@ checkMDW <- subset(medewerkersDF , MDWID == 'c7990d76-898a-4811-9fca-faa32ffc838
 checkTijdMDW <- subset(tijdschrijvenDF , MDWID == 'c7990d76-898a-4811-9fca-faa32ffc8386' & Type =="Reis")
 checkOrder <- subset(ordersDF , Ordernummer == 'B0050110') #Plaats=Utrecht
 
-mu <- ddply(meanDuurPerMedewerkerType, "Type", summarise, grp.mean=mean(x))
+# calculate mean per Type
+meanTypes <- ddply(meanDuurPerMedewerkerType, "Type", summarise, grp.mean=mean(x))
 
 # Change line colors by groups
 ggplot(meanDuurPerMedewerkerType, aes(x=x, color=Type, fill=Type)) +
   geom_histogram(binwidth=.2, position="dodge") +
   scale_x_continuous(breaks=0:15) +
-  geom_vline(data=mu, aes(xintercept=grp.mean, color=Type),
+  geom_vline(data=meanTypes, aes(xintercept=grp.mean, color=Type),
              linetype="dashed")+
   scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
   scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
