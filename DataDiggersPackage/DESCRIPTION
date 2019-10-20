@@ -1,6 +1,6 @@
 Package: DataDiggersPackage
 Title: Package that supports the DataDiggers project
-Version: 0.0.0.9000
+Version: 0.1.1
 Authors@R: 
     person(given = "Romano",
            family = "Londt",
@@ -12,3 +12,30 @@ License: What license it uses
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
+Depends: tidyverse
+    , naniar
+    , dplyr
+    , caret
+    , doSNOW
+    , sf
+    , futile.logger
+    , lubridate
+    , openxlsx
+    , anomalize
+    , VIM
+    , reshape2
+    , shiny
+    , naniar
+    , ggplot2
+    , tidyquant
+    , sqldf
+    , formatR
+    , bupaR
+    , edeaR
+    , eventdataR
+    , processmapR
+    , processmonitR
+    , xesreadR
+    , petrinetR    
+    , broom
+                   

@@ -1,19 +1,15 @@
 # init
-if (file.exists('./init.R')){
-  source('./init.R')
-}
-
-# readRDS
-
-summarizeOrderTijdschrijvenByOrderDF <- read_rds("summarizeOrderTijdschrijvenByOrderDF.rds")
+source('./init.R')
+library(DataDiggersPackage)
+startPreparation(workdir = "D:/datafiles", dataframesToGlobalEnvironment = TRUE)
 
 
 # visualisations
 
 
-hist(as.numeric(summarizeOrderTijdschrijvenByOrderDF$OverschreidingUitersteHersteltijd, units = "hours"))
+hist(as.numeric(summarized.OrderTijdschrijvenByOrderDF$OverschreidingUitersteHersteltijd, units = "hours"))
 
-qplot(as.numeric(summarizeOrderTijdschrijvenByOrderDF$OverschreidingUitersteHersteltijd, units = "days"),
+qplot(as.numeric(summarized.OrderTijdschrijvenByOrderDF$OverschreidingUitersteHersteltijd, units = "days"),
       geom="histogram",
       binwidth = 1,  
       main = "Histogram for overschreiding", 
@@ -24,17 +20,17 @@ qplot(as.numeric(summarizeOrderTijdschrijvenByOrderDF$OverschreidingUitersteHers
       xlim=c(-40,40)
 )
 
-qplot(as.numeric(TotaleSchrijftijdReis, units="hours"), data = summarizeOrderTijdschrijvenByOrderDF,
+qplot(as.numeric(TotaleSchrijftijdReis, units="hours"), data = summarized.OrderTijdschrijvenByOrderDF,
       geom="histogram",
       binwidth = 1,
       xlim=c(0, 25))
 
-qplot(as.numeric(TotaleSchrijftijdWerk, units="hours"), data = summarizeOrderTijdschrijvenByOrderDF,
+qplot(as.numeric(TotaleSchrijftijdWerk, units="hours"), data = summarized.OrderTijdschrijvenByOrderDF,
       geom="histogram",
       binwidth = 1,
       xlim=c(0, 100))
 
-qplot(as.numeric(TotaleDoorlooptijdVanuitKlant, units="hours"), data = summarizeOrderTijdschrijvenByOrderDF,
+qplot(as.numeric(TotaleDoorlooptijdVanuitKlant, units="hours"), data = summarized.OrderTijdschrijvenByOrderDF,
       geom="histogram",
       binwidth = 1,
       xlim=c(0, 100))

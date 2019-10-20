@@ -6,22 +6,6 @@
 #' @param dataframesToGlobalEnvironment infication of dataframes to global enironment
 #' @keywords import prepare eda
 #' @export
-#' @import tidyverse
-#' @import naniar
-#' @import dplyr
-#' @import caret
-#' @import doSNOW
-#' @import sf
-#' @import futile.logger
-#' @import openxlsx
-#' @import anomalize
-#' @import VIM
-#' @import reshape2
-#' @import shiny
-#' @import naniar
-#' @import ggplot2
-#' @import tidyquant
-#' @import sqldf
 #' @examples
 #' startPreparation( "C:/files", TRUE, FALSE)
 startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironment=FALSE){
@@ -259,9 +243,9 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
   
   futile.logger::flog.info(msg = "Tijdschrijven summary")
   
-  if(!file.exists(getLocationNaam("summarizeOrderTijdschrijvenByOrder.rds", FALSE))|rebuild){
-    futile.logger::flog.info(msg = "maken summarizeOrderTijdschrijvenByOrderDF.rds")
-    summarizeOrderTijdschrijvenByOrderDF <- join.ordersTijdschrijvenDF %>%
+  if(!file.exists(getLocationNaam("summarized_OrderTijdschrijvenByOrder.rds", FALSE))|rebuild){
+    futile.logger::flog.info(msg = "maken summarized.OrderTijdschrijvenByOrderDF.rds")
+    summarized.OrderTijdschrijvenByOrderDF <- join.ordersTijdschrijvenDF %>%
       group_by(Ordernummer) %>%
       summarise( VerschillendeDagen       = n_distinct(ShiftDate)
                  , AantalTijdschrijven               = n()
@@ -274,13 +258,13 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
                  , EindtijdTijdschrijven             = max(EndDate)
                  , Uiterstehersteltijd               = mean(Uiterstehersteltijd)
       )
-    dumpRDS(summarizeOrderTijdschrijvenByOrderDF, "summarizeOrderTijdschrijvenByOrder.rds")           
+    dumpRDS(summarized.OrderTijdschrijvenByOrderDF, "summarized_OrderTijdschrijvenByOrder.rds")           
   } else {
-    futile.logger::flog.info(msg = "Lezen summarizeOrderTijdschrijvenByOrderDF.rds")
-    summarizeOrderTijdschrijvenByOrderDF <- readRDSdd("summarizeOrderTijdschrijvenByOrder.rds")           
+    futile.logger::flog.info(msg = "Lezen summarized_OrderTijdschrijvenByOrderDF.rds")
+    summarized.OrderTijdschrijvenByOrderDF <- readRDSdd("summarized_OrderTijdschrijvenByOrder.rds")           
   }
   
-  if (!file.exists(getLocationNaam("summarizedWorkflow.rds", FALSE))|rebuild){
+  if (!file.exists(getLocationNaam("summarized_Workflow.rds", FALSE))|rebuild){
     futile.logger::flog.debug("create summarizedWorkflowDF")
     workflowStappen <- c("dummy"
                          # , "Opstellen POD"
@@ -320,7 +304,7 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
                          , "Cleanbeoordeling"
     )
     
-    summarizedWorkflowDF <- prep.workflowDF %>%
+    summarized.WorkflowDF <- prep.workflowDF %>%
       filter(Status == "Gereed") %>%
       filter(Taakomschrijving %in% workflowStappen )%>%
       mutate( Starttijd = unclass(Starttijd)
@@ -342,22 +326,22 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
       ,  Ordernummer ~ Taakomschrijving
       )
     futile.logger::flog.debug("opslaan summarizedWorkflowDF")
-    dumpRDS(summarizedWorkflowDF, "summarizedWorkflow.rds")
+    dumpRDS(summarized.WorkflowDF, "summarized_Workflow.rds")
   } else {
     futile.logger::flog.debug("lees summarizedWorkflowDF")
-    summarizedWorkflowDF <- readRDSdd("summarizedWorkflow.rds")
+    summarized.WorkflowDF <- readRDSdd("summarized_Workflow.rds")
   }
   
   
-  if (!file.exists(getLocationNaam("summarizedWorflowTijdschrijven.rds", FALSE))|rebuild){
+  if (!file.exists(getLocationNaam("summarized_WorflowTijdschrijven.rds", FALSE))|rebuild){
     futile.logger::flog.debug("create summarizedWorkflowTijdschrijvenDF")
-    summarizedWorflowTijdschrijvenDF <- full_join(summarizedWorkflowDF, summarizeOrderTijdschrijvenByOrderDF)
+    summarized.WorflowTijdschrijvenDF <- full_join(summarized.WorkflowDF, summarized.OrderTijdschrijvenByOrderDF)
     
     futile.logger::flog.debug("opslaan summarizedWorkflowDF")
-    dumpRDS(summarizedWorflowTijdschrijvenDF, "summarizedWorflowTijdschrijven.rds")
+    dumpRDS(summarized.WorflowTijdschrijvenDF, "summarized_WorflowTijdschrijven.rds")
   } else{
     futile.logger::flog.debug("lees summarizedWorkflowDF")
-    summarizedWorflowTijdschrijvenDF <- readRDSdd("summarizedWorflowTijdschrijven.rds")
+    summarized.WorflowTijdschrijvenDF <- readRDSdd("summarized_WorflowTijdschrijven.rds")
   }
   if(dataframesToGlobalEnvironment){
     assign("org.medewerkersDF", org.medewerkersDF, envir = globalenv())  
@@ -375,9 +359,9 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     assign("join.dienstMedewerkersDF", join.dienstMedewerkersDF, envir = globalenv())  
     assign("join.tijdschrijvenDienstMedewerkersDF", join.tijdschrijvenDienstMedewerkersDF, envir = globalenv())  
     
-    assign("summarizedWorflowTijdschrijvenDF", summarizedWorflowTijdschrijvenDF, envir = globalenv())  
-    assign("summarizedWorkflowDF", summarizedWorkflowDF, envir = globalenv())  
-    assign("summarizeOrderTijdschrijvenByOrderDF", summarizeOrderTijdschrijvenByOrderDF, envir = globalenv())  
+    assign("summarized.WorflowTijdschrijvenDF", summarized.WorflowTijdschrijvenDF, envir = globalenv())  
+    assign("summarized.WorkflowDF", summarized.WorkflowDF, envir = globalenv())  
+    assign("summarized.OrderTijdschrijvenByOrderDF", summarized.OrderTijdschrijvenByOrderDF, envir = globalenv())  
   }
   invisible()
 }
