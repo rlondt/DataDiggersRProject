@@ -187,7 +187,38 @@ btc_ts <-
 # 5. Heeft medewerker altijd een woonplaats
 # 6. Heeft elke order een plaats
 # 7. Orders die binnen een periode 'x' (vb een minuut) zijn uitgevoerd
+
 # 8. Verdeling van de reistijd over de medewerkers
+tempDF <- tijdschrijvenDF %>%
+  mutate(DuurTijdschrijvenInUren = as.numeric((EndDate - StartDate)/3600),unit="hours")
+
+meanDuurPerMedewerkerType <- aggregate(tempDF$DuurTijdschrijvenInUren, by=list(MDWID=tempDF$MDWID, Type=tempDF$Type), mean)
+
+# boxplot
+ggplot(data = meanDuurPerMedewerkerType, aes(x = Type, y=x)) +
+  geom_boxplot(fill = "blue", alpha = .2) +
+  scale_y_continuous(breaks=0:15) +
+  stat_summary(aes(group = Type), fun.y=mean, colour="darkred", geom="point") +
+  labs(title="Verdeling gemiddelde van tijdschrijf uren van medewerkers per Type tijd", y="Uren")
+
+# check medewerker with mean 12 hours 'Reis' tijd
+checkMDW <- subset(medewerkersDF , MDWID == 'c7990d76-898a-4811-9fca-faa32ffc8386') # Medewerker is 'Uit dienst'
+checkTijdMDW <- subset(tijdschrijvenDF , MDWID == 'c7990d76-898a-4811-9fca-faa32ffc8386' & Type =="Reis")
+checkOrder <- subset(ordersDF , Ordernummer == 'B0050110') #Plaats=Utrecht
+
+mu <- ddply(meanDuurPerMedewerkerType, "Type", summarise, grp.mean=mean(x))
+
+# Change line colors by groups
+ggplot(meanDuurPerMedewerkerType, aes(x=x, color=Type, fill=Type)) +
+  geom_histogram(binwidth=.2, position="dodge") +
+  scale_x_continuous(breaks=0:15) +
+  geom_vline(data=mu, aes(xintercept=grp.mean, color=Type),
+             linetype="dashed")+
+  scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
+  scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
+  labs(title="Verdeling gemiddelde van tijdschrijf uren van medewerkers per Type tijd", x="Uren", y="Count")
+  theme_classic()
+
 # 9. Aantal tijdschrijvers per order
 # 10. Verhouding aantal tijdschrijvers tov normtijd (outlier??)
 # 11. Tijdschrijvers ten opzichte van het order-klantteam (klantenteams VWT NOC geen tijdschrijvers??)

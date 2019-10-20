@@ -23,6 +23,7 @@ init <- function(){
                   ,"tidyverse"
                   ,"naniar"
                   ,"dplyr"
+                  ,"plyr"
                   ,"caret"
                   ,"doSNOW"
                   ,"sf"
