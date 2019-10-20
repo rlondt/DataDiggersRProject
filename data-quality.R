@@ -1,11 +1,14 @@
 source('./init.R')
 library(DataDiggersPackage)
 startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE)
-
+initializeDQScoringFramework()
 
 
 # Compleetheid
 # 1. Mogelijkheden voor kruistellingen
+addScoreToDQFramework(COMPLEETHEID, waarde=5, weging=5)
+
+
 # 2. Zijn alle onderdelen van VWT-data vertegenwoordigd
 # 3. Missing values analyse
 # 3.1 Medewerker

@@ -32,8 +32,8 @@ initializeDQScoringFramework <- function(){
 addScoreToDQFramework <- function(categorie, waarde, weging){
   
   stopifnot(categorie %in% c(COMPLEETHEID, CONSISTENTIE, UNICITEIT, VALIDITEIT, ACCURAATHEID))
-  stopifnot(waarde < 1)
-  stopifnot(waarde > 5)
+  stopifnot(waarde >= 0)
+  stopifnot(waarde <= 5)
   df <- data.frame(categorie, waarde, weging)
     names(df) <- c ("categorie", "waarde", "weging")
 
