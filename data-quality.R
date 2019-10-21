@@ -8,7 +8,13 @@ initializeDQScoringFramework()
 # Compleetheid
 # 1. Mogelijkheden voor kruistellingen
 addScoreToDQFramework(COMPLEETHEID, waarde=5, weging=5)
+addScoreToDQFramework(CONSISTENTIE, waarde=5, weging=5)
+addScoreToDQFramework(UNICITEIT, waarde=5, weging=5)
+addScoreToDQFramework(VALIDITEIT, waarde=5, weging=5)
+addScoreToDQFramework(ACCURAATHEID, waarde=5, weging=5)
 
+
+plotDQ()
 
 # 2. Zijn alle onderdelen van VWT-data vertegenwoordigd
 # 3. Missing values analyse
