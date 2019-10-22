@@ -82,6 +82,7 @@ aggr_plot <- aggr(workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'),
 # ..
 # Uniqueness
 # 1. Geen dubbele records
+  addScoreToDQFramework(UNICITEIT, waarde=4.5, weging=3)
 # 2. Zijn er medewerkers die tegelijkertijd aan meerdere orders werken?
   t1DF <- prep.tijdschrijvenDF %>%
     mutate(StartDate = unclass(StartDate))%>%
@@ -97,7 +98,9 @@ aggr_plot <- aggr(workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'),
                 and t1.StartDate <= t2.EndDate-1
                ")
   # 29 voorkomens
-
+  dumpRDS(t2DF, "dq_unique_2.rds")
+  addScoreToDQFramework(UNICITEIT, waarde=4.5, weging=1)
+  
   
 # 3. Zijn er medewerkers die tegelijkertijd voor meerdere orders reizen?
   t1DF <- prep.tijdschrijvenDF %>%
@@ -114,6 +117,8 @@ aggr_plot <- aggr(workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'),
                 and t1.StartDate <= t2.EndDate-1
                ")
   # 8 voorkomens  
+  dumpRDS(t2DF, "dq_unique_3.rds")
+  addScoreToDQFramework(UNICITEIT, waarde=5, weging=1)
   
 # 4. Overlappen de workflowstappen (kan zijn hoor)
   levels(prep.workflowDF$Status)
@@ -137,7 +142,7 @@ aggr_plot <- aggr(workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'),
                 and t1.Starttijd <= t2.Eindtijd-1
                ")
   
-  write_rds(overlappendeWorkflowstappenDF, "overlappendeWorkflowstappen.rds")
+  dumpRDS(overlappendeWorkflowstappenDF, "dq_unique_4.rds")
   # 397654 voorkomens
   
 # ..
@@ -216,11 +221,20 @@ ggplot(meanDuurPerMedewerkerType, aes(x=x, color=Type, fill=Type)) +
 # Accuraatheid
 # 1. Verdeling aantal orders per over de tijd uitgezet.(Heatmap timeline )
 
-tempDF <- summarized.WorkflowDF%>%
+heatmapStarttijdDF <- summarized.WorkflowDF%>%
   filter(!is.na.POSIXlt(Uitvoering_Starttijd))%>%
   mutate(Uitvoering_Starttijd = as.Date(Uitvoering_Starttijd))%>%
   group_by(Uitvoering_Starttijd) %>%
   summarise(aantal = n())
+
+dumpRDS(heatmapStarttijdDF, "dq_accuraatheid_1a.rds")
+
+heatmapEindtijdDF <- summarized.WorkflowDF%>%
+  filter(!is.na.POSIXlt(Uitvoering_WerkelijkeEindtijd))%>%
+  mutate(Uitvoering_WerkelijkeEindtijd = as.Date(Uitvoering_WerkelijkeEindtijd))%>%
+  group_by(Uitvoering_WerkelijkeEindtijd) %>%
+  summarise(aantal = n())
+dumpRDS(heatmapEindtijdDF, "dq_accuraatheid_1b.rds")
 
 #r2g <- c("#D61818", "#FFAE63", "#FFFFBD", "#B5E384") 
 calendarHeat(tempDF$Uitvoering_Starttijd
@@ -228,12 +242,6 @@ calendarHeat(tempDF$Uitvoering_Starttijd
              , ncolors = 99
              , color = "w2b"
              , varname="Starttijd orders uitvoering")
-
-tempDF <- summarized.WorkflowDF%>%
-  filter(!is.na.POSIXlt(Uitvoering_WerkelijkeEindtijd))%>%
-  mutate(Uitvoering_WerkelijkeEindtijd = as.Date(Uitvoering_WerkelijkeEindtijd))%>%
-  group_by(Uitvoering_WerkelijkeEindtijd) %>%
-  summarise(aantal = n())
 
 #r2g <- c("#D61818", "#FFAE63", "#FFFFBD", "#B5E384") 
 calendarHeat(tempDF$Uitvoering_WerkelijkeEindtijd
