@@ -134,11 +134,11 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     # lege strings, 'NA' en spaties naar NA
     futile.logger::flog.debug(msg = ".Omzetten null-values, factoren en datums")
     prep.workflowDF <- org.workflowDF %>%
-      mutate(RecordGewijzigd = convertToDateTime(RecordGewijzigd)) %>%
       mutate(Ordernummer = as.character(Ordernummer)) %>%
       mutate_all(list(~na_if(.,"")))%>%
       mutate_all(list(~na_if(.," ")))%>%
       mutate_all(list(~na_if(.,"NA")))%>%
+      mutate(RecordGewijzigd = convertToDateTime(RecordGewijzigd)) %>%
       mutate(GeplandeEindtijd = convertToDateTime(GeplandeEindtijd)) %>%
       mutate(WerkelijkeEindtijd = convertToDateTime(WerkelijkeEindtijd)) %>%
       mutate(Starttijd = convertToDateTime(Starttijd))
