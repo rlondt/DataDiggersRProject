@@ -10,7 +10,6 @@ initializeDQScoringFramework()
 addScoreToDQFramework(COMPLEETHEID, waarde=5, weging=5)
 addScoreToDQFramework(CONSISTENTIE, waarde=5, weging=5)
 addScoreToDQFramework(UNICITEIT, waarde=5, weging=5)
-addScoreToDQFramework(VALIDITEIT, waarde=5, weging=5)
 addScoreToDQFramework(ACCURAATHEID, waarde=5, weging=5)
 
 
@@ -20,8 +19,10 @@ plotDQ()
 # 3. Missing values analyse
 # 3.1 Medewerker
 aggr_plot <- aggr(medewerkersDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+aggr_plot <- aggr(prep.medewerkersDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(medewerkersDF), cex.axis=.8, 
+                  labels=names(prep.medewerkersDF), cex.axis=.8, 
                   gap=2, 
                   ylab=c("Missing values Medewerker","Combinatie"))
 
@@ -57,9 +58,31 @@ aggr_plot <- aggr(workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'),
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Workflow","Combinatie"))
 
-# 3.3
-# 4. Overcompleetheid, dataoverload
-# 5. Komen alle features voor die nodig zijn om een analyse te doen
+# 4. Heeft medewerker altijd een woonplaats
+
+
+# pie chart Medewerker plaats (Leeg vs gevuld)
+org.medewerkersDF[org.medewerkersDF==""]<-NA #TIJDELIJK TOTDAT NA GEFIXED IS
+org.medewerkersDF[org.medewerkersDF==" "]<-NA #TIJDELIJK TOTDAT NA GEFIXED IS
+dfMDWPie <- org.medewerkersDF %>%
+  mutate(PlaatsEmpty = ifelse(is.na(MDWPlaats), TRUE, FALSE))
+
+dataPie <- dfMDWPie %>% 
+  group_by(PlaatsEmpty) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(per=`n`/sum(`n`)) %>% 
+  arrange(desc(PlaatsEmpty))
+dataPie$label <- scales::percent(dataPie$per)
+ggplot(data=dataPie)+
+  geom_bar(aes(x="", y=per, fill=PlaatsEmpty), stat="identity", width = 1)+
+  labs(title="Plaats Medewerker leeg vs gevuld", fill="Plaats leeg") +
+  coord_polar("y", start=0)+
+  theme_void()+
+  geom_text(aes(x=1, y = cumsum(per) - per/2, label=label))
+
+# 5. Overcompleetheid, dataoverload
+# 6. Komen alle features voor die nodig zijn om een analyse te doen
 # ..
 # Consistentie
 # 1. Komt elke ordernummer van het tijdschrijven voor in de workflowDF, en vice versa
