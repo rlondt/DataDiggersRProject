@@ -9,14 +9,18 @@ install.packages("roxygen2", repos = 'file:///D:/minicran' )
 
 library(roxygen2)
 library(devtools)
-library("miniCRAN")
+library(miniCRAN)
+
 
 org_repo <- c(CRAN = "http://cran.us.r-project.org")
 pkgTypes <- c("source", "win.binary")
 pth <- "D://miniCRAN"
+
 detach(package:DataDiggersPackage, unload=TRUE)
 remove.packages("DataDiggersPackage")
+
 document("DataDiggersPackage")
 build("DataDiggersPackage")
+addLocalPackage(c("DataDiggersPackage"), ".", "D:/miniCRAN", build = FALSE,  )
+install.packages("DataDiggersPackage")
 
-addLocalPackage(c("DataDiggersPackage"), ".", "D:/miniCRAN", build = FALSE )

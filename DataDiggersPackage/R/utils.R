@@ -38,10 +38,3 @@ readRDSdd <- function(naam, ...){
   readRDS(getLocationNaam(naam), ...)  
 }
 
-empty_as_na <- function(x){
-  if("factor" %in% class(x)) x <- as.character(x) ## since ifelse wont work with factors
-  ret <-ifelse(as.character(x)!="", x, NA)
-  ret <-ifelse(as.character(x)!="NA", x, NA)
-  ret <-ifelse(as.character(x)!=" ", x, NA)
-  ret
-}
