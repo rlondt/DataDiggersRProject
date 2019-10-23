@@ -1,7 +1,7 @@
 source('./init.R')
 library(DataDiggersPackage)
 flog.threshold(DEBUG)
-startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE)
+startPreparation(workdir = "C:/Users/louis/OneDrive/studie/vakken/applied big data/datafiles", dataframesToGlobalEnvironment = TRUE)
 initializeDQScoringFramework()
 
 
@@ -18,18 +18,16 @@ plotDQ()
 # 2. Zijn alle onderdelen van VWT-data vertegenwoordigd
 # 3. Missing values analyse
 # 3.1 Medewerker
-aggr_plot <- aggr(medewerkersDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
 aggr_plot <- aggr(prep.medewerkersDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
-                  labels=names(medewerkersDF), cex.axis=.8, 
                   labels=names(prep.medewerkersDF), cex.axis=.8, 
                   gap=2, 
                   ylab=c("Missing values Medewerker","Combinatie"))
 
 # 3.2 Order
-aggr_plot <- aggr(ordersDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+aggr_plot <- aggr(prep.ordersDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,combined = TRUE,
-                  labels=names(ordersDF), cex.axis=.8, 
+                  labels=names(prep.ordersDF), cex.axis=.8, 
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Order","Combinatie"))
 
@@ -37,49 +35,50 @@ aggr_plot <- aggr(ordersDF,oma = c(8,5,5,3), col=c('lightblue','red'),
 naniar::gg_miss_var(ordersDF)
 
 
-# 3.3 Roosterdiensten
-aggr_plot <- aggr(roosterdienstenDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+# 3.3 roosterdiensten
+aggr_plot <- aggr(prep.roosterdienstenDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
-                  labels=names(roosterdienstenDF), cex.axis=.8, 
+                  labels=names(prep.roosterdienstenDF), cex.axis=.8, 
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Roosterdiensten","Combinatie"))
 
-# 3.4 Tijdschrijven
-aggr_plot <- aggr(tijdschrijvenDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+# 3.4 tijdschrijven
+aggr_plot <- aggr(prep.tijdschrijvenDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
-                  labels=names(tijdschrijvenDF), cex.axis=.8, 
+                  labels=names(prep.tijdschrijvenDF), cex.axis=.8, 
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Tijdschrijven","Combinatie"))
 
-# 3.5 Workflow
-aggr_plot <- aggr(workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+# 3.5 workflow
+aggr_plot <- aggr(prep.workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
-                  labels=names(workflowDF), cex.axis=.8, 
+                  labels=names(prep.workflowDF), cex.axis=.8, 
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Workflow","Combinatie"))
 
-# 4. Heeft medewerker altijd een woonplaats
+# 4. heeft medewerker altijd een woonplaats?
 
-
-# pie chart Medewerker plaats (Leeg vs gevuld)
-org.medewerkersDF[org.medewerkersDF==""]<-NA #TIJDELIJK TOTDAT NA GEFIXED IS
-org.medewerkersDF[org.medewerkersDF==" "]<-NA #TIJDELIJK TOTDAT NA GEFIXED IS
-dfMDWPie <- org.medewerkersDF %>%
+# add field for distincting 'plaats' filled or empty
+MDWPie <- prep.medewerkersDF %>%
   mutate(PlaatsEmpty = ifelse(is.na(MDWPlaats), TRUE, FALSE))
 
-dataPie <- dfMDWPie %>% 
+# create dataframe for pie chart
+dataPie <- MDWPie %>% 
   group_by(PlaatsEmpty) %>% 
   count() %>% 
   ungroup() %>% 
   mutate(per=`n`/sum(`n`)) %>% 
   arrange(desc(PlaatsEmpty))
 dataPie$label <- scales::percent(dataPie$per)
+
+# create pie chart
 ggplot(data=dataPie)+
   geom_bar(aes(x="", y=per, fill=PlaatsEmpty), stat="identity", width = 1)+
   labs(title="Plaats Medewerker leeg vs gevuld", fill="Plaats leeg") +
   coord_polar("y", start=0)+
   theme_void()+
   geom_text(aes(x=1, y = cumsum(per) - per/2, label=label))
+# Resultaat: 444 medewerker zonder plaats, 324 met
 
 # 5. Overcompleetheid, dataoverload
 # 6. Komen alle features voor die nodig zijn om een analyse te doen
@@ -95,7 +94,12 @@ ggplot(data=dataPie)+
 #   f. dienst zonder tijdschrijven
 #   g. tijdschrijven zonder order
 #   h. order zonder tijdschrijven
+
 # 3. Is bij tijdschrijven, de begintijd altijd kleiner dan de eindtijd
+dftijdschrijvenEindatumGroterDanBegindatum <- prep.tijdschrijvenDF %>%
+  filter(prep.tijdschrijvenDF$StartDate > prep.tijdschrijvenDF$EndDate)
+# resultaat: komt niet voor. Wel is het zo dat er 3 tijdschrijf records zijn waar de startdatum en eindddatum gelijk zijn.
+
 # 4. Bevinden de begintijd en eindtijd van het tijdschrijven zich binnen de begintijd en eindtijd van het rooster
 # 5. De relatie tussen rooster en medewerker en tijdschrijven en medewerker loopt "dubbel". Komen daar inconsistenties in voor
 # 6. Datumvelden als datum te behandelen ⇒ OK
@@ -171,7 +175,22 @@ ggplot(data=dataPie)+
 # ..
 # Validiteit (plausibiliteit/business rules)
 # 1. Is er daarbinnen nog verschil tussen werk en reistijd? Hoe gaan we om met overwerk?
+  
 # 2. Vervallen orders waar wel geakkoordeerd is tijdgeschreven
+  vervallenOrdersMetTijdschrijvenDF <- left_join(prep.ordersDF, join.tijdschrijvenDienstMedewerkersDF, by=c("Ordernummer" = "ERPID")) %>%
+    mutate(DuurTijdschrijvenInSeconden = EndDate - StartDate) %>%
+    mutate(VerschilUitersteHerstelEindeTijdschrijvenInSeconden = EndDate - Uiterstehersteltijd) %>%
+    filter(Verwerkingsstatus == "Akkoord" | Verwerkingsstatus == "Vrijgegeven ERP") %>%
+    filter(OpdrachtVervalt == "WAAR") %>%
+    filter(Approved == "WAAR")
+  
+  # count distinct values
+  vervallenOrdersMetTijdschrijvenDF %>%
+    group_by(Ordernummer) %>%
+    summarise(n_distinct(Ordernummer))
+  
+  #Resultaat: er zijn 3107 vervallen orders waarin in totaal 9188 tijdschrijf records voor geregistreerd staan
+  
 # 3. Anomaly detection/outlier verklaring.. 
 dfAnomalize <- summarizeOrderTijdschrijvenByOrderDF[,c("OverschreidingUitersteHersteltijd", "EindtijdTijdschrijven")]
 dfAnomalizeCompleteCases <- dfAnomalize[complete.cases(dfAnomalize), ]
