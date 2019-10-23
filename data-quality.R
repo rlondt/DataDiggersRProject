@@ -1,7 +1,7 @@
 source('./init.R')
 library(DataDiggersPackage)
 flog.threshold(DEBUG)
-startPreparation(workdir = "D:/datafiles2", rebuild = FALSE, dataframesToGlobalEnvironment = TRUE)
+startPreparation(workdir = "D:/datafiles2", rebuild = TRUE, dataframesToGlobalEnvironment = TRUE)
 initializeDQScoringFramework()
 
 # Compleetheid

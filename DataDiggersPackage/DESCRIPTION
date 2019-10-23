@@ -1,6 +1,6 @@
 Package: DataDiggersPackage
 Title: Package that supports the DataDiggers project
-Version: 0.1.5
+Version: 0.1.6
 Authors@R: 
     person(given = "Romano",
            family = "Londt",
