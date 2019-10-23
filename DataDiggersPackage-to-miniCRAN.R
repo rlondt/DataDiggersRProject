@@ -19,6 +19,10 @@ pth <- "D://miniCRAN"
 detach(package:DataDiggersPackage, unload=TRUE)
 remove.packages("DataDiggersPackage")
 
+# delete package in minicran
+pkgFile <- dir(path = paste(pth,"/src/contrib/", sep = ""), pattern = "DataDiggers*")
+file.remove(pkgFile)
+
 document("DataDiggersPackage")
 build("DataDiggersPackage")
 addLocalPackage(c("DataDiggersPackage"), ".", "D:/miniCRAN", build = FALSE,  )

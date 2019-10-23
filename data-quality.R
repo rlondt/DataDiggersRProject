@@ -1,9 +1,8 @@
 source('./init.R')
 library(DataDiggersPackage)
 flog.threshold(DEBUG)
-startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE)
+startPreparation(workdir = "D:/datafiles2", rebuild = FALSE, dataframesToGlobalEnvironment = TRUE)
 initializeDQScoringFramework()
-
 
 # Compleetheid
 # 1. Mogelijkheden voor kruistellingen
@@ -13,47 +12,48 @@ addScoreToDQFramework(UNICITEIT, waarde=5, weging=5)
 addScoreToDQFramework(VALIDITEIT, waarde=5, weging=5)
 addScoreToDQFramework(ACCURAATHEID, waarde=5, weging=5)
 
+levels(prep.ordersDF$Postcode4)
 
 plotDQ()
 
 # 2. Zijn alle onderdelen van VWT-data vertegenwoordigd
 # 3. Missing values analyse
 # 3.1 Medewerker
-aggr_plot <- aggr(medewerkersDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+aggr_plot <- aggr(prep.medewerkersDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
-                  labels=names(medewerkersDF), cex.axis=.8, 
+                  labels=names(prep.medewerkersDF), cex.axis=.8, 
                   gap=2, 
                   ylab=c("Missing values Medewerker","Combinatie"))
 
 # 3.2 Order
-aggr_plot <- aggr(ordersDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+aggr_plot <- aggr(prep.ordersDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,combined = TRUE,
-                  labels=names(ordersDF), cex.axis=.8, 
+                  labels=names(prep.ordersDF), cex.axis=.8, 
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Order","Combinatie"))
 
 # alternative
-naniar::gg_miss_var(ordersDF)
+gg_miss_var(prep.ordersDF)
 
 
 # 3.3 Roosterdiensten
-aggr_plot <- aggr(roosterdienstenDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+aggr_plot <- aggr(prep.roosterdienstenDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
-                  labels=names(roosterdienstenDF), cex.axis=.8, 
+                  labels=names(prep.roosterdienstenDF), cex.axis=.8, 
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Roosterdiensten","Combinatie"))
 
 # 3.4 Tijdschrijven
-aggr_plot <- aggr(tijdschrijvenDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+aggr_plot <- aggr(prep.tijdschrijvenDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
-                  labels=names(tijdschrijvenDF), cex.axis=.8, 
+                  labels=names(prep.tijdschrijvenDF), cex.axis=.8, 
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Tijdschrijven","Combinatie"))
 
 # 3.5 Workflow
-aggr_plot <- aggr(workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+aggr_plot <- aggr(prep.workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
-                  labels=names(workflowDF), cex.axis=.8, 
+                  labels=names(prep.workflowDF), cex.axis=.8, 
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Workflow","Combinatie"))
 
@@ -63,6 +63,18 @@ aggr_plot <- aggr(workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'),
 # ..
 # Consistentie
 # 1. Komt elke ordernummer van het tijdschrijven voor in de workflowDF, en vice versa
+DataDiggersPackage::getLocationNaam("test")
+workflowOnbekendTijdschrijvenDF <- prep.workflowDF[!prep.workflowDF$Ordernummer %in% prep.tijdschrijvenDF$ERPID,] 
+dumpRDS(workflowOnbekendTijdschrijvenDF, "dq_consistentie_1a.rds")
+count(workflowOnbekendOrderDF) 
+# 700.054
+
+tijdschrijvenOnbekendWorkflowDF <- prep.tijdschrijvenDF[!prep.tijdschrijvenDF$ERPID %in% prep.workflowDF$Ordernummer,]
+dumpRDS(tijdschrijvenOnbekendWorkflowDF, "dq_consistentie_1b.rds")
+count(tijdschrijvenOnbekendWorkflowDF) 
+# 266.229
+
+
 # 2. Alle relaties twee kanten op
 #   a. order zonder workflow
 #   b. workflow zonder order
@@ -81,8 +93,9 @@ aggr_plot <- aggr(workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'),
 # 9. Controle postcode-plaatsnaam zowel voor persoon als order
 # ..
 # Uniqueness
-# 1. Geen dubbele records
+# 1. Geen dubbele records, functioneel en obv primary key
   addScoreToDQFramework(UNICITEIT, waarde=4.5, weging=3)
+
 # 2. Zijn er medewerkers die tegelijkertijd aan meerdere orders werken?
   t1DF <- prep.tijdschrijvenDF %>%
     mutate(StartDate = unclass(StartDate))%>%
@@ -142,7 +155,14 @@ aggr_plot <- aggr(workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'),
                 and t1.Starttijd <= t2.Eindtijd-1
                ")
   
-  dumpRDS(overlappendeWorkflowstappenDF, "dq_unique_4.rds")
+  summarized.wfDubbelDF <- overlappendeWorkflowstappenDF %>%
+    group_by(taakomschrijving_1, taakomschrijving_2)%>%
+    summarize(aantal = n())
+  
+  
+  dumpRDS(overlappendeWorkflowstappenDF, "dq_unique_4a.rds")
+  dumpRDS(summarized.wfDubbelDF, "dq_unique_4b.rds")
+  
   # 397654 voorkomens
   
 # ..

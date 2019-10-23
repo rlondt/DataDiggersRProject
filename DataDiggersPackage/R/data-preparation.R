@@ -56,7 +56,13 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
       mutate(CreationDate = convertToDateTime(CreationDate)) %>%
       mutate(Uiterstehersteltijd = convertToDateTime(Uiterstehersteltijd)) %>%
       mutate(GeplandeTG = convertToDateTime(GeplandeTG)) %>%
-      mutate(ModifiedOn = convertToDateTime(ModifiedOn))
+      mutate(ModifiedOn = convertToDateTime(ModifiedOn)) %>%
+      mutate(Categorie = case_when(str_length(Categorie) > 0 ~ Categorie,
+                                   str_count(as.character(OpdrachtType), "NLS")> 0 ~ "NLS"
+      ))%>%
+      mutate(Categorie = as.factor(Categorie)) %>%
+      mutate(OpdrachtType = as.factor(OpdrachtType))
+    
     dumpRDS(org.ordersDF, "org_orders.rds")
     dumpRDS(prep.ordersDF, "prep_orders.rds")
   } else {
