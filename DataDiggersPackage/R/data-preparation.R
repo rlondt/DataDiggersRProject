@@ -24,11 +24,13 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     # omzetten datums naar R-datums
     # lege strings, 'NA' en spaties naar NA
     futile.logger::flog.debug(msg = ".Omzetten null-values, factoren en datums")
+
     prep.medewerkersDF <- org.medewerkersDF %>%
       mutate(MDWID = as.character(MDWID)) %>%
-      mutate_all(funs(empty_as_na))
-      
-    
+      mutate_all(list(~na_if(.,"")))%>%
+      mutate_all(list(~na_if(.," ")))%>%
+      mutate_all(list(~na_if(.,"NA")))
+
     futile.logger::flog.debug(msg = ".Opslaan medewerkers")
     dumpRDS(org.medewerkersDF, "org_medewerkers.rds")
     dumpRDS(prep.medewerkersDF, "prep_medewerkers.rds")
@@ -48,7 +50,9 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     futile.logger::flog.debug(msg = ".Omzetten null-values, factoren en datums")
     prep.ordersDF <- org.ordersDF %>%
       mutate(Ordernummer = as.character(Ordernummer)) %>%
-      mutate_all(funs(empty_as_na)) %>%
+      mutate_all(list(~na_if(.,"")))%>%
+      mutate_all(list(~na_if(.," ")))%>%
+      mutate_all(list(~na_if(.,"NA")))%>%
       mutate(CreationDate = convertToDateTime(CreationDate)) %>%
       mutate(Uiterstehersteltijd = convertToDateTime(Uiterstehersteltijd)) %>%
       mutate(GeplandeTG = convertToDateTime(GeplandeTG)) %>%
@@ -73,7 +77,9 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     prep.roosterdienstenDF <- org.roosterdienstenDF %>%
       mutate(DienstID = as.character(DienstID)) %>%
       mutate(MDWID = as.character(MDWID)) %>%
-      mutate_all(funs(empty_as_na)) %>%
+      mutate_all(list(~na_if(.,"")))%>%
+      mutate_all(list(~na_if(.," ")))%>%
+      mutate_all(list(~na_if(.,"NA")))%>%
       mutate(Starttijd = convertToDateTime(Starttijd))%>%
       mutate(Eindtijd = convertToDateTime(Eindtijd))%>%
       mutate(ShiftDate = convertToDate(ShiftDate))
@@ -100,7 +106,9 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
       mutate(DienstID = as.character(DienstID)) %>%
       mutate(MDWID = as.character(MDWID)) %>%
       mutate(ERPID = as.character(ERPID)) %>%
-      mutate_all(funs(empty_as_na)) %>%
+      mutate_all(list(~na_if(.,"")))%>%
+      mutate_all(list(~na_if(.," ")))%>%
+      mutate_all(list(~na_if(.,"NA")))%>%
       mutate(CreatedOn = convertToDateTime(CreatedOn)) %>%
       mutate(ModifiedOn = convertToDateTime(ModifiedOn)) %>%
       mutate(StartDate = convertToDateTime(StartDate)) %>%
@@ -126,9 +134,11 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     # lege strings, 'NA' en spaties naar NA
     futile.logger::flog.debug(msg = ".Omzetten null-values, factoren en datums")
     prep.workflowDF <- org.workflowDF %>%
-      mutate(RecordGewijzigd = convertToDateTime(RecordGewijzigd)) %>%
       mutate(Ordernummer = as.character(Ordernummer)) %>%
-      mutate_all(funs(empty_as_na)) %>%
+      mutate_all(list(~na_if(.,"")))%>%
+      mutate_all(list(~na_if(.," ")))%>%
+      mutate_all(list(~na_if(.,"NA")))%>%
+      mutate(RecordGewijzigd = convertToDateTime(RecordGewijzigd)) %>%
       mutate(GeplandeEindtijd = convertToDateTime(GeplandeEindtijd)) %>%
       mutate(WerkelijkeEindtijd = convertToDateTime(WerkelijkeEindtijd)) %>%
       mutate(Starttijd = convertToDateTime(Starttijd))
