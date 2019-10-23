@@ -9,7 +9,6 @@ initializeDQScoringFramework()
 addScoreToDQFramework(COMPLEETHEID, waarde=5, weging=5)
 addScoreToDQFramework(CONSISTENTIE, waarde=5, weging=5)
 addScoreToDQFramework(UNICITEIT, waarde=5, weging=5)
-addScoreToDQFramework(VALIDITEIT, waarde=5, weging=5)
 addScoreToDQFramework(ACCURAATHEID, waarde=5, weging=5)
 
 levels(prep.ordersDF$Postcode4)
@@ -19,16 +18,16 @@ plotDQ()
 # 2. Zijn alle onderdelen van VWT-data vertegenwoordigd
 # 3. Missing values analyse
 # 3.1 Medewerker
-aggr_plot <- aggr(prep.medewerkersDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+aggr_plot <- aggr(prep.medewerkersDF,oma = c(8,5,5,3), col=c('lightblue','red'),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
-                  labels=names(prep.medewerkersDF), cex.axis=.8, 
-                  gap=2, 
+                  labels=names(prep.medewerkersDF), cex.axis=.8,
+                  gap=2,
                   ylab=c("Missing values Medewerker","Combinatie"))
 
 # 3.2 Order
-aggr_plot <- aggr(prep.ordersDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+aggr_plot <- aggr(prep.ordersDF,oma = c(8,5,5,3), col=c('lightblue','red'),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,combined = TRUE,
-                  labels=names(prep.ordersDF), cex.axis=.8, 
+                  labels=names(prep.ordersDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Order","Combinatie"))
 
@@ -36,42 +35,64 @@ aggr_plot <- aggr(prep.ordersDF,oma = c(8,5,5,3), col=c('lightblue','red'),
 gg_miss_var(prep.ordersDF)
 
 
-# 3.3 Roosterdiensten
-aggr_plot <- aggr(prep.roosterdienstenDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+# 3.3 roosterdiensten
+aggr_plot <- aggr(prep.roosterdienstenDF,oma = c(8,5,5,3), col=c('lightblue','red'),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
-                  labels=names(prep.roosterdienstenDF), cex.axis=.8, 
+                  labels=names(prep.roosterdienstenDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Roosterdiensten","Combinatie"))
 
-# 3.4 Tijdschrijven
-aggr_plot <- aggr(prep.tijdschrijvenDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+# 3.4 tijdschrijven
+aggr_plot <- aggr(prep.tijdschrijvenDF,oma = c(8,5,5,3), col=c('lightblue','red'),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
-                  labels=names(prep.tijdschrijvenDF), cex.axis=.8, 
+                  labels=names(prep.tijdschrijvenDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Tijdschrijven","Combinatie"))
 
-# 3.5 Workflow
-aggr_plot <- aggr(prep.workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'), 
+# 3.5 workflow
+aggr_plot <- aggr(prep.workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
-                  labels=names(prep.workflowDF), cex.axis=.8, 
+                  labels=names(prep.workflowDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Workflow","Combinatie"))
 
-# 3.3
-# 4. Overcompleetheid, dataoverload
-# 5. Komen alle features voor die nodig zijn om een analyse te doen
+# 4. heeft medewerker altijd een woonplaats?
+
+# add field for distincting 'plaats' filled or empty
+MDWPie <- prep.medewerkersDF %>%
+  mutate(PlaatsEmpty = ifelse(is.na(MDWPlaats), TRUE, FALSE))
+
+# create dataframe for pie chart
+dataPie <- MDWPie %>%
+  group_by(PlaatsEmpty) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(per=`n`/sum(`n`)) %>%
+  arrange(desc(PlaatsEmpty))
+dataPie$label <- scales::percent(dataPie$per)
+
+# create pie chart
+ggplot(data=dataPie)+
+  geom_bar(aes(x="", y=per, fill=PlaatsEmpty), stat="identity", width = 1)+
+  labs(title="Plaats Medewerker leeg vs gevuld", fill="Plaats leeg") +
+  coord_polar("y", start=0)+
+  theme_void()+
+  geom_text(aes(x=1, y = cumsum(per) - per/2, label=label))
+# Resultaat: 444 medewerker zonder plaats, 324 met
+
+# 5. Overcompleetheid, dataoverload
+# 6. Komen alle features voor die nodig zijn om een analyse te doen
 # ..
 # Consistentie
 # 1. Komt elke ordernummer van het tijdschrijven voor in de workflowDF, en vice versa
-DataDiggersPackage::getLocationNaam("test")
-workflowOnbekendTijdschrijvenDF <- prep.workflowDF[!prep.workflowDF$Ordernummer %in% prep.tijdschrijvenDF$ERPID,] 
+workflowOnbekendTijdschrijvenDF <- prep.workflowDF[!prep.workflowDF$Ordernummer %in% prep.tijdschrijvenDF$ERPID,]
 dumpRDS(workflowOnbekendTijdschrijvenDF, "dq_consistentie_1a.rds")
-count(workflowOnbekendOrderDF) 
+count(workflowOnbekendOrderDF)
 # 700.054
 
 tijdschrijvenOnbekendWorkflowDF <- prep.tijdschrijvenDF[!prep.tijdschrijvenDF$ERPID %in% prep.workflowDF$Ordernummer,]
 dumpRDS(tijdschrijvenOnbekendWorkflowDF, "dq_consistentie_1b.rds")
-count(tijdschrijvenOnbekendWorkflowDF) 
+count(tijdschrijvenOnbekendWorkflowDF)
 # 266.229
 
 
@@ -84,7 +105,12 @@ count(tijdschrijvenOnbekendWorkflowDF)
 #   f. dienst zonder tijdschrijven
 #   g. tijdschrijven zonder order
 #   h. order zonder tijdschrijven
+
 # 3. Is bij tijdschrijven, de begintijd altijd kleiner dan de eindtijd
+dftijdschrijvenEindatumGroterDanBegindatum <- prep.tijdschrijvenDF %>%
+  filter(prep.tijdschrijvenDF$StartDate > prep.tijdschrijvenDF$EndDate)
+# resultaat: komt niet voor. Wel is het zo dat er 3 tijdschrijf records zijn waar de startdatum en eindddatum gelijk zijn.
+
 # 4. Bevinden de begintijd en eindtijd van het tijdschrijven zich binnen de begintijd en eindtijd van het rooster
 # 5. De relatie tussen rooster en medewerker en tijdschrijven en medewerker loopt "dubbel". Komen daar inconsistenties in voor
 # 6. Datumvelden als datum te behandelen ⇒ OK
@@ -103,36 +129,36 @@ count(tijdschrijvenOnbekendWorkflowDF)
     filter(Type == "Werk")%>%
     select(MDWID, ERPID, StartDate, EndDate)
 
-  t2DF <- sqldf("select * 
+  t2DF <- sqldf("select *
                 from t1DF t1
-                ,    t1DF t2 
-                on t1.MDWID = t2.MDWID 
-                and t1.StartDate > t2.StartDate 
+                ,    t1DF t2
+                on t1.MDWID = t2.MDWID
+                and t1.StartDate > t2.StartDate
                 and t1.StartDate <= t2.EndDate-1
                ")
   # 29 voorkomens
   dumpRDS(t2DF, "dq_unique_2.rds")
   addScoreToDQFramework(UNICITEIT, waarde=4.5, weging=1)
-  
-  
+
+
 # 3. Zijn er medewerkers die tegelijkertijd voor meerdere orders reizen?
   t1DF <- prep.tijdschrijvenDF %>%
     mutate(StartDate = unclass(StartDate))%>%
     mutate(EndDate = unclass(EndDate))%>%
     filter(Type != "Werk")%>%
     select(MDWID, ERPID, StartDate, EndDate)
-  
-  t2DF <- sqldf("select * 
+
+  t2DF <- sqldf("select *
                 from t1DF t1
-                ,    t1DF t2 
-                on t1.MDWID = t2.MDWID 
-                and t1.StartDate > t2.StartDate 
+                ,    t1DF t2
+                on t1.MDWID = t2.MDWID
+                and t1.StartDate > t2.StartDate
                 and t1.StartDate <= t2.EndDate-1
                ")
-  # 8 voorkomens  
+  # 8 voorkomens
   dumpRDS(t2DF, "dq_unique_3.rds")
   addScoreToDQFramework(UNICITEIT, waarde=5, weging=1)
-  
+
 # 4. Overlappen de workflowstappen (kan zijn hoor)
   levels(prep.workflowDF$Status)
   t1DF <- prep.workflowDF %>%
@@ -140,7 +166,7 @@ count(tijdschrijvenOnbekendWorkflowDF)
     mutate(Starttijd = unclass(Starttijd))%>%
     mutate(Eindtijd  = unclass(WerkelijkeEindtijd))%>%
     select(Ordernummer, Taakomschrijving, Starttijd, Eindtijd)
-    
+
   overlappendeWorkflowstappenDF <- sqldf("select t1.Ordernummer
                 , t1.taakomschrijving taakomschrijving_1
                 , t2.taakomschrijving taakomschrijving_2
@@ -149,27 +175,42 @@ count(tijdschrijvenOnbekendWorkflowDF)
                 , t2.Starttijd starttijd_2
                 , t2.Eindtijd  eindtijd_2
                 from t1DF t1
-                ,    t1DF t2 
-                on t1.Ordernummer = t2.Ordernummer 
-                and t1.Starttijd > t2.Starttijd 
+                ,    t1DF t2
+                on t1.Ordernummer = t2.Ordernummer
+                and t1.Starttijd > t2.Starttijd
                 and t1.Starttijd <= t2.Eindtijd-1
                ")
-  
+
   summarized.wfDubbelDF <- overlappendeWorkflowstappenDF %>%
     group_by(taakomschrijving_1, taakomschrijving_2)%>%
     summarize(aantal = n())
-  
-  
+
+
   dumpRDS(overlappendeWorkflowstappenDF, "dq_unique_4a.rds")
   dumpRDS(summarized.wfDubbelDF, "dq_unique_4b.rds")
-  
+
   # 397654 voorkomens
-  
+
 # ..
 # Validiteit (plausibiliteit/business rules)
 # 1. Is er daarbinnen nog verschil tussen werk en reistijd? Hoe gaan we om met overwerk?
+
 # 2. Vervallen orders waar wel geakkoordeerd is tijdgeschreven
-# 3. Anomaly detection/outlier verklaring.. 
+  vervallenOrdersMetTijdschrijvenDF <- left_join(prep.ordersDF, join.tijdschrijvenDienstMedewerkersDF, by=c("Ordernummer" = "ERPID")) %>%
+    mutate(DuurTijdschrijvenInSeconden = EndDate - StartDate) %>%
+    mutate(VerschilUitersteHerstelEindeTijdschrijvenInSeconden = EndDate - Uiterstehersteltijd) %>%
+    filter(Verwerkingsstatus == "Akkoord" | Verwerkingsstatus == "Vrijgegeven ERP") %>%
+    filter(OpdrachtVervalt == "WAAR") %>%
+    filter(Approved == "WAAR")
+
+  # count distinct values
+  vervallenOrdersMetTijdschrijvenDF %>%
+    group_by(Ordernummer) %>%
+    summarise(n_distinct(Ordernummer))
+
+  #Resultaat: er zijn 3107 vervallen orders waarin in totaal 9188 tijdschrijf records voor geregistreerd staan
+
+# 3. Anomaly detection/outlier verklaring..
 dfAnomalize <- summarizeOrderTijdschrijvenByOrderDF[,c("OverschreidingUitersteHersteltijd", "EindtijdTijdschrijven")]
 dfAnomalizeCompleteCases <- dfAnomalize[complete.cases(dfAnomalize), ]
 
@@ -191,7 +232,7 @@ dfAnomalizeCompleteCases %>%
 
 
 
-btc_ts <- 
+btc_ts <-
   time_decompose(as_tibble(summarizeOrderTijdschrijvenByOrderDF$EindtijdTijdschrijven)) %>%
   anomalize(summarizeOrderTijdschrijvenByOrderDF$OverschreidingUitersteHersteltijd) %>%
   time_recompose() %>%
@@ -235,9 +276,9 @@ ggplot(meanDuurPerMedewerkerType, aes(x=x, color=Type, fill=Type)) +
 # 9. Aantal tijdschrijvers per order
 # 10. Verhouding aantal tijdschrijvers tov normtijd (outlier??)
 # 11. Tijdschrijvers ten opzichte van het order-klantteam (klantenteams VWT NOC geen tijdschrijvers??)
-# 
-# 
-# 
+#
+#
+#
 # Accuraatheid
 # 1. Verdeling aantal orders per over de tijd uitgezet.(Heatmap timeline )
 
@@ -256,14 +297,14 @@ heatmapEindtijdDF <- summarized.WorkflowDF%>%
   summarise(aantal = n())
 dumpRDS(heatmapEindtijdDF, "dq_accuraatheid_1b.rds")
 
-#r2g <- c("#D61818", "#FFAE63", "#FFFFBD", "#B5E384") 
+#r2g <- c("#D61818", "#FFAE63", "#FFFFBD", "#B5E384")
 calendarHeat(tempDF$Uitvoering_Starttijd
              , tempDF$aantal
              , ncolors = 99
              , color = "w2b"
              , varname="Starttijd orders uitvoering")
 
-#r2g <- c("#D61818", "#FFAE63", "#FFFFBD", "#B5E384") 
+#r2g <- c("#D61818", "#FFAE63", "#FFFFBD", "#B5E384")
 calendarHeat(tempDF$Uitvoering_WerkelijkeEindtijd
              , tempDF$aantal
              , ncolors = 99
@@ -275,13 +316,12 @@ hist(summarized.WorkflowDF$Uitvoering_Starttijd
 , "days"
           )
 
-# 
+#
 # Analyses voor normtijden
-# 1. Reistijd tussen verschillende orders met zelfde plaats 
+# 1. Reistijd tussen verschillende orders met zelfde plaats
 # 2. Gezien door de tijd
 # 3. Zelfde woonplaats medewerker en order plaats
 # 4. Meetbaar datakwaliteit
 # 5. Score opstellen a.d.v. bovenstaande bolletjes
 # 6. Verschil AP/EP (ander personeel/eigen personeel)
-# 
-
+#
