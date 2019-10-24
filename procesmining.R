@@ -11,38 +11,44 @@ startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE
 
 
 
-df <- prep.workflowDF%>%
-  filter(Status!="Geannuleerd")
-
+df <- join.ordersWorkflowDF%>%
+  filter(Status!="Geannuleerd") %>%
+  filter(Starttijd > as.POSIXct("2019-05-01 00:00:00", tz="UTC")) 
 
 df_start <- df %>%
   mutate(lifecycle_id="start")%>%
   mutate(timestamp=Starttijd)%>%
   mutate(case_id=Ordernummer)%>%
   mutate(activity_id=Taakomschrijving)%>%
-  select(lifecycle_id, activity_id, timestamp, case_id )
+  mutate(resource_id=paste(Categorie, Klantteam))%>%
+  select(lifecycle_id, activity_id, timestamp, case_id, resource_id )
+
 df_einde <- df %>%
   mutate(lifecycle_id="complete")%>%
   mutate(timestamp=WerkelijkeEindtijd)%>%
   mutate(case_id=Ordernummer)%>%
   mutate(activity_id=Taakomschrijving)%>%
-  select(lifecycle_id, activity_id, timestamp, case_id )
+  mutate(resource_id=paste(Categorie, Klantteam))%>%
+  select(lifecycle_id, activity_id, timestamp, case_id, resource_id )
 
 df_eventlog <- rbind(df_start, df_einde)  
 
 df_eventlog <- df_eventlog%>%
-  order(unclass(timestamp))
+  arrange(timestamp)
 
 
 df_eventlog <- df_eventlog%>%
-  mutate( activity_instance_id = 1:nrow(.),
-          resource_id = ".")
+#  group_by(case_id) %>% 
+#  mutate(activity_instance_id = row_number())
+  mutate(activity_instance_id = row_number())
+
+df_eventlog$activity_instance_id
   
-simpleEventlog <- simple_eventlog(eventlog=prep.workflowDF
-                                  , case_id="Ordernummer"
-                                  , activity_id = "Taakomschrijving"
-                                  , timestamp = "Starttijd")
-write_rds(simpleEventlog, "simple_eventlog.rds")
+# simpleEventlog <- simple_eventlog(eventlog=prep.workflowDF
+#                                   , case_id="Ordernummer"
+#                                   , activity_id = "Taakomschrijving"
+#                                   , timestamp = "Starttijd")
+# write_rds(simpleEventlog, "simple_eventlog.rds")
 
 eventlog <- eventlog(df_eventlog
                        , case_id="case_id"
