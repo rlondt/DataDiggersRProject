@@ -1,7 +1,7 @@
 source('./init.R')
 library(DataDiggersPackage)
 flog.threshold(DEBUG)
-startPreparation(workdir = "D:/datafiles2", rebuild = TRUE, dataframesToGlobalEnvironment = TRUE)
+startPreparation(workdir = "D:/datafiles2", rebuild = FALSE, dataframesToGlobalEnvironment = TRUE)
 initializeDQScoringFramework()
 
 # Compleetheid
@@ -85,15 +85,38 @@ ggplot(data=dataPie)+
 # ..
 # Consistentie
 # 1. Komt elke ordernummer van het tijdschrijven voor in de workflowDF, en vice versa
-workflowOnbekendTijdschrijvenDF <- prep.workflowDF[!prep.workflowDF$Ordernummer %in% prep.tijdschrijvenDF$ERPID,]
-dumpRDS(workflowOnbekendTijdschrijvenDF, "dq_consistentie_1a.rds")
-count(workflowOnbekendOrderDF)
-# 700.054
 
-tijdschrijvenOnbekendWorkflowDF <- prep.tijdschrijvenDF[!prep.tijdschrijvenDF$ERPID %in% prep.workflowDF$Ordernummer,]
-dumpRDS(tijdschrijvenOnbekendWorkflowDF, "dq_consistentie_1b.rds")
-count(tijdschrijvenOnbekendWorkflowDF)
-# 266.229
+OrdersZonderTijdschrijvenZonderWorkflowDF <- prep.ordersDF %>%
+  filter(!Ordernummer %in% prep.tijdschrijvenDF$ERPID)%>%
+  filter(!Ordernummer %in% prep.workflowDF$Ordernummer)%>%
+  filter(OpdrachtVervalt == "ONWAAR")%>%
+  mutate(Klantteam = fct_explicit_na(Klantteam, na_level = "Onbekend"))%>%
+  mutate(Categorie = fct_explicit_na(Categorie, na_level = "Onbekend"))
+# 15
+
+TijdschrijvenZonderWorkflowDF <- prep.tijdschrijvenDF %>%
+  filter(!ERPID %in% prep.workflowDF$Ordernummer)%>%
+  filter(is.na(ERPID)==FALSE) # Null 265833
+# 396
+
+WorkflowZonderTijdschrijvenDF <- prep.workflowDF %>%
+  filter(!Ordernummer %in% prep.tijdschrijvenDF$ERPID)%>%
+  filter(!Ordernummer %in% prep.ordersDF$Ordernummer)
+# 700054 aantal workflow-regels
+
+nrow(table(WorkflowZonderTijdschrijvenDF$Ordernummer)) # 56688 aantal verschillende orders
+
+nrow(table(prep.ordersDF$Ordernummer))   # 147441 unieke orders (gelijk aan aantal records)
+nrow(table(prep.workflowDF$Ordernummer)) # 147349 unieke orders
+nrow(table(prep.tijdschrijvenDF$ERPID))  #  90663 unieke orders
+
+dumpRDS(WorkflowZonderTijdschrijvenDF, "dq_consistentie_1a.rds")
+dumpRDS(TijdschrijvenZonderWorkflowDF, "dq_consistentie_1b.rds")
+
+
+addScoreToDQFramework(COMPLEETHEID, waarde=1, weging=1)
+addScoreToDQFramework(CONSISTENTIE, waarde=4, weging=5)
+
 
 
 # 2. Alle relaties twee kanten op
@@ -161,12 +184,16 @@ dftijdschrijvenEindatumGroterDanBegindatum <- prep.tijdschrijvenDF %>%
 
 # 4. Overlappen de workflowstappen (kan zijn hoor)
   levels(prep.workflowDF$Status)
-  t1DF <- prep.workflowDF %>%
+  vervallenOrdersDF <- prep.ordersDF%>%
+    filter(OpdrachtVervalt=="WAAR")
+  
+  wfDF <- prep.workflowDF %>%
     filter(Status != "Geannuleerd")%>%
+    filter(!Ordernummer %in% vervallenOrdersDF$Ordernummer)%>%
     mutate(Starttijd = unclass(Starttijd))%>%
     mutate(Eindtijd  = unclass(WerkelijkeEindtijd))%>%
     select(Ordernummer, Taakomschrijving, Starttijd, Eindtijd)
-
+  
   overlappendeWorkflowstappenDF <- sqldf("select t1.Ordernummer
                 , t1.taakomschrijving taakomschrijving_1
                 , t2.taakomschrijving taakomschrijving_2
@@ -174,8 +201,8 @@ dftijdschrijvenEindatumGroterDanBegindatum <- prep.tijdschrijvenDF %>%
                 , t1.Eindtijd  eindtijd_1
                 , t2.Starttijd starttijd_2
                 , t2.Eindtijd  eindtijd_2
-                from t1DF t1
-                ,    t1DF t2
+                from wfDF t1
+                ,    wfDF t2
                 on t1.Ordernummer = t2.Ordernummer
                 and t1.Starttijd > t2.Starttijd
                 and t1.Starttijd <= t2.Eindtijd-1
@@ -190,6 +217,8 @@ dftijdschrijvenEindatumGroterDanBegindatum <- prep.tijdschrijvenDF %>%
   dumpRDS(summarized.wfDubbelDF, "dq_unique_4b.rds")
 
   # 397654 voorkomens
+  
+  # Zie ook procesmining voor verdere analyse
 
 # ..
 # Validiteit (plausibiliteit/business rules)
@@ -315,6 +344,7 @@ hist(summarized.WorkflowDF$Uitvoering_Starttijd
 #          , tempDF$aantal
 , "days"
           )
+plotDQ()
 
 #
 # Analyses voor normtijden
@@ -325,3 +355,7 @@ hist(summarized.WorkflowDF$Uitvoering_Starttijd
 # 5. Score opstellen a.d.v. bovenstaande bolletjes
 # 6. Verschil AP/EP (ander personeel/eigen personeel)
 #
+
+
+
+

@@ -16,6 +16,7 @@ org_repo <- c(CRAN = "http://cran.us.r-project.org")
 pkgTypes <- c("source", "win.binary")
 pth <- "D://miniCRAN"
 
+
 detach(package:DataDiggersPackage, unload=TRUE)
 remove.packages("DataDiggersPackage")
 
