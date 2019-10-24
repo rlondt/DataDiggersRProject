@@ -383,6 +383,7 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     assign("org.ordersDF", org.ordersDF, envir = globalenv())  
     assign("prep.ordersDF", prep.ordersDF, envir = globalenv())  
     
+    assign("join.ordersWorkflowDF", join.ordersWorkflowDF, envir = globalenv())  
     assign("join.ordersTijdschrijvenDF", join.ordersTijdschrijvenDF, envir = globalenv())  
     assign("join.dienstMedewerkersDF", join.dienstMedewerkersDF, envir = globalenv())  
     assign("join.tijdschrijvenDienstMedewerkersDF", join.tijdschrijvenDienstMedewerkersDF, envir = globalenv())  
