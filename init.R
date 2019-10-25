@@ -1,8 +1,12 @@
 ## 
 # setup of dataframes
 
-if ("devtools" %in% rownames(installed.packages()) == FALSE) {
-  install.packages("devtools", dependencies = TRUE, repos = 'file:///D:/minicran', )
+# install.packages("broom", dependencies = TRUE, repos = 'file:///D:/miniCRAN' )
+# if ("devtools" %in% rownames(installed.packages()) == FALSE) {
+#   install.packages("devtools", dependencies = TRUE, repos = 'file:///D:/miniCRAN', )
+# }
+if ("broom" %in% rownames(installed.packages()) == FALSE) {
+  devtools::install_github("tidyverse/broom", dependencies = TRUE, repos = 'file:///D:/miniCRAN')
 }
 suppressPackageStartupMessages(
   library("devtools", quietly = TRUE, character.only = TRUE ) 
@@ -10,14 +14,12 @@ suppressPackageStartupMessages(
 if (!exists("calendarHeat")){
   source("https://raw.githubusercontent.com/iascchen/VisHealth/master/R/calendarHeat.R")
 }
-if ("broom" %in% rownames(installed.packages()) == FALSE) {
-  devtools::install_github("tidyverse/broom", dependencies = TRUE)
-}
 if ("DataDiggersPackage" %in% rownames(installed.packages()) == FALSE) {
   install.packages("DataDiggersPackage", dependencies = TRUE, repos = 'file:///D://miniCRAN')
 }
 library(DataDiggersPackage)
 
+#.libPaths()
 # 
 # install.packages("DataDiggersPackage", dependencies = TRUE, repos = 'http://cran.us.r-project.org')
 # library(DataDiggersPackage)

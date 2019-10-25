@@ -1,4 +1,4 @@
-source('./init.R')
+source("./init.R")
 library(DataDiggersPackage)
 library(bupaR)
 library(pm4py)
@@ -11,7 +11,7 @@ startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE
   
 overlappendeWorkflowstappenDF <- readRDSdd( "dq_unique_4a.rds")
 overlappendeWorkflowstappenDF <- overlappendeWorkflowstappenDF %>%
-  filter(starttijd_1 > as.POSIXct("2019-05-01 00:00:00", tz="UTC")) %>%
+  filter(starttijd_1 > as.POSIXct("2018-05-01 00:00:00", tz="UTC")) %>%
   filter(starttijd_1 < as.POSIXct("2019-05-08 00:00:00", tz="UTC")) 
 
 df <- join.ordersWorkflowDF%>%
@@ -55,7 +55,8 @@ eventlog <- eventlog(df_eventlog
                        , timestamp = "timestamp"
                        , resource_id = "resource_id"
 )
-dumpRDS(eventlog, "eventlog.rds")
+#dumpRDS(eventlog, "eventlog.rds")
+eventlog <- readRDSdd( "eventlog.rds")
 
 eventlog %>%
   process_map()
@@ -71,13 +72,11 @@ precedence_matrix%>%plot()
 depMatrix <- dependency_matrix(eventlog) 
 render_dependency_matrix(depMatrix)
 
-cNet <- causal_net(eventlog) 
+cNet <- causal_net(eventlog, threshold_frequency = 750) 
 render_causal_net(cNet) 
 
 
 
-eventlog_complete <- eventlog %>% filter_lifecycle("complete")
-discovery_alpha(eventlog_complete) -> PN
 
 
 

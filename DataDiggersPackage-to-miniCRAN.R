@@ -2,7 +2,7 @@
 # Executing this file will update the local cran repository with 
 # our own DataDigersPackage
 # be sure to upgrade the version number 
-source(./init.R)
+source("./init.R")
 install.packages("miniCRAN")
 install.packages("roxygen2", repos = 'file:///D:/minicran' )
 
@@ -26,6 +26,7 @@ file.remove(pkgFile)
 
 document("DataDiggersPackage")
 build("DataDiggersPackage")
-addLocalPackage(c("DataDiggersPackage"), ".", "D:/miniCRAN", build = FALSE,  )
-install.packages("DataDiggersPackage")
+addLocalPackage(c("DataDiggersPackage"), ".", "D:/miniCRAN", build = FALSE)
+detach(package:DataDiggersPackage, unload=TRUE)
+install.packages("DataDiggersPackage", repos = 'file:///D:/minicran' )
 
