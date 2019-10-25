@@ -14,7 +14,7 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
   stopifnot(is.logical(dataframesToGlobalEnvironment))
   
   futile.logger::flog.info(msg = "Inlezen bronbestanden")
-  if(!file.exists(getLocationNaam("prep_medewerkers.rds", FALSE))){
+  if(!file.exists(getLocationNaam("prep_medewerkers.rds", FALSE))|rebuild){
     
     futile.logger::flog.debug(msg = ".Lees medewerkers.csv")
     org.medewerkersDF <- readCSV("Medewerkers.csv")
@@ -50,13 +50,31 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     futile.logger::flog.debug(msg = ".Omzetten null-values, factoren en datums")
     prep.ordersDF <- org.ordersDF %>%
       mutate(Ordernummer = as.character(Ordernummer)) %>%
-      mutate_all(list(~na_if(.,"")))%>%
-      mutate_all(list(~na_if(.," ")))%>%
-      mutate_all(list(~na_if(.,"NA")))%>%
+      mutate_all(list(~na_if(as.character(.),"")))%>%
+      mutate_all(list(~na_if(as.character(.)," ")))%>%
+      mutate_all(list(~na_if(as.character(.),"NA")))%>%
       mutate(CreationDate = convertToDateTime(CreationDate)) %>%
       mutate(Uiterstehersteltijd = convertToDateTime(Uiterstehersteltijd)) %>%
       mutate(GeplandeTG = convertToDateTime(GeplandeTG)) %>%
-      mutate(ModifiedOn = convertToDateTime(ModifiedOn))
+      mutate(ModifiedOn = convertToDateTime(ModifiedOn)) %>%
+      mutate(Categorie = case_when(str_length(Categorie) > 0 ~ Categorie,
+                                   str_count(as.character(OpdrachtType), "NLS")> 0 ~ "NLS"
+                                  )
+             )%>%
+      mutate(Categorie = as.factor(Categorie)) %>%
+      mutate(OrderStatus = as.factor(OrderStatus)) %>%
+      mutate(Postcode4 = as.factor(Postcode4)) %>%
+      mutate(Plaats = as.factor(Plaats)) %>%
+      mutate(Klantteam = as.factor(Klantteam)) %>%
+      mutate(NLSType = as.factor(NLSType)) %>%
+      mutate(Orderacceptatie = as.factor(Orderacceptatie)) %>%
+      mutate(OpdrachtVervalt = as.factor(OpdrachtVervalt)) %>%
+      mutate(DSO = as.factor(DSO)) %>%
+      mutate(DSOHistory = as.factor(DSOHistory)) %>%
+      mutate(Stagnatie = as.factor(Stagnatie)) %>%
+      mutate(Afmeldcode = as.factor(Afmeldcode)) %>%
+      mutate(OpdrachtType = as.factor(OpdrachtType))
+    
     dumpRDS(org.ordersDF, "org_orders.rds")
     dumpRDS(prep.ordersDF, "prep_orders.rds")
   } else {
@@ -365,6 +383,7 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     assign("org.ordersDF", org.ordersDF, envir = globalenv())  
     assign("prep.ordersDF", prep.ordersDF, envir = globalenv())  
     
+    assign("join.ordersWorkflowDF", join.ordersWorkflowDF, envir = globalenv())  
     assign("join.ordersTijdschrijvenDF", join.ordersTijdschrijvenDF, envir = globalenv())  
     assign("join.dienstMedewerkersDF", join.dienstMedewerkersDF, envir = globalenv())  
     assign("join.tijdschrijvenDienstMedewerkersDF", join.tijdschrijvenDienstMedewerkersDF, envir = globalenv())  

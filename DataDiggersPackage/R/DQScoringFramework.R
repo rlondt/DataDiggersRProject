@@ -35,14 +35,13 @@ addScoreToDQFramework <- function(categorie, waarde, weging){
   stopifnot(waarde >= 0)
   stopifnot(waarde <= 5)
   df <- data.frame(categorie, waarde, weging)
-    names(df) <- c ("categorie", "waarde", "weging")
-
-    DQScoringDF <- get("DQScoringDF", envir=.DataDiggersPackageOptions)
-    DQScoringDF <- rbind(DQScoringDF, df)
-    assign("DQScoringDF", DQScoringDF,  envir=.DataDiggersPackageOptions)
-    
-    futile.logger::flog.debug(DQScoringDF)
-    invisible()
+  names(df) <- c ("categorie", "waarde", "weging")
+  
+  DQScoringDF <- get("DQScoringDF", envir=.DataDiggersPackageOptions)
+  DQScoringDF <- rbind(DQScoringDF, df)
+  assign("DQScoringDF", DQScoringDF,  envir=.DataDiggersPackageOptions)
+  futile.logger::flog.debug(DQScoringDF)
+  invisible()
 }
 
 #' A Function display the results of the DQF
@@ -56,13 +55,13 @@ plotDQ <- function(){
   DQScoringDF <- get("DQScoringDF", envir=.DataDiggersPackageOptions)
   df <- DQScoringDF %>%
     group_by(categorie)%>%
-    summarise(percentage = round(sum((waarde * weging)/sum(weging))/5))%>%
+    summarise(percentage = round((sum((waarde * weging)/sum(weging))/5),2))%>%
     mutate(categorie = dplyr::recode(as.character(categorie), '1' = "Compleetheid"
                   , '2' = "Consistentie"
                   , '3' = "Uniciteit"
                   , '4' = "Validiteit"
                   , '5' = "Accuraatheid"))
-  
+  futile.logger::flog.debug(df)
   df <- df %>% mutate(group=ifelse(percentage <0.25, "red",
                ifelse(percentage>=0.25 & percentage<0.8, "orange","green")),
               label=paste0(percentage*100, "%"),
