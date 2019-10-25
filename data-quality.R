@@ -1,7 +1,7 @@
 source('./init.R')
 library(DataDiggersPackage)
 flog.threshold(DEBUG)
-startPreparation(workdir = "C:/Users/louis/OneDrive/studie/vakken/applied big data/datafiles", dataframesToGlobalEnvironment = TRUE)
+-startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE)
 initializeDQScoringFramework()
 
 
