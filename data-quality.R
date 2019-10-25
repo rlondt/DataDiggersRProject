@@ -191,7 +191,7 @@ dftijdschrijvenEindatumGroterDanBegindatum <- prep.tijdschrijvenDF %>%
   
   #Resultaat: er zijn 3107 vervallen orders waarin in totaal 9188 tijdschrijf records voor geregistreerd staan
   
-# 3. Anomaly detection/outlier verklaring.. 
+# 3. Anomaly detection/outlier verklaring..TODO Louis: bepalen welke attributen interessant zijn voor anomoly detection
 dfAnomalize <- summarizeOrderTijdschrijvenByOrderDF[,c("OverschreidingUitersteHersteltijd", "EindtijdTijdschrijven")]
 dfAnomalizeCompleteCases <- dfAnomalize[complete.cases(dfAnomalize), ]
 
