@@ -1,3 +1,4 @@
+
 source("./init.R")
 library(DataDiggersPackage)
 library(bupaR)
@@ -11,8 +12,8 @@ startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE
   
 overlappendeWorkflowstappenDF <- readRDSdd( "dq_unique_4a.rds")
 overlappendeWorkflowstappenDF <- overlappendeWorkflowstappenDF %>%
-  filter(starttijd_1 > as.POSIXct("2018-05-01 00:00:00", tz="UTC")) %>%
-  filter(starttijd_1 < as.POSIXct("2019-05-08 00:00:00", tz="UTC")) 
+  filter(starttijd_1 > as.POSIXct("2019-05-01 00:00:00", tz="UTC")) %>%
+  filter(starttijd_1 < as.POSIXct("2019-05-15 00:00:00", tz="UTC")) 
 
 df <- join.ordersWorkflowDF%>%
   filter(Status!="Geannuleerd") %>%
@@ -57,6 +58,7 @@ eventlog <- eventlog(df_eventlog
 )
 #dumpRDS(eventlog, "eventlog.rds")
 eventlog <- readRDSdd( "eventlog.rds")
+write_xes(eventlog, "D:/Datafiles/eventlog.xes")
 
 eventlog %>%
   process_map()
