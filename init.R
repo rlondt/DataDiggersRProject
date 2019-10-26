@@ -11,9 +11,9 @@ if ("broom" %in% rownames(installed.packages()) == FALSE) {
 suppressPackageStartupMessages(
   library("devtools", quietly = TRUE, character.only = TRUE ) 
 )
-if (!exists("calendarHeat")){
-  source("https://raw.githubusercontent.com/iascchen/VisHealth/master/R/calendarHeat.R")
-}
+# if (!exists("calendarHeat")){
+#   source("https://raw.githubusercontent.com/iascchen/VisHealth/master/R/calendarHeat.R")
+# }
 if ("DataDiggersPackage" %in% rownames(installed.packages()) == FALSE) {
   install.packages("DataDiggersPackage", dependencies = TRUE, repos = 'file:///D://miniCRAN')
 }

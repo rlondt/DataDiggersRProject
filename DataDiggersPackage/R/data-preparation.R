@@ -275,8 +275,9 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     futile.logger::flog.info(msg = "maken summarized.OrderTijdschrijvenByOrderDF.rds")
     summarized.OrderTijdschrijvenByOrderDF <- join.ordersTijdschrijvenDF %>%
       group_by(Ordernummer) %>%
-      summarise( VerschillendeDagen       = n_distinct(ShiftDate)
+      summarise( VerschillendeDagen       = n_distinct(format(StartDate, "%Y-%m-%d"))
                  , AantalTijdschrijven               = n()
+                 , AantalVerschillendeMedewerkers    = n_distinct(MDWID)
                  , OverschreidingUitersteHersteltijd = max(VerschilUitersteHerstelEindeTijdschrijvenInSeconden)
                  , TotaleSchrijftijdReis             = sum(replace_na(DuurTijdschrijvenInSeconden[Type == "Reis" ], 0) )
                  , TotaleSchrijftijdWerk             = sum(replace_na(DuurTijdschrijvenInSeconden[Type != "Reis" ], 0)  )
