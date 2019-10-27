@@ -1,7 +1,7 @@
 source('./init.R')
 library(DataDiggersPackage)
 flog.threshold(DEBUG)
--startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE)
+startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE)
 initializeDQScoringFramework()
 
 
@@ -306,4 +306,11 @@ hist(summarized.WorkflowDF$Uitvoering_Starttijd
 # 5. Score opstellen a.d.v. bovenstaande bolletjes
 # 6. Verschil AP/EP (ander personeel/eigen personeel)
 # 
+
+
+
+
+
+
+
 
