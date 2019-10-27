@@ -28,7 +28,7 @@ for (categorie in (levels(join.ordersWorkflowDF$Categorie))){
     mutate(timestamp=Starttijd)%>%
     mutate(case_id=Ordernummer)%>%
     mutate(activity_id=Taakomschrijving)%>%
-    mutate(resource_id=paste(Categorie, Klantteam))%>%
+    mutate(resource_id=Klantteam)%>%
     select(lifecycle_id, activity_id, timestamp, case_id, resource_id )
   
   df_einde <- df %>%
@@ -36,7 +36,7 @@ for (categorie in (levels(join.ordersWorkflowDF$Categorie))){
     mutate(timestamp=WerkelijkeEindtijd)%>%
     mutate(case_id=Ordernummer)%>%
     mutate(activity_id=Taakomschrijving)%>%
-    mutate(resource_id=paste(Categorie, Klantteam))%>%
+    mutate(resource_id=Klantteam)%>%
     select(lifecycle_id, activity_id, timestamp, case_id, resource_id )
   
   df_eventlog <- rbind(df_start, df_einde)  
@@ -106,7 +106,7 @@ cnet.0_9.NLS.plot
 cnet.0_9.Schade.plot
 cnet.0_9.Storing.plot
 
-eventlog.Schade %>%
+eventlog.NLS %>%
   dotted_chart( x="absolute", y="start")
 
 processmonitR::activity_dashboard(eventlog.Schade)
@@ -116,7 +116,18 @@ processmonitR::performance_dashboard(eventlog.Schade)
 install.packages("processanimateR")
 library(processanimateR)
 library(eventdataR)
-animate_process(eventlog.Schade)
+animate_process(eventlog.Schade, mode = "absolute", duration = 300
+                , mapping = token_aes(color = token_scale("resource_id", 
+                                                        scale = "ordinal", 
+                                                        range = RColorBrewer::brewer.pal(7, "Paired"))))
+
+
+animate_process(eventlog.Schade, mode = "relative", jitter = 10, legend = "color",
+                mapping = token_aes(color = token_scale("employee", 
+                                                        scale = "ordinal", 
+                                                        range = RColorBrewer::brewer.pal(7, "Paired"))))
+
+
 
 # simpleEventlog <- simple_eventlog(eventlog=prep.workflowDF
 #                                   , case_id="Ordernummer"
