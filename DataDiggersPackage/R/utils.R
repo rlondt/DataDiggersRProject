@@ -1,4 +1,11 @@
-# Utils
+## Utils
+
+#' A Function to get the filename on the local pc.
+#'
+#' This function om de exacte locatie te achterhalen
+#' @param naam naam van het bestand
+#' @param checkExists is er controle nodig om te kijken of het bestand bestaat
+#' @keywords file local location
 #' @export
 getLocationNaam <- function(naam, checkExists=TRUE){
   stopifnot(is.logical(checkExists))
@@ -12,18 +19,34 @@ getLocationNaam <- function(naam, checkExists=TRUE){
   locatie
 }
 
+#' A Function to specify the data location
+#'
+#' This function om de exacte locatie te achterhalen
+#' @param directory naam van de basisdirectory
+#' @keywords file local location
 #' @export
 setWorkdir <- function(directory){
   assign("werkdir", directory,  envir=.DataDiggersPackageOptions)
   invisible()
 }
 
+#' A Function to save the rds to a location whithin the datafiles-location
+#'
+#' This function om de exacte locatie te achterhalen
+#' @param object naam van het object dat bewaard moet worden
+#' @param naam naam van het bestand
+#' @keywords file rds location
 #' @export
 dumpRDS <- function(object, naam, ...){
   saveRDS(object = object, file = getLocationNaam(naam, checkExists = FALSE), ...)
   invisible()
 }
 
+#' A Function to read a rds to a location whithin the datafiles-location
+#'
+#' This function om de exacte locatie te achterhalen
+#' @param naam naam van het bestand
+#' @keywords file rds location
 #' @export
 readCSV <- function(naam, ...){
   #  werkdirOld <- getwd()

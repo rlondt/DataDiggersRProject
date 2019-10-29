@@ -94,3 +94,19 @@ addLocalPackage(c("DataDiggersPackage"), ".", "D:/miniCRAN", build = FALSE )
 
 library(DataDiggersPackage)
 startPreparation("D:/datafiles", dataframesToGlobalEnvironment = TRUE)
+
+
+
+
+
+install.packages("usethis")
+
+
+install.packages("testthat")
+library(devtools)
+library(testthat)
+library(usethis)
+use_testthat()
+
+
+test("DataDiggersPackage")

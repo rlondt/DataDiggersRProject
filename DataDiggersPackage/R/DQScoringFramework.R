@@ -14,7 +14,6 @@ initializeDQScoringFramework <- function(){
                             , stringsAsFactors=FALSE
                             )
   assign("DQScoringDF", DQScoringDF,  envir=.DataDiggersPackageOptions)
-  #assign("DQScoringDF", df, envir=pkg.env)
   invisible()
 }
 
@@ -27,7 +26,7 @@ initializeDQScoringFramework <- function(){
 #' @keywords melt dcast transposed
 #' @export
 #' @examples
-#' addScoreToDQFramework(category, waarde, weging)
+#' addScoreToDQFramework(COMPLEETHEID, 23, 5)
 
 addScoreToDQFramework <- function(categorie, waarde, weging){
   
@@ -81,6 +80,4 @@ plotDQ <- function(){
           strip.text.x = element_blank()) +
     guides(fill=FALSE) +
     guides(colour=FALSE)
-  
-  
 }

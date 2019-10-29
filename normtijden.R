@@ -100,7 +100,7 @@ theme_minimal()
 # Multiple plot per category
 ggplot(norm.summary.perCategoriePerPerKlantteamMaandDF%>% filter(str_count(maand,"2017")== 0), aes(x = maand, y = gemiddeldeWerktijdPerOrder, fill = Klantteam)) +
   geom_bar(stat="identity",position = position_dodge()) +
-  scale_y_continuous(limits = c(0,35))+
+  scale_y_continuous(limits = c(0,15))+
   #scale_color_manual(values = c("#00AFBB", "#E7B800")) +
   facet_wrap(~Categorie, nrow = 4)+
   theme(axis.text.x = element_text(face = "bold", color = "blue", 
