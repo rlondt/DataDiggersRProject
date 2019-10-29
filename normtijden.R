@@ -145,3 +145,34 @@ norm.ordersDF <-  left_join(summarized.OrderTijdschrijvenByOrderDF, prep.ordersD
   group_by(Startdag, Categorie)%>%
   summarize(werktijd = mean(as.double(TotaleSchrijftijdWerk, units="hours")))
 
+
+
+# dataframe for deviation visualization
+norm.categoryDF <- left_join(summarized.OrderTijdschrijvenByOrderDF, prep.ordersDF, by=c("Ordernummer" = "Ordernummer"))%>%
+  filter(is.na(Ordernummer)==FALSE)%>%
+  filter(is.na(Categorie)==FALSE)%>%
+  group_by(Ordernummer, Categorie) %>%
+  summarise(werktijd = sum(TotaleSchrijftijdWerk))
+  #filter(werktijd < 1000000) # filter outliers
+  
+# boxplot
+ggplot(data = norm.categoryDF, aes(x = Categorie, y=werktijd)) +
+  geom_boxplot(fill = "blue", alpha = .2) +
+  stat_summary(aes(group = Categorie), fun.y=mean, colour="darkred", geom="point") +
+  labs(title="Verdeling normtijd per Categorie", y="Uren")
+
+# histogram
+ggplot(norm.categoryDF, aes(x=werktijd, color=Categorie, fill=Categorie)) +
+  geom_histogram(binwidth=200, position="dodge") +
+  scale_x_continuous(limits = c(0, 250000)) +
+  scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
+  scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
+  labs(title="Verdeling normtijd per Categorie", x="Uren", y="Count")
+
+  # single chart with deviation chart 
+  ggplot(norm.categoryDF, aes(x=werktijd, fill=Categorie))+ 
+    geom_histogram(bins=50)+
+    scale_x_continuous(limits = c(0, 250000)) +
+    facet_grid(. ~ Categorie)+
+    ggtitle("Verdeling normtijd per Categorie")
+  + theme(legend.position="none")
