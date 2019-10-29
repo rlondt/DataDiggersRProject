@@ -26,7 +26,7 @@ initializeDQScoringFramework <- function(){
 #' @keywords melt dcast transposed
 #' @export
 #' @examples
-#' addScoreToDQFramework(COMPLEETHEID, 23, 5)
+#' addScoreToDQFramework(COMPLEETHEID, 3, 5)
 
 addScoreToDQFramework <- function(categorie, waarde, weging){
   
@@ -36,7 +36,20 @@ addScoreToDQFramework <- function(categorie, waarde, weging){
   df <- data.frame(categorie, waarde, weging)
   names(df) <- c ("categorie", "waarde", "weging")
   
-  DQScoringDF <- get("DQScoringDF", envir=.DataDiggersPackageOptions)
+  DQScoringDF <- tryCatch({get("DQScoringDF", envir=.DataDiggersPackageOptions)}
+                          , warning = function(w){
+                            initializeDQScoringFramework()
+                            return (get("DQScoringDF", envir=.DataDiggersPackageOptions))
+                            }
+                          , error = function(e){
+                            initializeDQScoringFramework()
+                            return (get("DQScoringDF", envir=.DataDiggersPackageOptions))
+                          }
+  )
+  # if (is.null(DQScoringDF)){
+  #   initializeDQScoringFramework()
+  #   DQScoringDF <- get("DQScoringDF", envir=.DataDiggersPackageOptions)
+  # }
   DQScoringDF <- rbind(DQScoringDF, df)
   assign("DQScoringDF", DQScoringDF,  envir=.DataDiggersPackageOptions)
   futile.logger::flog.debug(DQScoringDF)
@@ -45,11 +58,9 @@ addScoreToDQFramework <- function(categorie, waarde, weging){
 
 #' A Function display the results of the DQF
 #'
-#' This function blablablabla
-#' @keywords DQFramework
+#' This function plots the marvelous DataQuality-dashboard 
+#' @keywords DQFramework dashboard
 #' @export
-#' @examples
-#' plotDQ()
 plotDQ <- function(){
   DQScoringDF <- get("DQScoringDF", envir=.DataDiggersPackageOptions)
   df <- DQScoringDF %>%

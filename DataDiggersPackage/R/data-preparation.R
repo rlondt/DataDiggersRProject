@@ -6,8 +6,6 @@
 #' @param dataframesToGlobalEnvironment infication of dataframes to global enironment
 #' @keywords import prepare eda
 #' @export
-#' @examples
-#' startPreparation( "C:/files", TRUE, FALSE)
 startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironment=FALSE){
   setWorkdir(workdir)
   stopifnot(is.logical(rebuild))

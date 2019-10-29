@@ -2,7 +2,7 @@
 #'
 #' This function blablablabla
 #' @param data the dataframe that has to be transposed
-#' @param meaureVars a list of measured values
+#' @param measureVars a list of measured values
 #' @param dcastFormula the formula that is used to transpose via dcast
 #' @keywords melt dcast transposed
 #' @export
@@ -22,8 +22,6 @@
 #' @import ggplot2
 #' @import tidyquant
 #' @import sqldf
-#' @examples
-#' transposeWorkflowDataFrame( workflowDF, c("measure1", "measure2"),)
 transposeWorkflowDataFrame <- function (data, measureVars, dcastFormula){
   # converteren posix naar numeric
   for (i in names(data)){

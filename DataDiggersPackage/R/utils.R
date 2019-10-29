@@ -35,6 +35,7 @@ setWorkdir <- function(directory){
 #' This function om de exacte locatie te achterhalen
 #' @param object naam van het object dat bewaard moet worden
 #' @param naam naam van het bestand
+#' @param ... overige parameters 
 #' @keywords file rds location
 #' @export
 dumpRDS <- function(object, naam, ...){
@@ -42,11 +43,12 @@ dumpRDS <- function(object, naam, ...){
   invisible()
 }
 
-#' A Function to read a rds to a location whithin the datafiles-location
+#' A Function to read a csv-file from a location whithin the work-location
 #'
 #' This function om de exacte locatie te achterhalen
 #' @param naam naam van het bestand
-#' @keywords file rds location
+#' @param ... overige parameters 
+#' @keywords file csv location
 #' @export
 readCSV <- function(naam, ...){
   #  werkdirOld <- getwd()
@@ -56,6 +58,12 @@ readCSV <- function(naam, ...){
   csv
 }
 
+#' A Function to read a rds-file from a location whithin the work-location
+#'
+#' This function om de exacte locatie te achterhalen
+#' @param naam naam van het bestand
+#' @param ... overige parameters 
+#' @keywords file rds location
 #' @export
 readRDSdd <- function(naam, ...){
   readRDS(getLocationNaam(naam), ...)  

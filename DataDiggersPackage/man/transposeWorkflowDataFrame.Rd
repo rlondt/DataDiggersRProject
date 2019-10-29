@@ -9,15 +9,12 @@ transposeWorkflowDataFrame(data, measureVars, dcastFormula)
 \arguments{
 \item{data}{the dataframe that has to be transposed}
 
-\item{dcastFormula}{the formula that is used to transpose via dcast}
+\item{measureVars}{a list of measured values}
 
-\item{meaureVars}{a list of measured values}
+\item{dcastFormula}{the formula that is used to transpose via dcast}
 }
 \description{
 This function blablablabla
-}
-\examples{
-transposeWorkflowDataFrame( workflowDF, c("measure1", "measure2"),)
 }
 \keyword{dcast}
 \keyword{melt}

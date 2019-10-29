@@ -17,7 +17,7 @@ addScoreToDQFramework(categorie, waarde, weging)
 This function blablablabla
 }
 \examples{
-addScoreToDQFramework(category, waarde, weging)
+addScoreToDQFramework(COMPLEETHEID, 3, 5)
 }
 \keyword{dcast}
 \keyword{melt}
