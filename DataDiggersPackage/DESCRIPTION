@@ -25,7 +25,6 @@ Depends: tidyverse
     , VIM
     , reshape2
     , shiny
-    , naniar
     , ggplot2
     , tidyquant
     , sqldf
@@ -38,4 +37,5 @@ Depends: tidyverse
     , xesreadR
     , petrinetR    
     , broom
-                   
+Suggests: 
+    testthat

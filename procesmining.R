@@ -14,15 +14,24 @@ overlappendeWorkflowstappenDF <- overlappendeWorkflowstappenDF %>%
   filter(starttijd_1 > as.POSIXct("2019-05-01 00:00:00", tz="UTC")) %>%
   filter(starttijd_1 < as.POSIXct("2019-05-15 00:00:00", tz="UTC")) 
 
+
+ordersInDF <- join.ordersWorkflowDF %>%
+  filter(Starttijd > as.POSIXct("2019-02-01 00:00:00", tz="UTC")) %>%
+  filter(Starttijd < as.POSIXct("2019-05-31 00:00:00", tz="UTC")) %>%
+  group_by(Ordernummer)%>%
+  summarize(aantal=n())
+  
+
+
+
 levels(join.ordersWorkflowDF$Categorie)
 
 for (categorie in (levels(join.ordersWorkflowDF$Categorie))){
   df <- join.ordersWorkflowDF%>%
     filter(Status!="Geannuleerd") %>%
-    filter(as.character(Categorie) == categorie) %>%
-    filter(Starttijd > as.POSIXct("2019-04-01 00:00:00", tz="UTC")) %>%
-    filter(Starttijd < as.POSIXct("2019-05-31 00:00:00", tz="UTC")) 
-  
+    filter(Ordernummer %in% ordersInDF$Ordernummer) %>%
+    filter(as.character(Categorie) == categorie)
+
   df_start <- df %>%
     mutate(lifecycle_id="start")%>%
     mutate(timestamp=Starttijd)%>%
@@ -106,7 +115,9 @@ cnet.0_9.NLS.plot
 cnet.0_9.Schade.plot
 cnet.0_9.Storing.plot
 
-eventlog.NLS %>%
+readRDSdd("cnet_0_9.NLS.rdx")
+  
+eventlog.Schade %>%
   dotted_chart( x="absolute", y="start")
 
 processmonitR::activity_dashboard(eventlog.Schade)
