@@ -1,4 +1,35 @@
 language: r
+
+
+warnings_are_errors: false
+
+r_binary_packages:
+  - devtools
+  - Rcpp
+  - RcppEigen
+  - roxygen2
+  - stringi
+  - tidyverse
+  - VIM
+  - anomalize
+  - caret
+  - doSNOW
+  - dplyr
+  - futile.logger
+  - ggplot2
+  - naniar
+  - openxlsx
+  - reshape2
+  - sf
+  - shiny
+  - sqldf
+  - tidyquant
+  - tidyverse
+
+
+r_build_args: --no-build-vignettes --no-manual --no-resave-data
+r_check_args: --no-build-vignettes --no-manual
+
 before_install:
   - cd DataDiggersPackage
   - sudo apt-get -y install libudunits2-dev
