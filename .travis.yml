@@ -26,6 +26,7 @@ r_binary_packages:
   - sqldf
   - tidyquant
   - tidyverse
+  - plotly
 
 r_packages:
   - openxslx
@@ -36,7 +37,6 @@ r_packages:
   - processmonitorR
   - petrinetR
   - DiagrammeR
-  - plotly
   - Rook
   - hexbin
 
