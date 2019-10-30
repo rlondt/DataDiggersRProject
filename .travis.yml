@@ -29,12 +29,12 @@ r_binary_packages:
   - plotly
 
 r_packages:
-  - openxslx
+  - openxlsx
   - edeaR
   - bupaR
   - eventdataR
   - processmapR
-  - processmonitorR
+  - processmonitR
   - petrinetR
   - DiagrammeR
   - Rook
