@@ -1,7 +1,11 @@
 language: r
 
-
 warnings_are_errors: false
+
+apt_packages: 
+  - libudunits2-dev
+  - libudunits2-0
+  - libgdal-dev
 
 r_binary_packages:
   - devtools
@@ -45,7 +49,8 @@ r_build_args: --no-build-vignettes --no-manual --no-resave-data
 r_check_args: --no-build-vignettes --no-manual
 
 before_install:
+  - "export DISPLAY=:99.0"
   - cd DataDiggersPackage
-  - sudo apt-get -y install libudunits2-dev
-  - sudo apt-get -y install libudunits2-0 libudunits2-dev
-  - sudo apt-get -y install libgdal-dev
+
+after_success:
+  - Rscript -e 'devtools::install();devtools::test()'
