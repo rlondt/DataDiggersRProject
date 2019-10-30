@@ -7,7 +7,7 @@
 addScoreToDQFramework(categorie, waarde, weging)
 }
 \arguments{
-\item{categorie}{categorie}
+\item{categorie}{categorie; één van de volgende opties: COMPLEETHEID, CONSISTENTIE, UNICITEIT, VALIDITEIT, ACCURAATHEID}
 
 \item{waarde}{waarde 1-5}
 

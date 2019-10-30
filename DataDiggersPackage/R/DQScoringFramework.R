@@ -20,7 +20,7 @@ initializeDQScoringFramework <- function(){
 #' A Function to add a score to the data-quality-framework
 #'
 #' This function adds a score to the data-quality-framework
-#' @param categorie categorie
+#' @param categorie categorie; één van de volgende opties: COMPLEETHEID, CONSISTENTIE, UNICITEIT, VALIDITEIT, ACCURAATHEID
 #' @param waarde waarde 1-5
 #' @param weging weging van het item
 #' @keywords melt dcast transposed

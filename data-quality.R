@@ -1,20 +1,10 @@
 source('./init.R')
 library(DataDiggersPackage)
 flog.threshold(DEBUG)
-startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE)
-initializeDQScoringFramework()
+startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE, rebuild = TRUE)
 
 # Compleetheid
 # 1. Mogelijkheden voor kruistellingen
-addScoreToDQFramework(COMPLEETHEID, waarde=5, weging=5)
-addScoreToDQFramework(CONSISTENTIE, waarde=5, weging=5)
-addScoreToDQFramework(UNICITEIT, waarde=5, weging=5)
-addScoreToDQFramework(ACCURAATHEID, waarde=5, weging=5)
-
-levels(prep.ordersDF$Postcode4)
-
-plotDQ()
-
 # 2. Zijn alle onderdelen van VWT-data vertegenwoordigd
 # 3. Missing values analyse
 # 3.1 Medewerker
