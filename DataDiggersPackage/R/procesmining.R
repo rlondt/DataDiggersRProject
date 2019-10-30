@@ -1,0 +1,103 @@
+#' DataPreparation for procesMining with Bupar
+#' @param pStartTijd starttijd, waarbinnen een order moet vallen om een cnet te bepalen
+#' @param pEindTijd Eindtijd, waarbinnen een order moet vallen om een cnet te bepalen
+#' @param pThreshOlds collectie van thresholds waarvoor een causal net wordt gemaakt
+#' @import tidyverse
+#' @import bupaR
+#' @import heuristicsmineR
+#' @import petrinetR
+#' @importFrom futile.logger flog.debug
+#' @export
+procesMining.init <- function(pStartTijd, pEindTijd, pThreshOlds){
+  
+  stopifnot(is.POSIXct(pStartTijd))
+  stopifnot(is.POSIXct(pEindTijd))
+  flog.debug("bepalen welke orders binnen de periode vallen")
+  ordersInDF <- join.ordersWorkflowDF %>%
+    filter(Starttijd > pStartTijd) %>%
+    filter(Starttijd < pEindTijd) %>%
+    group_by(Ordernummer)%>%
+    summarize(aantal=n())
+  
+  for (categorie in (levels(join.ordersWorkflowDF$Categorie))){
+    df <- join.ordersWorkflowDF%>%
+      filter(Status!="Geannuleerd") %>%
+      filter(Ordernummer %in% ordersInDF$Ordernummer) %>%
+      filter(as.character(Categorie) == categorie)
+    
+    df_start <- df %>%
+      mutate(lifecycle_id="start")%>%
+      mutate(timestamp=Starttijd)%>%
+      mutate(case_id=Ordernummer)%>%
+      mutate(activity_id=Taakomschrijving)%>%
+      mutate(resource_id=Klantteam)%>%
+      select(lifecycle_id, activity_id, timestamp, case_id, resource_id )
+    
+    df_einde <- df %>%
+      mutate(lifecycle_id="complete")%>%
+      mutate(timestamp=WerkelijkeEindtijd)%>%
+      mutate(case_id=Ordernummer)%>%
+      mutate(activity_id=Taakomschrijving)%>%
+      mutate(resource_id=Klantteam)%>%
+      select(lifecycle_id, activity_id, timestamp, case_id, resource_id )
+    
+    df_eventlog <- rbind(df_start, df_einde)  
+    
+    df_eventlog <- df_eventlog%>%
+      arrange(timestamp)%>%
+      mutate(activity_instance_id = 1:nrow(.))#row_number())
+    
+    eventlog <- eventlog(df_eventlog
+                         , case_id="case_id"
+                         , activity_id = "activity_id"
+                         , activity_instance_id = "activity_instance_id"
+                         , lifecycle_id = "lifecycle_id"
+                         , timestamp = "timestamp"
+                         , resource_id = "resource_id"
+    )
+    dumpRDS(eventlog, paste("eventlog",format(Sys.time(), "%y-%m-%d-%H-%M"),categorie, ".rds", sep = "_"))
+    
+    assign(paste("eventlog",categorie, sep = ".")
+           , eventlog
+           , globalenv())
+    
+    eventlog %>%process_map()
+    
+    precedence_matrix <- precedence_matrix(eventlog, type="absolute") 
+    assign(paste("precedence_matrix",categorie, sep = ".")
+           , precedence_matrix
+           , globalenv())
+    assign(paste("precedence_matrix",categorie,"plot", sep = ".")
+           , precedence_matrix%>%plot()
+           , globalenv())
+    
+    
+    depMatrix <- dependency_matrix(eventlog) 
+    assign(paste("dependency_matrix",categorie,"object", sep = ".")
+           , dependency_matrix
+           , globalenv())
+    assign(paste("dependency_matrix",categorie,"matrix", sep = ".")
+           , render_dependency_matrix(depMatrix)
+           , globalenv())
+    
+    for(threshold in pThreshhOlds){
+      cNet <- causal_net(eventlog, threshold = threshold) 
+      assign(paste("cnet",replace(as.character(threshold), ".", "_"), categorie, sep = ".")
+             , cNet 
+             , globalenv())
+      dumpRDS(cNet, paste("cnet",replace(as.character(threshold), ".", "_") ,categorie,".rdx", sep = "_"))
+      assign(paste("cnet"
+                   , as.character(threshold)
+                   ,categorie,"plot", sep = ".")
+             , render_causal_net(cNet
+                                 , title=paste("casual net:"
+                                               , categorie
+                                               , "~ drempel ="
+                                               ,as.character(threshold)
+                                               ,sep=" ")
+                                 )
+             , globalenv())
+    }
+  }
+}
+

@@ -12,13 +12,20 @@ apt_packages:
 r_binary_packages:
   - devtools
   - roxygen2
-  - stringr
   - tidyverse
+  - tidyr
+  - dplyr
   - futile.logger
-  - ggplot2
+  - lubridate
   - openxlsx
   - reshape2
+  - ggplot2
   - sqldf
+  - formatR
+  - stringr
+  - bupaR
+  - heuristicsmineR
+  - petrinetR
 
 r_packages:
 

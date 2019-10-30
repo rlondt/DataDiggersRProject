@@ -6,10 +6,16 @@
 #' @param dcastFormula the formula that is used to transpose via dcast
 #' @keywords melt dcast transposed
 #' @export
-#' @importFrom futile.logger flog.debug
+#' @importFrom futile.logger flog.debug flog.info
 #' @importFrom stringr str_detect
 #' @importFrom lubridate is.POSIXct
 #' @importFrom reshape2 dcast
+#' @ importFrom tidyverse full_join group replace_na case_when left_join melt mutate_all n n_distinct summarize 
+#' @importFrom dplyr full_join case_when left_join mutate_all n n_distinct summarize 
+#' @ importFrom tidyverse 
+#' @importFrom stats update.formula
+#' @importFrom reshape2 melt
+#' 
 #' 
 transposeWorkflowDataFrame <- function (data, measureVars, dcastFormula){
   # converteren posix naar numeric

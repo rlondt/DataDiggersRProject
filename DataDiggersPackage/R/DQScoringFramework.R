@@ -62,6 +62,7 @@ addScoreToDQFramework <- function(categorie, waarde, weging){
 #' @keywords DQFramework dashboard
 #' @import ggplot2
 #' @import tidyverse
+#' @importFrom graphics plot title
 #' @export
 plotDQ <- function(){
   

@@ -11,6 +11,7 @@
 #' @ import dplyr
 #' @importFrom futile.logger flog.debug
 #' @import openxlsx
+#' @importFrom tidyr replace_na
 #' @ import anomalize
 #' @ import VIM
 #' @ import reshape2
