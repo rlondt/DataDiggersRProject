@@ -2,7 +2,7 @@
 % Please edit documentation in R/DQScoringFramework.R
 \name{initializeDQScoringFramework}
 \alias{initializeDQScoringFramework}
-\title{A Function to transpose a data based on some parameters}
+\title{A Function to initialize the data-quality-framework}
 \usage{
 initializeDQScoringFramework()
 }

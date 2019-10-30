@@ -12,11 +12,11 @@ startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE
 overlappendeWorkflowstappenDF <- readRDSdd( "dq_unique_4a.rds")
 overlappendeWorkflowstappenDF <- overlappendeWorkflowstappenDF %>%
   filter(starttijd_1 > as.POSIXct("2019-05-01 00:00:00", tz="UTC")) %>%
-  filter(starttijd_1 < as.POSIXct("2019-05-15 00:00:00", tz="UTC")) 
+  filter(starttijd_1 < as.POSIXct("2019-05-08 00:00:00", tz="UTC")) 
 
 
 ordersInDF <- join.ordersWorkflowDF %>%
-  filter(Starttijd > as.POSIXct("2019-02-01 00:00:00", tz="UTC")) %>%
+  filter(Starttijd > as.POSIXct("2019-05-21 00:00:00", tz="UTC")) %>%
   filter(Starttijd < as.POSIXct("2019-05-31 00:00:00", tz="UTC")) %>%
   group_by(Ordernummer)%>%
   summarize(aantal=n())
@@ -127,7 +127,11 @@ processmonitR::performance_dashboard(eventlog.Schade)
 install.packages("processanimateR")
 library(processanimateR)
 library(eventdataR)
-animate_process(eventlog.Schade, mode = "absolute", duration = 300
+
+lEventlog <- eventlog.NLS%>%
+  filter_activity_frequency(percentage = .45)
+
+animate_process(lEventlog, mode = "absolute", duration = 300
                 , mapping = token_aes(color = token_scale("resource_id", 
                                                         scale = "ordinal", 
                                                         range = RColorBrewer::brewer.pal(7, "Paired"))))

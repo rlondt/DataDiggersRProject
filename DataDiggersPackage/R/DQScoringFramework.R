@@ -1,4 +1,4 @@
-#' A Function to transpose a data based on some parameters
+#' A Function to initialize the data-quality-framework
 #'
 #' This function blablablabla
 #' @keywords init DQ Scoring
@@ -17,9 +17,9 @@ initializeDQScoringFramework <- function(){
   invisible()
 }
 
-#' A Function to transpose a data based on some parameters
+#' A Function to add a score to the data-quality-framework
 #'
-#' This function blablablabla
+#' This function adds a score to the data-quality-framework
 #' @param categorie categorie
 #' @param waarde waarde 1-5
 #' @param weging weging van het item

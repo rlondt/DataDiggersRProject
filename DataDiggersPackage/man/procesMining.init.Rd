@@ -4,14 +4,14 @@
 \alias{procesMining.init}
 \title{DataPreparation for procesMining with Bupar}
 \usage{
-procesMining.init(pStartTijd, pEindTijd, pThreshOlds)
+procesMining.init(pStartTijd, pEindTijd, pThresholds)
 }
 \arguments{
 \item{pStartTijd}{starttijd, waarbinnen een order moet vallen om een cnet te bepalen}
 
 \item{pEindTijd}{Eindtijd, waarbinnen een order moet vallen om een cnet te bepalen}
 
-\item{pThreshOlds}{collectie van thresholds waarvoor een causal net wordt gemaakt}
+\item{pThresholds}{collectie van thresholds waarvoor een causal net wordt gemaakt}
 }
 \description{
 DataPreparation for procesMining with Bupar

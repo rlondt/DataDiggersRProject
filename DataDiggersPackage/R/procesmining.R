@@ -1,15 +1,15 @@
 #' DataPreparation for procesMining with Bupar
 #' @param pStartTijd starttijd, waarbinnen een order moet vallen om een cnet te bepalen
 #' @param pEindTijd Eindtijd, waarbinnen een order moet vallen om een cnet te bepalen
-#' @param pThreshOlds collectie van thresholds waarvoor een causal net wordt gemaakt
+#' @param pThresholds collectie van thresholds waarvoor een causal net wordt gemaakt
 #' @import tidyverse
 #' @import bupaR
 #' @import heuristicsmineR
 #' @import petrinetR
 #' @importFrom futile.logger flog.debug
+#' @importFrom lubridate is.POSIXct
 #' @export
-procesMining.init <- function(pStartTijd, pEindTijd, pThreshOlds){
-  
+procesMining.init <- function(pStartTijd, pEindTijd, pThresholds){
   stopifnot(is.POSIXct(pStartTijd))
   stopifnot(is.POSIXct(pEindTijd))
   flog.debug("bepalen welke orders binnen de periode vallen")
@@ -61,7 +61,7 @@ procesMining.init <- function(pStartTijd, pEindTijd, pThreshOlds){
            , eventlog
            , globalenv())
     
-    eventlog %>%process_map()
+    #eventlog %>%process_map()
     
     precedence_matrix <- precedence_matrix(eventlog, type="absolute") 
     assign(paste("precedence_matrix",categorie, sep = ".")

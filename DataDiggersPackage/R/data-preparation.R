@@ -7,17 +7,8 @@
 #' @keywords import prepare eda
 #' @import sqldf
 #' @import tidyverse
-#' @ import naniar
-#' @ import dplyr
 #' @importFrom futile.logger flog.debug
-#' @import openxlsx
-#' @importFrom tidyr replace_na
-#' @ import anomalize
-#' @ import VIM
-#' @ import reshape2
-#' @ import shiny
-#' @ import ggplot2
-#' @ import tidyquant
+#' @importFrom openxlsx convertToDateTime
 #' @export
 startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironment=FALSE){
   setWorkdir(workdir)
@@ -346,7 +337,7 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     
     summarized.WorkflowDF <- prep.workflowDF %>%
       filter(Status == "Gereed") %>%
-      filter(Taakomschrijving %in% workflowStappen )%>%
+      # filter(Taakomschrijving %in% workflowStappen )%>%
       mutate( Starttijd = unclass(Starttijd)
               #,NormDoorlooptijd = NormDoorlooptijd
               ,GeplandeEindtijd = unclass(GeplandeEindtijd)

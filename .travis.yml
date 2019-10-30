@@ -4,7 +4,7 @@ sudo: false
 
 warnings_are_errors: false
 
-apt_packages: 
+__apt_packages: 
   - libudunits2-dev
   - libudunits2-0
   - libgdal-dev
