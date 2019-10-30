@@ -23,11 +23,11 @@ r_binary_packages:
   - sqldf
   - formatR
   - stringr
+
+r_packages:
   - bupaR
   - heuristicsmineR
   - petrinetR
-
-r_packages:
 
 
 r_build_args: --no-build-vignettes --no-manual --no-resave-data
