@@ -26,6 +26,8 @@ r_binary_packages:
   - sqldf
   - tidyquant
   - tidyverse
+
+r_packages:
   - openxslx
   - edeaR
   - bupaR
