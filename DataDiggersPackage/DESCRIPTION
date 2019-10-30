@@ -15,9 +15,6 @@ RoxygenNote: 6.1.1
 Depends: tidyverse
     , naniar
     , dplyr
-    , caret
-    , doSNOW
-    , sf
     , futile.logger
     , lubridate
     , openxlsx
@@ -29,13 +26,7 @@ Depends: tidyverse
     , tidyquant
     , sqldf
     , formatR
-    , bupaR
-    , edeaR
-    , eventdataR
-    , processmapR
-    , processmonitR
-    , xesreadR
-    , petrinetR    
     , broom
+    , stringr
 Suggests: 
     testthat

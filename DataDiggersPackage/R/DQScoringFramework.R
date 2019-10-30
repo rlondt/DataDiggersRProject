@@ -24,10 +24,10 @@ initializeDQScoringFramework <- function(){
 #' @param waarde waarde 1-5
 #' @param weging weging van het item
 #' @keywords melt dcast transposed
+#' @import tidyverse
 #' @export
 #' @examples
 #' addScoreToDQFramework(COMPLEETHEID, 3, 5)
-
 addScoreToDQFramework <- function(categorie, waarde, weging){
   
   stopifnot(categorie %in% c(COMPLEETHEID, CONSISTENTIE, UNICITEIT, VALIDITEIT, ACCURAATHEID))
@@ -60,9 +60,15 @@ addScoreToDQFramework <- function(categorie, waarde, weging){
 #'
 #' This function plots the marvelous DataQuality-dashboard 
 #' @keywords DQFramework dashboard
+#' @import ggplot2
+#' @import tidyverse
 #' @export
 plotDQ <- function(){
+  
   DQScoringDF <- get("DQScoringDF", envir=.DataDiggersPackageOptions)
+  utils::globalVariables(names(DQScoringDF))
+  utils::globalVariables(c("percentage", "group","label", "title"))
+  
   df <- DQScoringDF %>%
     group_by(categorie)%>%
     summarise(percentage = round((sum((waarde * weging)/sum(weging))/5),2))%>%

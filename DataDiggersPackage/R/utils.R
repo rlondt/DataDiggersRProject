@@ -53,7 +53,7 @@ dumpRDS <- function(object, naam, ...){
 readCSV <- function(naam, ...){
   #  werkdirOld <- getwd()
   #  setwd(get("werkdir", envir=.DataDiggersPackageOptions))
-  csv <- read.csv2(file = getLocationNaam(naam), ...)
+  csv <- utils::read.csv2(file = getLocationNaam(naam), ...)
   #  setwd(werkdirOld)
   csv
 }
@@ -62,7 +62,8 @@ readCSV <- function(naam, ...){
 #'
 #' This function om de exacte locatie te achterhalen
 #' @param naam naam van het bestand
-#' @param ... overige parameters 
+#' @param ... ove
+#' rige parameters 
 #' @keywords file rds location
 #' @export
 readRDSdd <- function(naam, ...){

@@ -9,7 +9,8 @@ readRDSdd(naam, ...)
 \arguments{
 \item{naam}{naam van het bestand}
 
-\item{...}{overige parameters}
+\item{...}{ove
+rige parameters}
 }
 \description{
 This function om de exacte locatie te achterhalen

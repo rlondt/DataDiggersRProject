@@ -9,40 +9,16 @@ apt_packages:
 
 r_binary_packages:
   - devtools
-  - Rcpp
-  - RcppEigen
   - roxygen2
-  - stringi
+  - stringr
   - tidyverse
-  - dplyr
-  - VIM
-  - anomalize
-  - caret
-  - doSNOW
-  - dplyr
   - futile.logger
   - ggplot2
-  - naniar
   - openxlsx
   - reshape2
-  - sf
-  - shiny
   - sqldf
-  - tidyquant
-  - tidyverse
-  - plotly
 
 r_packages:
-  - openxlsx
-  - edeaR
-  - bupaR
-  - eventdataR
-  - processmapR
-  - processmonitR
-  - petrinetR
-  - DiagrammeR
-  - Rook
-  - hexbin
 
 
 r_build_args: --no-build-vignettes --no-manual --no-resave-data
