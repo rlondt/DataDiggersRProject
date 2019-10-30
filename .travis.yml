@@ -10,6 +10,7 @@ r_binary_packages:
   - roxygen2
   - stringi
   - tidyverse
+  - dplyr
   - VIM
   - anomalize
   - caret
@@ -25,6 +26,17 @@ r_binary_packages:
   - sqldf
   - tidyquant
   - tidyverse
+  - openxslx
+  - edeaR
+  - bupaR
+  - eventdataR
+  - processmapR
+  - processmonitorR
+  - petrinetR
+  - DiagrammeR
+  - plotly
+  - Rook
+  - hexbin
 
 
 r_build_args: --no-build-vignettes --no-manual --no-resave-data
