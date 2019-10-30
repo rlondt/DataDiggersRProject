@@ -12,8 +12,8 @@ getLocationNaam <- function(naam, checkExists=TRUE){
   werkdir = get("werkdir", envir=.DataDiggersPackageOptions)
   locatie = paste(werkdir, naam, sep = "/")
   if (!file.exists(locatie)&checkExists){
-    futile.logger::flog.error(paste("Bestand niet gevonden: ", locatie))
-    stop()
+    futile.logger::flog.debug(paste("Bestand niet gevonden: ", locatie))
+    stop(paste("Bestand niet gevonden: ", locatie))
   }
   futile.logger::flog.debug(paste("Locatie: ", locatie))
   locatie
