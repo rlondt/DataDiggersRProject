@@ -70,7 +70,7 @@ plotDQ <- function(){
   utils::globalVariables(names(DQScoringDF))
   utils::globalVariables(c("percentage", "group","label", "title"))
   
-  df <- DQScoringDF %>%
+  plotDF <- DQScoringDF %>%
     group_by(categorie)%>%
     summarise(percentage = round((sum((waarde * weging)/sum(weging))/5),2))%>%
     mutate(categorie = dplyr::recode(as.character(categorie), '1' = "Compleetheid"
@@ -78,13 +78,13 @@ plotDQ <- function(){
                   , '3' = "Uniciteit"
                   , '4' = "Validiteit"
                   , '5' = "Accuraatheid"))
-  futile.logger::flog.debug(df)
-  df <- df %>% mutate(group=ifelse(percentage <0.25, "red",
-               ifelse(percentage>=0.25 & percentage<0.8, "orange","green")),
+  futile.logger::flog.debug(plotDF)
+  plotDF <- plotDF %>% mutate(group=ifelse(percentage <0.25, "red",
+               ifelse(percentage>=0.25 & percentage<0.7, "orange","green")),
               label=paste0(percentage*100, "%"),
                       title=categorie)
 
-  ggplot(df, aes(fill = group, ymax = percentage, ymin = 0, xmax = 2, xmin = 1)) +
+  ggplot(plotDF, aes(fill = group, ymax = percentage, ymin = 0, xmax = 2, xmin = 1)) +
     geom_rect(aes(ymax=1, ymin=0, xmax=2, xmin=1), fill ="#ece8bd") +
     geom_rect() + 
     coord_polar(theta = "y",start=-pi/2) + xlim(c(0, 2)) + ylim(c(0,2)) +
