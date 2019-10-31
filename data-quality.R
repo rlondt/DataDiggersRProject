@@ -131,8 +131,41 @@ dftijdschrijvenEindatumGroterDanBegindatum <- prep.tijdschrijvenDF %>%
 addScoreToDQFramework(CONSISTENTIE, waarde=4, weging=2)
 # resultaat: komt niet voor. Wel is het zo dat er 3 tijdschrijf records zijn waar de startdatum en eindddatum gelijk zijn.
 
-# 4. Bevinden de begintijd en eindtijd van het tijdschrijven zich binnen de begintijd en eindtijd van het rooster
+# 4. Bevinden de begintijd en eindtijd van het tijdschrijven zich 
+#    binnen de begintijd en eindtijd van het rooster
+dq.tijdschrijvenBuitenRooster <- join.tijdschrijvenDienstMedewerkersDF %>%
+  filter(is.na(ERPID) == FALSE) %>%
+  #filter(Starttijd < StartDate  )%>%
+  filter(Eindtijd > EndDate)%>%
+  filter(Type == "Werk")%>%
+  mutate(periodeTeVroeg = case_when(Starttijd < StartDate~ Starttijd-StartDate)) %>%
+  mutate(periodeTelaat = case_when(Eindtijd > EndDate~ EndDate-Eindtijd)) %>%
+  select(ERPID, periodeTeVroeg, Starttijd, StartDate, EndDate, Eindtijd, periodeTelaat)%>%
+  arrange(StartDate)
+
+ggplot(dq.tijdschrijvenBuitenRooster, aes(x=StartDate))+ 
+  geom_histogram(bins=50)
+
+dq.tijdschrijvenBuitenRooster <- join.tijdschrijvenDienstMedewerkersDF %>%
+  filter(is.na(ERPID) == FALSE) %>%
+  #filter(Starttijd < StartDate  )%>%
+  filter(Eindtijd > EndDate)%>%
+  filter(Type == "Werk")%>%
+  mutate(periodeTeVroeg = case_when(Starttijd < StartDate~ Starttijd-StartDate)) %>%
+  mutate(periodeTelaat = case_when(Eindtijd > EndDate~ Eindtijd- EndDate)) %>%
+  select(ERPID, periodeTeVroeg, Starttijd, StartDate, EndDate, Eindtijd, periodeTelaat)%>%
+  arrange(StartDate)
+ggplot(dq.tijdschrijvenBuitenRooster, aes(x=as.numeric(periodeTelaat)))+ 
+  geom_histogram(bins=500)
+
+
 # 5. De relatie tussen rooster en medewerker en tijdschrijven en medewerker loopt "dubbel". Komen daar inconsistenties in voor
+t1DF <- prep.tijdschrijvenDF %>%
+  anti_join(prep.roosterdienstenDF)
+# 1391 veel maar niet alle roosterdiensten leeg.
+
+#==> ~1400 niet kunnen joinen..
+
 # 6. Datumvelden als datum te behandelen ⇒ OK
 # 7. Zijn de order oplopend
 # 8. Naamgeving kolommen
