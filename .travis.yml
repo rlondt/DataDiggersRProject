@@ -1,13 +1,7 @@
 language: r
 cache: packages
 sudo: false
-
-warnings_are_errors: false
-
-__apt_packages: 
-  - libudunits2-dev
-  - libudunits2-0
-  - libgdal-dev
+pandoc: false
 
 r_binary_packages:
   - devtools
