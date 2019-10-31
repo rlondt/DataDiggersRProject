@@ -2,22 +2,22 @@
 % Please edit documentation in R/DQScoringFramework.R
 \name{addScoreToDQFramework}
 \alias{addScoreToDQFramework}
-\title{A Function to transpose a data based on some parameters}
+\title{A Function to add a score to the data-quality-framework}
 \usage{
 addScoreToDQFramework(categorie, waarde, weging)
 }
 \arguments{
-\item{categorie}{categorie}
+\item{categorie}{categorie; één van de volgende opties: COMPLEETHEID, CONSISTENTIE, UNICITEIT, VALIDITEIT, ACCURAATHEID}
 
 \item{waarde}{waarde 1-5}
 
 \item{weging}{weging van het item}
 }
 \description{
-This function blablablabla
+This function adds a score to the data-quality-framework
 }
 \examples{
-addScoreToDQFramework(category, waarde, weging)
+addScoreToDQFramework(COMPLEETHEID, 3, 5)
 }
 \keyword{dcast}
 \keyword{melt}

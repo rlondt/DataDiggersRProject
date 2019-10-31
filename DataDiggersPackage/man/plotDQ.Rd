@@ -7,9 +7,7 @@
 plotDQ()
 }
 \description{
-This function blablablabla
-}
-\examples{
-plotDQ()
+This function plots the marvelous DataQuality-dashboard
 }
 \keyword{DQFramework}
+\keyword{dashboard}

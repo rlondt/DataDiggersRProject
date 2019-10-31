@@ -5,25 +5,27 @@
 #' @param rebuild indication of dataframes have to be rebuild when not available
 #' @param dataframesToGlobalEnvironment infication of dataframes to global enironment
 #' @keywords import prepare eda
+#' @import sqldf
+#' @import tidyverse
+#' @importFrom futile.logger flog.debug
+#' @importFrom openxlsx convertToDateTime
 #' @export
-#' @examples
-#' startPreparation( "C:/files", TRUE, FALSE)
 startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironment=FALSE){
   setWorkdir(workdir)
   stopifnot(is.logical(rebuild))
   stopifnot(is.logical(dataframesToGlobalEnvironment))
   
-  futile.logger::flog.info(msg = "Inlezen bronbestanden")
+  flog.info(msg = "Inlezen bronbestanden")
   if(!file.exists(getLocationNaam("prep_medewerkers.rds", FALSE))|rebuild){
     
-    futile.logger::flog.debug(msg = ".Lees medewerkers.csv")
+    flog.debug(msg = ".Lees medewerkers.csv")
     org.medewerkersDF <- readCSV("Medewerkers.csv")
     
     # eerste bewerking
     # omzetten factoren naar echte waardes
     # omzetten datums naar R-datums
     # lege strings, 'NA' en spaties naar NA
-    futile.logger::flog.debug(msg = ".Omzetten null-values, factoren en datums")
+    flog.debug(msg = ".Omzetten null-values, factoren en datums")
 
     prep.medewerkersDF <- org.medewerkersDF %>%
       mutate(MDWID = as.character(MDWID)) %>%
@@ -31,23 +33,23 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
       mutate_all(list(~na_if(.," ")))%>%
       mutate_all(list(~na_if(.,"NA")))
 
-    futile.logger::flog.debug(msg = ".Opslaan medewerkers")
+    flog.debug(msg = ".Opslaan medewerkers")
     dumpRDS(org.medewerkersDF, "org_medewerkers.rds")
     dumpRDS(prep.medewerkersDF, "prep_medewerkers.rds")
   } else {
-    futile.logger::flog.debug(msg = ".Lees medewerkers.rds")
+    flog.debug(msg = ".Lees medewerkers.rds")
     org.medewerkersDF <- readRDSdd( "org_medewerkers.rds")
     prep.medewerkersDF <- readRDSdd( "prep_medewerkers.rds")
   }
   if(!file.exists(getLocationNaam("prep_orders.rds", FALSE))|rebuild){
-    futile.logger::flog.debug(msg = "Build medewerkers")
+    flog.debug(msg = "Build medewerkers")
     org.ordersDF      <- readCSV("Orders.csv")
     
     # eerste bewerking
     # omzetten factoren naar echte waardes
     # omzetten datums naar R-datums
     # lege strings, 'NA' en spaties naar NA
-    futile.logger::flog.debug(msg = ".Omzetten null-values, factoren en datums")
+    flog.debug(msg = ".Omzetten null-values, factoren en datums")
     prep.ordersDF <- org.ordersDF %>%
       mutate(Ordernummer = as.character(Ordernummer)) %>%
       mutate_all(list(~na_if(as.character(.),"")))%>%
@@ -78,20 +80,20 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     dumpRDS(org.ordersDF, "org_orders.rds")
     dumpRDS(prep.ordersDF, "prep_orders.rds")
   } else {
-    futile.logger::flog.debug(msg = ".Lees orders.rds")
+    flog.debug(msg = ".Lees orders.rds")
     org.ordersDF <- readRDSdd( "org_orders.rds")
     prep.ordersDF <- readRDSdd( "prep_orders.rds")
   }  
   
   if(!file.exists(getLocationNaam("prep_roosterdiensten.rds", FALSE))|rebuild){
-    futile.logger::flog.debug(msg = ".Lees Roosterdiensten.csv")
+    flog.debug(msg = ".Lees Roosterdiensten.csv")
     org.roosterdienstenDF <- readCSV("Roosterdiensten.csv")
     
     # eerste bewerking
     # omzetten factoren naar echte waardes
     # omzetten datums naar R-datums
     # lege strings, 'NA' en spaties naar NA
-    futile.logger::flog.debug(msg = ".Omzetten null-values, factoren en datums")
+    flog.debug(msg = ".Omzetten null-values, factoren en datums")
     prep.roosterdienstenDF <- org.roosterdienstenDF %>%
       mutate(DienstID = as.character(DienstID)) %>%
       mutate(MDWID = as.character(MDWID)) %>%
@@ -102,24 +104,24 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
       mutate(Eindtijd = convertToDateTime(Eindtijd))%>%
       mutate(ShiftDate = convertToDate(ShiftDate))
     
-    futile.logger::flog.debug(msg = ".Schrijf roosterdiensten.rds")
+    flog.debug(msg = ".Schrijf roosterdiensten.rds")
     dumpRDS(org.roosterdienstenDF, "org_roosterdiensten.rds")
     dumpRDS(prep.roosterdienstenDF, "prep_roosterdiensten.rds")
   }else {
-    futile.logger::flog.debug(msg = ".Lees roosterdiensten.rds")
+    flog.debug(msg = ".Lees roosterdiensten.rds")
     org.roosterdienstenDF <- readRDSdd( "org_roosterdiensten.rds")
     prep.roosterdienstenDF <- readRDSdd( "prep_roosterdiensten.rds")
   }
   
   if(!file.exists(getLocationNaam("prep_tijdschrijven.rds", FALSE))|rebuild){
-    futile.logger::flog.debug(msg = ".Lees Tijdschrijven.csv")
+    flog.debug(msg = ".Lees Tijdschrijven.csv")
     org.tijdschrijvenDF <- readCSV("Tijdschrijven.csv") 
     
     # eerste bewerking
     # omzetten factoren naar echte waardes
     # omzetten datums naar R-datums
     # lege strings, 'NA' en spaties naar NA
-    futile.logger::flog.debug(msg = ".Omzetten null-values, factoren en datums")
+    flog.debug(msg = ".Omzetten null-values, factoren en datums")
     prep.tijdschrijvenDF <- org.tijdschrijvenDF %>%
       mutate(DienstID = as.character(DienstID)) %>%
       mutate(MDWID = as.character(MDWID)) %>%
@@ -132,25 +134,25 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
       mutate(StartDate = convertToDateTime(StartDate)) %>%
       mutate(EndDate = convertToDateTime(EndDate))
     
-    futile.logger::flog.debug(msg = ".Schrijf tijdschrijven.rds")
+    flog.debug(msg = ".Schrijf tijdschrijven.rds")
     dumpRDS(org.tijdschrijvenDF, "org_tijdschrijven.rds")
     dumpRDS(prep.tijdschrijvenDF, "prep_tijdschrijven.rds")
     
   }else {
-    futile.logger::flog.debug(msg = ".Lees tijdschrijven.rds")
+    flog.debug(msg = ".Lees tijdschrijven.rds")
     org.tijdschrijvenDF <- readRDSdd( "org_tijdschrijven.rds")
     prep.tijdschrijvenDF <- readRDSdd( "prep_tijdschrijven.rds")
   }  
   
   if(!file.exists(getLocationNaam("prep_workflow.rds", FALSE))|rebuild){
-    futile.logger::flog.debug(msg = ".Lees workflow 1+2.csv")
+    flog.debug(msg = ".Lees workflow 1+2.csv")
     org.workflowDF <- rbind(readCSV("Workflow 1.csv"),readCSV("Workflow 2.csv"))
     
     # eerste bewerking
     # omzetten factoren naar echte waardes
     # omzetten datums naar R-datums
     # lege strings, 'NA' en spaties naar NA
-    futile.logger::flog.debug(msg = ".Omzetten null-values, factoren en datums")
+    flog.debug(msg = ".Omzetten null-values, factoren en datums")
     prep.workflowDF <- org.workflowDF %>%
       mutate(Ordernummer = as.character(Ordernummer)) %>%
       mutate_all(list(~na_if(.,"")))%>%
@@ -161,11 +163,11 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
       mutate(WerkelijkeEindtijd = convertToDateTime(WerkelijkeEindtijd)) %>%
       mutate(Starttijd = convertToDateTime(Starttijd))
     
-    futile.logger::flog.debug(msg = ".schrijf workflow.rds")
+    flog.debug(msg = ".schrijf workflow.rds")
     dumpRDS(org.workflowDF, "org_workflow.rds")
     dumpRDS(prep.workflowDF, "prep_workflow.rds")
   }else {
-    futile.logger::flog.debug(msg = ".Lees workflow.rds")
+    flog.debug(msg = ".Lees workflow.rds")
     org.workflowDF <- readRDSdd( "org_workflow.rds")
     prep.workflowDF <- readRDSdd( "prep_workflow.rds")
   }  
@@ -174,7 +176,7 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
   # Backoffice data = workflow 
   # workflow actifiteiten met orders
   if(!file.exists(getLocationNaam("join_ordersWorkflow.rds", FALSE))|rebuild){
-    futile.logger::flog.info(msg = "Workflow actifiteiten met orders")
+    flog.info(msg = "Workflow actifiteiten met orders")
     join.ordersWorkflowDF <- left_join(prep.ordersDF, prep.workflowDF)
     dumpRDS(join.ordersWorkflowDF, "join_ordersWorkflow.rds")
   } else {
@@ -185,7 +187,7 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
   ##
   # joins operations = tijdschrijven
   # Diensten met medewerkers
-  futile.logger::flog.info(msg = "Combineren dienst, medewerkers en tijdschrijven")
+  flog.info(msg = "Combineren dienst, medewerkers en tijdschrijven")
   
   if (!file.exists(getLocationNaam("join_ordersTijdschrijven.rds", FALSE))
       |!file.exists(getLocationNaam("join_dienstMedewerkers.rds", FALSE))
@@ -269,10 +271,10 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     join.tijdschrijvenDienstMedewerkersDF<- readRDSdd("join_tijdschrijvenDienstMedewerkers.rds")
   }
   
-  futile.logger::flog.info(msg = "Tijdschrijven summary")
+  flog.info(msg = "Tijdschrijven summary")
   
   if(!file.exists(getLocationNaam("summarized_OrderTijdschrijvenByOrder.rds", FALSE))|rebuild){
-    futile.logger::flog.info(msg = "maken summarized.OrderTijdschrijvenByOrderDF.rds")
+    flog.info(msg = "maken summarized.OrderTijdschrijvenByOrderDF.rds")
     summarized.OrderTijdschrijvenByOrderDF <- join.ordersTijdschrijvenDF %>%
       group_by(Ordernummer) %>%
       summarise( VerschillendeDagen       = n_distinct(format(StartDate, "%Y-%m-%d"))
@@ -289,12 +291,12 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
       )
     dumpRDS(summarized.OrderTijdschrijvenByOrderDF, "summarized_OrderTijdschrijvenByOrder.rds")           
   } else {
-    futile.logger::flog.info(msg = "Lezen summarized_OrderTijdschrijvenByOrderDF.rds")
+    flog.info(msg = "Lezen summarized_OrderTijdschrijvenByOrderDF.rds")
     summarized.OrderTijdschrijvenByOrderDF <- readRDSdd("summarized_OrderTijdschrijvenByOrder.rds")           
   }
   
   if (!file.exists(getLocationNaam("summarized_Workflow.rds", FALSE))|rebuild){
-    futile.logger::flog.debug("create summarizedWorkflowDF")
+    flog.debug("create summarizedWorkflowDF")
     workflowStappen <- c("dummy"
                          # , "Opstellen POD"
                          # , "V&G plan"
@@ -335,7 +337,7 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     
     summarized.WorkflowDF <- prep.workflowDF %>%
       filter(Status == "Gereed") %>%
-      filter(Taakomschrijving %in% workflowStappen )%>%
+      # filter(Taakomschrijving %in% workflowStappen )%>%
       mutate( Starttijd = unclass(Starttijd)
               #,NormDoorlooptijd = NormDoorlooptijd
               ,GeplandeEindtijd = unclass(GeplandeEindtijd)
@@ -354,22 +356,22 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
       )
       ,  Ordernummer ~ Taakomschrijving
       )
-    futile.logger::flog.debug("opslaan summarizedWorkflowDF")
+    flog.debug("opslaan summarizedWorkflowDF")
     dumpRDS(summarized.WorkflowDF, "summarized_Workflow.rds")
   } else {
-    futile.logger::flog.debug("lees summarizedWorkflowDF")
+    flog.debug("lees summarizedWorkflowDF")
     summarized.WorkflowDF <- readRDSdd("summarized_Workflow.rds")
   }
   
   
   if (!file.exists(getLocationNaam("summarized_WorflowTijdschrijven.rds", FALSE))|rebuild){
-    futile.logger::flog.debug("create summarizedWorkflowTijdschrijvenDF")
+    flog.debug("create summarizedWorkflowTijdschrijvenDF")
     summarized.WorflowTijdschrijvenDF <- full_join(summarized.WorkflowDF, summarized.OrderTijdschrijvenByOrderDF)
     
-    futile.logger::flog.debug("opslaan summarizedWorkflowDF")
+    flog.debug("opslaan summarizedWorkflowDF")
     dumpRDS(summarized.WorflowTijdschrijvenDF, "summarized_WorflowTijdschrijven.rds")
   } else{
-    futile.logger::flog.debug("lees summarizedWorkflowDF")
+    flog.debug("lees summarizedWorkflowDF")
     summarized.WorflowTijdschrijvenDF <- readRDSdd("summarized_WorflowTijdschrijven.rds")
   }
   if(dataframesToGlobalEnvironment){

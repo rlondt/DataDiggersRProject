@@ -17,9 +17,6 @@ startPreparation(workdir, rebuild = FALSE,
 \description{
 This function
 }
-\examples{
-startPreparation( "C:/files", TRUE, FALSE)
-}
 \keyword{eda}
 \keyword{import}
 \keyword{prepare}

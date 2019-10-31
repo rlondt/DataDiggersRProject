@@ -1,20 +1,10 @@
 source('./init.R')
 library(DataDiggersPackage)
 flog.threshold(DEBUG)
-startPreparation(workdir = "C:/Users/louis/OneDrive/studie/vakken/applied big data/datafiles", dataframesToGlobalEnvironment = TRUE)
-initializeDQScoringFramework()
+startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE, rebuild = TRUE)
 
 # Compleetheid
 # 1. Mogelijkheden voor kruistellingen
-addScoreToDQFramework(COMPLEETHEID, waarde=5, weging=5)
-addScoreToDQFramework(CONSISTENTIE, waarde=5, weging=5)
-addScoreToDQFramework(UNICITEIT, waarde=5, weging=5)
-addScoreToDQFramework(ACCURAATHEID, waarde=5, weging=5)
-
-levels(prep.ordersDF$Postcode4)
-
-plotDQ()
-
 # 2. Zijn alle onderdelen van VWT-data vertegenwoordigd
 # 3. Missing values analyse
 # 3.1 Medewerker
@@ -193,14 +183,14 @@ addScoreToDQFramework(CONSISTENTIE, waarde=4, weging=2)
   levels(prep.workflowDF$Status)
   vervallenOrdersDF <- prep.ordersDF%>%
     filter(OpdrachtVervalt=="WAAR")
-  
+
   wfDF <- prep.workflowDF %>%
     filter(Status != "Geannuleerd")%>%
     filter(!Ordernummer %in% vervallenOrdersDF$Ordernummer)%>%
     mutate(Starttijd = unclass(Starttijd))%>%
     mutate(Eindtijd  = unclass(WerkelijkeEindtijd))%>%
     select(Ordernummer, Taakomschrijving, Starttijd, Eindtijd)
-  
+
   overlappendeWorkflowstappenDF <- sqldf("select t1.Ordernummer
                 , t1.taakomschrijving taakomschrijving_1
                 , t2.taakomschrijving taakomschrijving_2
@@ -224,7 +214,7 @@ addScoreToDQFramework(CONSISTENTIE, waarde=4, weging=2)
   dumpRDS(summarized.wfDubbelDF, "dq_unique_4b.rds")
 
   # 397654 voorkomens
-  
+
   # Zie ook procesmining voor verdere analyse
 
 # ..
@@ -234,31 +224,31 @@ addScoreToDQFramework(CONSISTENTIE, waarde=4, weging=2)
     select(MDWID, StartDate, EndDate, Type) %>%
     filter(as.Date(StartDate) == as.Date(EndDate)) %>%
   mutate(DuurTijdschrijvenInUren = round((EndDate - StartDate),-1)/3600) # round to nearest 10
-  
+
   urenPerDagWerk <- urenPerDagTotaal %>%
     filter(Type=="Werk")
-  
+
   # aggregeer uren op MDW, startdatum, Type
   aggUrenPerDagWerk <- setNames(aggregate(urenPerDagWerk[,c("DuurTijdschrijvenInUren")], by=list(urenPerDag$MDWID, as.Date(urenPerDag$StartDate), urenPerDag$Type), "sum"), c("MDWID", "Datum", "Type", "Duur"))
-  
+
   # Spreiding tijdschrijf uren medewerkers
    ggplot(data=aggUrenPerDagWerk, aes(aggUrenPerDagWerk$Duur)) + geom_histogram(binwidth=.5, boundary = 0, color = "black", fill = "lightblue") +
      scale_x_continuous(breaks=0:20) +
    xlab("Tijdschrijf uren medewerkers per dag")
-  
+
   # filter overwerk (overwerk=urenPerDag>9)
   # TODO: overwerk=overschreiding van roostertijd
   urenOverwerk <- aggUrenPerDag %>%
     filter(Duur > 9)
-  
+
   # Spreiding overwerk uren medewerkers per dag
   ggplot(data=urenOverwerk, aes(urenOverwerk$Duur)) + geom_histogram(binwidth=.5, boundary = 0, color = "black", fill = "lightblue") +
     scale_x_continuous(breaks=0:20) +
     xlab("Overwerk uren medewerkers per dag")
-  
+
   #addScoreToDQFramework(COMPLEETHEID, waarde=2, weging=4) wat hier invullen?
   #Resultaat/conclusie: overwerk: uitschieters in aantal uren per dag vooral 10 en 12 uur. Max is 19 uur.
-  
+
 # 2. Vervallen orders waar wel geakkoordeerd is tijdgeschreven
   vervallenOrdersMetTijdschrijvenDF <- left_join(prep.ordersDF, join.tijdschrijvenDienstMedewerkersDF, by=c("Ordernummer" = "ERPID")) %>%
     mutate(DuurTijdschrijvenInSeconden = EndDate - StartDate) %>%
@@ -296,15 +286,15 @@ dfAnomalizeCompleteCases %>%
 # 6. Orders die binnen een periode 'x' (vb een minuut) zijn uitgevoerd
 orderBinnenMinuut <- summarized.OrderTijdschrijvenByOrderDF %>%
   filter(difftime(EindtijdTijdschrijven, StarttijdTijdschrijven,units="min")< 1)
-  
+
 # testWF <- prep.workflowDF %>%
 #   filter(Ordernummer=='B0036800')
-# 
+#
 # testTijd <- prep.tijdschrijvenDF %>%
 #   filter(ERPID=='B0036800')
 
 addScoreToDQFramework(VALIDITEIT, waarde=5, weging=1)
-#Resultaat: er wordt altijd minimaal 15 minuten tijdgeschreven. Orders duren op basis van tijdschrijven dus nooit korter dan 
+#Resultaat: er wordt altijd minimaal 15 minuten tijdgeschreven. Orders duren op basis van tijdschrijven dus nooit korter dan
 #           15 minuten.
 # TODO: nog iets doen met doorlooptijd van order (op basis van workflowstappen) vs tijdschrijf tijd?
 
@@ -393,14 +383,3 @@ plotDQ()
 # 5. Score opstellen a.d.v. bovenstaande bolletjes
 # 6. Verschil AP/EP (ander personeel/eigen personeel)
 #
-
-
-
-
-
-
-
-
-
-
-

@@ -1,4 +1,4 @@
-#' A Function to transpose a data based on some parameters
+#' A Function to initialize the data-quality-framework
 #'
 #' This function blablablabla
 #' @keywords init DQ Scoring
@@ -17,17 +17,17 @@ initializeDQScoringFramework <- function(){
   invisible()
 }
 
-#' A Function to transpose a data based on some parameters
+#' A Function to add a score to the data-quality-framework
 #'
-#' This function blablablabla
-#' @param categorie categorie
+#' This function adds a score to the data-quality-framework
+#' @param categorie categorie; één van de volgende opties: COMPLEETHEID, CONSISTENTIE, UNICITEIT, VALIDITEIT, ACCURAATHEID
 #' @param waarde waarde 1-5
 #' @param weging weging van het item
 #' @keywords melt dcast transposed
+#' @import tidyverse
 #' @export
 #' @examples
-#' addScoreToDQFramework(COMPLEETHEID, 23, 5)
-
+#' addScoreToDQFramework(COMPLEETHEID, 3, 5)
 addScoreToDQFramework <- function(categorie, waarde, weging){
   
   stopifnot(categorie %in% c(COMPLEETHEID, CONSISTENTIE, UNICITEIT, VALIDITEIT, ACCURAATHEID))
@@ -36,7 +36,20 @@ addScoreToDQFramework <- function(categorie, waarde, weging){
   df <- data.frame(categorie, waarde, weging)
   names(df) <- c ("categorie", "waarde", "weging")
   
-  DQScoringDF <- get("DQScoringDF", envir=.DataDiggersPackageOptions)
+  DQScoringDF <- tryCatch({get("DQScoringDF", envir=.DataDiggersPackageOptions)}
+                          , warning = function(w){
+                            initializeDQScoringFramework()
+                            return (get("DQScoringDF", envir=.DataDiggersPackageOptions))
+                            }
+                          , error = function(e){
+                            initializeDQScoringFramework()
+                            return (get("DQScoringDF", envir=.DataDiggersPackageOptions))
+                          }
+  )
+  # if (is.null(DQScoringDF)){
+  #   initializeDQScoringFramework()
+  #   DQScoringDF <- get("DQScoringDF", envir=.DataDiggersPackageOptions)
+  # }
   DQScoringDF <- rbind(DQScoringDF, df)
   assign("DQScoringDF", DQScoringDF,  envir=.DataDiggersPackageOptions)
   futile.logger::flog.debug(DQScoringDF)
@@ -45,13 +58,18 @@ addScoreToDQFramework <- function(categorie, waarde, weging){
 
 #' A Function display the results of the DQF
 #'
-#' This function blablablabla
-#' @keywords DQFramework
+#' This function plots the marvelous DataQuality-dashboard 
+#' @keywords DQFramework dashboard
+#' @import ggplot2
+#' @import tidyverse
+#' @importFrom graphics plot title
 #' @export
-#' @examples
-#' plotDQ()
 plotDQ <- function(){
+  
   DQScoringDF <- get("DQScoringDF", envir=.DataDiggersPackageOptions)
+  utils::globalVariables(names(DQScoringDF))
+  utils::globalVariables(c("percentage", "group","label", "title"))
+  
   df <- DQScoringDF %>%
     group_by(categorie)%>%
     summarise(percentage = round((sum((waarde * weging)/sum(weging))/5),2))%>%

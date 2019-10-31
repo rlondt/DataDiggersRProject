@@ -2,40 +2,37 @@ Package: DataDiggersPackage
 Title: Package that supports the DataDiggers project
 Version: 0.1.7
 Authors@R: 
-    person(given = "Romano",
+    c(person(given = "Romano",
            family = "Londt",
            role = c("aut", "cre"),
            email = "datadiggers@londt.nl",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: Package that supports the DataDiggers project
-License: What license it uses
+           ),
+    person(given = "Louis",
+           family = "Oudshoorn",
+           role = c("aut"),
+           ),
+    person(given = "Jeroen",
+           family = "Visscher",
+           role = c("aut"),
+           ))
+Description: Package that supports the DataDiggersProject. It prepares data to explore and do some procesmining.
+License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 Depends: tidyverse
-    , naniar
     , dplyr
-    , caret
-    , doSNOW
-    , sf
     , futile.logger
     , lubridate
     , openxlsx
-    , anomalize
-    , VIM
     , reshape2
-    , shiny
     , ggplot2
-    , tidyquant
     , sqldf
-    , formatR
+    , stringr
     , bupaR
-    , edeaR
-    , eventdataR
-    , processmapR
-    , processmonitR
-    , xesreadR
-    , petrinetR    
-    , broom
-Suggests: 
-    testthat
+    , heuristicsmineR
+    , petrinetR
+Suggests: testthat
+    , tidyr
+    , formatR
+    

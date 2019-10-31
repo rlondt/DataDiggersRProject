@@ -2,28 +2,19 @@
 #'
 #' This function blablablabla
 #' @param data the dataframe that has to be transposed
-#' @param meaureVars a list of measured values
+#' @param measureVars a list of measured values
 #' @param dcastFormula the formula that is used to transpose via dcast
 #' @keywords melt dcast transposed
 #' @export
-#' @import tidyverse
-#' @import naniar
-#' @import dplyr
-#' @import caret
-#' @import doSNOW
-#' @import sf
-#' @import futile.logger
-#' @import openxlsx
-#' @import anomalize
-#' @import VIM
-#' @import reshape2
-#' @import shiny
-#' @import naniar
-#' @import ggplot2
-#' @import tidyquant
-#' @import sqldf
-#' @examples
-#' transposeWorkflowDataFrame( workflowDF, c("measure1", "measure2"),)
+#' @importFrom futile.logger flog.debug flog.info
+#' @importFrom stringr str_detect
+#' @importFrom lubridate is.POSIXct
+#' @importFrom reshape2 dcast
+#' @importFrom dplyr full_join case_when left_join mutate_all n n_distinct summarize 
+#' @importFrom stats update.formula
+#' @importFrom reshape2 melt
+#' 
+#' 
 transposeWorkflowDataFrame <- function (data, measureVars, dcastFormula){
   # converteren posix naar numeric
   for (i in names(data)){
@@ -37,7 +28,7 @@ transposeWorkflowDataFrame <- function (data, measureVars, dcastFormula){
   flog.debug(colnames(data))
   meltDF <- melt(data, id.vars = all.vars(dcastFormula), measure.vars = measureVars)
   flog.debug(colnames(meltDF))
-  dcastFormula <- update(dcastFormula, ~.+variable)
+  dcastFormula <- update.formula(dcastFormula, ~.+variable)
   tempDF <- dcast(meltDF, dcastFormula, value.var = "value")
   # converteren naar posix
   for (i in names(tempDF)){
@@ -50,3 +41,4 @@ transposeWorkflowDataFrame <- function (data, measureVars, dcastFormula){
   }
   tempDF
 }
+
