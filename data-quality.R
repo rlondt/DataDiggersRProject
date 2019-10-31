@@ -1,7 +1,7 @@
 source('./init.R')
 library(DataDiggersPackage)
 flog.threshold(DEBUG)
-startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE)
+startPreparation(workdir = "C:/Users/louis/OneDrive/studie/vakken/applied big data/datafiles", dataframesToGlobalEnvironment = TRUE)
 initializeDQScoringFramework()
 
 # Compleetheid
@@ -230,20 +230,24 @@ addScoreToDQFramework(CONSISTENTIE, waarde=4, weging=2)
 # ..
 # Validiteit (plausibiliteit/business rules)
 # 1. Is er daarbinnen nog verschil tussen werk en reistijd? Hoe gaan we om met overwerk?
-  urenPerDag <- prep.tijdschrijvenDF %>%
-    filter(Type=="Werk") %>%
-    select(MDWID, StartDate, EndDate) %>%
+  urenPerDagTotaal <- prep.tijdschrijvenDF %>%
+    select(MDWID, StartDate, EndDate, Type) %>%
     filter(as.Date(StartDate) == as.Date(EndDate)) %>%
   mutate(DuurTijdschrijvenInUren = round((EndDate - StartDate),-1)/3600) # round to nearest 10
-
-  aggUrenPerDag <- setNames(aggregate(urenPerDag[,c("DuurTijdschrijvenInUren")], by=list(urenPerDag$MDWID, as.Date(urenPerDag$StartDate)), "sum"), c("MDWID", "Datum", "Duur"))
+  
+  urenPerDagWerk <- urenPerDagTotaal %>%
+    filter(Type=="Werk")
+  
+  # aggregeer uren op MDW, startdatum, Type
+  aggUrenPerDagWerk <- setNames(aggregate(urenPerDagWerk[,c("DuurTijdschrijvenInUren")], by=list(urenPerDag$MDWID, as.Date(urenPerDag$StartDate), urenPerDag$Type), "sum"), c("MDWID", "Datum", "Type", "Duur"))
   
   # Spreiding tijdschrijf uren medewerkers
-   ggplot(data=aggUrenPerDag, aes(aggUrenPerDag$Duur)) + geom_histogram(binwidth=.5, boundary = 0, color = "black", fill = "lightblue") +
+   ggplot(data=aggUrenPerDagWerk, aes(aggUrenPerDagWerk$Duur)) + geom_histogram(binwidth=.5, boundary = 0, color = "black", fill = "lightblue") +
      scale_x_continuous(breaks=0:20) +
    xlab("Tijdschrijf uren medewerkers per dag")
   
   # filter overwerk (overwerk=urenPerDag>9)
+  # TODO: overwerk=overschreiding van roostertijd
   urenOverwerk <- aggUrenPerDag %>%
     filter(Duur > 9)
   
@@ -305,18 +309,17 @@ addScoreToDQFramework(VALIDITEIT, waarde=5, weging=1)
 # TODO: nog iets doen met doorlooptijd van order (op basis van workflowstappen) vs tijdschrijf tijd?
 
 
-# 7. Verdeling van de reistijd over de medewerkers
-tijdInUren <- prep.tijdschrijvenDF %>%
-  mutate(DuurTijdschrijvenInUren = as.numeric((EndDate - StartDate)/3600),unit="hours")
+# 7. Verdeling van de reis- en werktijd over de medewerkers
 
-meanDuurPerMedewerkerType <- aggregate(tijdInUren$DuurTijdschrijvenInUren, by=list(MDWID=tijdInUren$MDWID, Type=tijdInUren$Type), mean)
+# aggregeer uren op MDW, startdatum, Type
+aggUrenPerDagTotaal <- setNames(aggregate(urenPerDagTotaal[,c("DuurTijdschrijvenInUren")], by=list(urenPerDagTotaal$MDWID, as.Date(urenPerDagTotaal$StartDate), urenPerDagTotaal$Type), "sum"), c("MDWID", "Datum", "Type", "Duur"))
 
 # boxplot
-ggplot(data = meanDuurPerMedewerkerType, aes(x = Type, y=x)) +
+ggplot(data = aggUrenPerDagTotaal, aes(x = Type, y=Duur)) +
   geom_boxplot(fill = "blue", alpha = .2) +
-  scale_y_continuous(breaks=0:15) +
+  scale_y_continuous(breaks=0:25) +
   stat_summary(aes(group = Type), fun.y=mean, colour="darkred", geom="point") +
-  labs(title="Verdeling gemiddelde van tijdschrijf uren van medewerkers per Type tijd", y="Uren")
+  labs(title="Verdeling van tijdschrijf uren van medewerkers per Type tijd per dag", y="Uren")
 
 # check medewerker with mean 12 hours 'Reis' tijd
 checkMDW <- subset(prep.medewerkersDF , MDWID == 'c7990d76-898a-4811-9fca-faa32ffc8386') # Medewerker is 'Uit dienst'
@@ -325,17 +328,17 @@ checkOrder <- subset(prep.ordersDF , Ordernummer == 'B0050110') #Plaats=Utrecht
 
 # calculate mean per Type
 library(plyr)
-meanTypes <- ddply(meanDuurPerMedewerkerType, "Type", summarise, grp.mean=mean(x))
+meanTypes <- ddply(aggUrenPerDagTotaal, "Type", summarise, grp.mean=mean(Duur))
 
 # show histogram
-ggplot(meanDuurPerMedewerkerType, aes(x=x, color=Type, fill=Type)) +
-  geom_histogram(binwidth=.2, position="dodge") +
-  scale_x_continuous(breaks=0:15) +
+ggplot(aggUrenPerDagTotaal, aes(x=Duur, color=Type, fill=Type)) +
+  geom_histogram(binwidth=.5, position="dodge") +
+  scale_x_continuous(breaks=0:25) +
   geom_vline(data=meanTypes, aes(xintercept=grp.mean, color=Type),
              linetype="dashed")+
   scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
   scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
-  labs(title="Verdeling gemiddelde van tijdschrijf uren van medewerkers per Type tijd", x="Uren", y="Count")
+  labs(title="Verdeling van tijdschrijf uren van medewerkers per Type tijd per dag", x="Uren", y="Count")
 
 # 8. Aantal tijdschrijvers per order
 # 9. Verhouding aantal tijdschrijvers tov normtijd (outlier??)

@@ -2,7 +2,7 @@ source("./init.R")
 library(DataDiggersPackage)
 library(lubridate)
 flog.threshold(DEBUG)
-startPreparation(workdir = "D:/datafiles2", rebuild = FALSE,  dataframesToGlobalEnvironment = TRUE)
+startPreparation(workdir = "C:/Users/louis/OneDrive/studie/vakken/applied big data/datafiles", rebuild = FALSE,  dataframesToGlobalEnvironment = TRUE)
 
 
 ##
