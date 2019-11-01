@@ -2,7 +2,15 @@ source("./init.R")
 library(DataDiggersPackage)
 library(lubridate)
 flog.threshold(DEBUG)
-startPreparation(workdir = "C:/Users/louis/OneDrive/studie/vakken/applied big data/datafiles", rebuild = FALSE,  dataframesToGlobalEnvironment = TRUE)
+startPreparation(workdir = "D:/datafiles2", rebuild = FALSE,  dataframesToGlobalEnvironment = TRUE)
+
+
+#snel normtijd berekend orders per jaar
+prep.ordersDF %>%
+  group_by(format(CreationDate, "%Y")) %>%
+  summarise(aantal=n(), aantalDagen= n_distinct(format(CreationDate, "%Y%m%d")))
+
+summary(prep.medewerkersDF)
 
 
 ##
