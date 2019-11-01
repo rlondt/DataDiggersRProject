@@ -21,7 +21,7 @@ addScoreToDQFramework(COMPLEETHEID, weging=15	, waarde = 3);
 ## CONSISTENTIE
 #1. Komt elke ordernummer van het tijdschrijven voor in de workflowDF, en vice versa
 addScoreToDQFramework(CONSISTENTIE, weging=10	, waarde = 3);
-addScoreToDQFramework(COMPLEETHEID, waarde=1, weging=1)
+addScoreToDQFramework(COMPLEETHEID, waarde=1, weging=10)
 addScoreToDQFramework(CONSISTENTIE, waarde=4, weging=5)
 #2.1. order zonder workflow
 addScoreToDQFramework(CONSISTENTIE, weging=5	, waarde = 4);
