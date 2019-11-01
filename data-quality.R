@@ -78,7 +78,7 @@ addScoreToDQFramework(COMPLEETHEID, waarde=2, weging=4)
 # 5. Overcompleetheid, dataoverload
 # 6. Komen alle features voor die nodig zijn om een analyse te doen
 # ..
-# Consistentie
+## Consistentie
 # 1. Komt elke ordernummer van het tijdschrijven voor in de workflowDF, en vice versa
 
 OrdersZonderTijdschrijvenZonderWorkflowDF <- prep.ordersDF %>%
