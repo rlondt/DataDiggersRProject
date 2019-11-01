@@ -135,29 +135,34 @@ addScoreToDQFramework(CONSISTENTIE, waarde=4, weging=2)
 #    binnen de begintijd en eindtijd van het rooster
 dq.tijdschrijvenBuitenRooster <- join.tijdschrijvenDienstMedewerkersDF %>%
   filter(is.na(ERPID) == FALSE) %>%
-  #filter(Starttijd < StartDate  )%>%
-  filter(Eindtijd > EndDate)%>%
-  filter(Type == "Werk")%>%
-  mutate(periodeTeVroeg = case_when(Starttijd < StartDate~ Starttijd-StartDate)) %>%
-  mutate(periodeTelaat = case_when(Eindtijd > EndDate~ EndDate-Eindtijd)) %>%
+  filter( StartDate < Starttijd | EndDate> Eindtijd)%>%
+  #filter(Type == "Werk")%>%
+  mutate(periodeTeVroeg = case_when(Starttijd > StartDate~ StartDate-Starttijd)) %>%
+  mutate(periodeTelaat = case_when(Eindtijd < EndDate~ Eindtijd-EndDate)) %>%
   select(ERPID, periodeTeVroeg, Starttijd, StartDate, EndDate, Eindtijd, periodeTelaat)%>%
   arrange(StartDate)
 
-ggplot(dq.tijdschrijvenBuitenRooster, aes(x=StartDate))+ 
-  geom_histogram(bins=50)
+ggplot(dq.tijdschrijvenBuitenRooster, aes(x=Starttijd))+ 
+  geom_histogram()
+# voorral midden 2017 worden de roostertijden overschreden
 
 dq.tijdschrijvenBuitenRooster <- join.tijdschrijvenDienstMedewerkersDF %>%
   filter(is.na(ERPID) == FALSE) %>%
   #filter(Starttijd < StartDate  )%>%
-  filter(Eindtijd > EndDate)%>%
+  filter(Eindtijd < EndDate)%>%
   filter(Type == "Werk")%>%
   mutate(periodeTeVroeg = case_when(Starttijd < StartDate~ Starttijd-StartDate)) %>%
-  mutate(periodeTelaat = case_when(Eindtijd > EndDate~ Eindtijd- EndDate)) %>%
+  mutate(periodeTelaat = case_when(Eindtijd < EndDate~ EndDate- Eindtijd)) %>%
   select(ERPID, periodeTeVroeg, Starttijd, StartDate, EndDate, Eindtijd, periodeTelaat)%>%
   arrange(StartDate)
-ggplot(dq.tijdschrijvenBuitenRooster, aes(x=as.numeric(periodeTelaat)))+ 
-  geom_histogram(bins=500)
 
+ggplot(dq.tijdschrijvenBuitenRooster, aes(x=as.numeric(periodeTelaat, units="hours")))+ 
+  geom_histogram(bins=50)
+
+ggplot(prep.roosterdienstenDF, aes(x=Starttijd))+ 
+  geom_histogram()
+
+# roosterdiensten zijn niet gelijjk verdeeld 
 
 # 5. De relatie tussen rooster en medewerker en tijdschrijven en medewerker loopt "dubbel". Komen daar inconsistenties in voor
 t1DF <- prep.tijdschrijvenDF %>%
@@ -165,6 +170,7 @@ t1DF <- prep.tijdschrijvenDF %>%
 # 1391 veel maar niet alle roosterdiensten leeg.
 
 #==> ~1400 niet kunnen joinen..
+
 
 # 6. Datumvelden als datum te behandelen ⇒ OK
 # 7. Zijn de order oplopend
