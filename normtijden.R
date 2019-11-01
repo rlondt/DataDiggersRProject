@@ -159,27 +159,36 @@ norm.categoryDF <- left_join(summarized.OrderTijdschrijvenByOrderDF, prep.orders
   filter(is.na(Ordernummer)==FALSE)%>%
   filter(is.na(Categorie)==FALSE)%>%
   group_by(Ordernummer, Categorie) %>%
-  summarise(werktijd = sum(TotaleSchrijftijdWerk)/3600)
-  #filter(werktijd < 1000000) # filter outliers
+  summarise(werktijd = sum(TotaleSchrijftijdWerk)/3600)%>%
+  filter(werktijd < 150) # filter outliers
   
 # boxplot
 ggplot(data = norm.categoryDF, aes(x = Categorie, y=werktijd)) +
+  scale_y_continuous(limits = c(0, 150)) +
   geom_boxplot(fill = "blue", alpha = .2) +
   stat_summary(aes(group = Categorie), fun.y=mean, colour="darkred", geom="point") +
-  labs(title="Verdeling normtijd per Categorie", y="Uren")
+  labs(title="Verdeling werktijd per order categorie", y="Uren")
 
 # histogram
 ggplot(norm.categoryDF, aes(x=werktijd, color=Categorie, fill=Categorie)) +
-  geom_histogram(binwidth=200, position="dodge") +
-  scale_x_continuous(limits = c(0, 250000)) +
+  geom_histogram(binwidth=1, position="dodge") +
+  scale_x_continuous(limits = c(0, 200)) +
   scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
   scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
-  labs(title="Verdeling normtijd per Categorie", x="Uren", y="Count")
+  labs(title="Verdeling werktijd per order categorie", x="Werktijd", y="Count")
+
+
+# dataframe voor gemiddelden
+meanTypes <- norm.summary.perCategorieDF %>%
+  filter(Categorie != 'NA')
+
 
   # single chart with deviation chart 
 ggplot(norm.categoryDF, aes(x=werktijd, fill=Categorie))+ 
     geom_histogram(bins=50)+
     scale_x_continuous(limits = c(0, 250000/3600)) +
     facet_grid(. ~ Categorie)+
-    ggtitle("Verdeling normtijd per Categorie")
+    geom_vline(data=meanTypes, aes(xintercept=meanTypes$gemiddeldeWerktijdPerOrder, color=meanTypes$Categorie), show.legend = FALSE,linetype="dashed") +
+    xlab("Werktijd (uren)") +
+    ggtitle("Verdeling werktijd per order categorie")
   + theme(legend.position="none")

@@ -1,7 +1,7 @@
 # init
 source('./init.R')
 library(DataDiggersPackage)
-startPreparation(workdir = "D:/datafiles", dataframesToGlobalEnvironment = TRUE)
+startPreparation(workdir = "C:/Users/louis/OneDrive/studie/vakken/applied big data/datafiles", dataframesToGlobalEnvironment = TRUE)
 
 
 # visualisations
