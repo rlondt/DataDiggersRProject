@@ -135,36 +135,44 @@ addScoreToDQFramework(CONSISTENTIE, waarde=4, weging=2)
 #    binnen de begintijd en eindtijd van het rooster
 dq.tijdschrijvenBuitenRooster <- join.tijdschrijvenDienstMedewerkersDF %>%
   filter(is.na(ERPID) == FALSE) %>%
-  #filter(Starttijd < StartDate  )%>%
-  filter(Eindtijd > EndDate)%>%
-  filter(Type == "Werk")%>%
-  mutate(periodeTeVroeg = case_when(Starttijd < StartDate~ Starttijd-StartDate)) %>%
-  mutate(periodeTelaat = case_when(Eindtijd > EndDate~ EndDate-Eindtijd)) %>%
+  filter( StartDate < Starttijd | EndDate> Eindtijd)%>%
+  #filter(Type == "Werk")%>%
+  mutate(periodeTeVroeg = case_when(Starttijd > StartDate~ StartDate-Starttijd)) %>%
+  mutate(periodeTelaat = case_when(Eindtijd < EndDate~ Eindtijd-EndDate)) %>%
   select(ERPID, periodeTeVroeg, Starttijd, StartDate, EndDate, Eindtijd, periodeTelaat)%>%
   arrange(StartDate)
 
-ggplot(dq.tijdschrijvenBuitenRooster, aes(x=StartDate))+ 
-  geom_histogram(bins=50)
+ggplot(dq.tijdschrijvenBuitenRooster, aes(x=Starttijd))+ 
+  geom_histogram()
+# voorral midden 2017 worden de roostertijden overschreden
 
 dq.tijdschrijvenBuitenRooster <- join.tijdschrijvenDienstMedewerkersDF %>%
   filter(is.na(ERPID) == FALSE) %>%
   #filter(Starttijd < StartDate  )%>%
-  filter(Eindtijd > EndDate)%>%
+  filter(Eindtijd < EndDate)%>%
   filter(Type == "Werk")%>%
   mutate(periodeTeVroeg = case_when(Starttijd < StartDate~ Starttijd-StartDate)) %>%
-  mutate(periodeTelaat = case_when(Eindtijd > EndDate~ Eindtijd- EndDate)) %>%
+  mutate(periodeTelaat = case_when(Eindtijd < EndDate~ EndDate- Eindtijd)) %>%
   select(ERPID, periodeTeVroeg, Starttijd, StartDate, EndDate, Eindtijd, periodeTelaat)%>%
   arrange(StartDate)
-ggplot(dq.tijdschrijvenBuitenRooster, aes(x=as.numeric(periodeTelaat)))+ 
-  geom_histogram(bins=500)
 
+ggplot(dq.tijdschrijvenBuitenRooster, aes(x=as.numeric(periodeTelaat, units="hours")))+ 
+  geom_histogram(bins=50)
 
-# 5. De relatie tussen rooster en medewerker en tijdschrijven en medewerker loopt "dubbel". Komen daar inconsistenties in voor
+ggplot(prep.roosterdienstenDF, aes(x=Starttijd))+ 
+  geom_histogram()
+
+# roosterdiensten zijn niet gelijjk verdeeld 
+
+## 5. De relatie tussen rooster en medewerker en tijdschrijven en medewerker loopt "dubbel". Komen daar inconsistenties in voor
 t1DF <- prep.tijdschrijvenDF %>%
   anti_join(prep.roosterdienstenDF)
 # 1391 veel maar niet alle roosterdiensten leeg.
 
-#==> ~1400 niet kunnen joinen..
+ggplot(t1DF, aes(x=StartDate))+ 
+  geom_histogram()
+# over het algemeen redelijk verdeeld maar uitschieter aan het einde van de data
+
 
 # 6. Datumvelden als datum te behandelen ⇒ OK
 # 7. Zijn de order oplopend
@@ -401,8 +409,20 @@ ggplot(aggUrenPerDagTotaal, aes(x=Duur, color=Type, fill=Type)) +
   labs(title="Verdeling van tijdschrijf uren van medewerkers per Type tijd per dag", x="Uren", y="Count")
 
 # 8. Aantal tijdschrijvers per order
+
+
+
 # 9. Verhouding aantal tijdschrijvers tov normtijd (outlier??)
+
+
+
+
 # 10. Tijdschrijvers ten opzichte van het order-klantteam (klantenteams VWT NOC geen tijdschrijvers??)
+
+
+
+
+
 #
 #
 #
@@ -444,12 +464,4 @@ hist(summarized.WorkflowDF$Uitvoering_Starttijd
           )
 plotDQ()
 
-#
-# Analyses voor normtijden
-# 1. Reistijd tussen verschillende orders met zelfde plaats
-# 2. Gezien door de tijd
-# 3. Zelfde woonplaats medewerker en order plaats
-# 4. Meetbaar datakwaliteit
-# 5. Score opstellen a.d.v. bovenstaande bolletjes
-# 6. Verschil AP/EP (ander personeel/eigen personeel)
-#
+
