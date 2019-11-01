@@ -1,21 +1,21 @@
 source('./init.R')
 library(DataDiggersPackage)
 flog.threshold(DEBUG)
-startPreparation(workdir = "C:/Users/louis/OneDrive/studie/vakken/applied big data/datafiles", dataframesToGlobalEnvironment = TRUE, rebuild = TRUE)
+startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE, rebuild = FALSE)
 
 # Compleetheid
 # 1. Mogelijkheden voor kruistellingen
 # 2. Zijn alle onderdelen van VWT-data vertegenwoordigd
 # 3. Missing values analyse
 # 3.1 Medewerker
-aggr_plot <- aggr(prep.medewerkersDF,oma = c(8,5,5,3), col=c('lightblue','red'),
+aggr_plot <- aggr(prep.medewerkersDF,oma = c(8,5,5,3), col=c( "#E69F00", "#56B4E9"),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(prep.medewerkersDF), cex.axis=.8,
                   gap=2,
                   ylab=c("Missing values Medewerker","Combinatie"))
 
 # 3.2 Order
-aggr_plot <- aggr(prep.ordersDF,oma = c(8,5,5,3), col=c('lightblue','red'),
+aggr_plot <- aggr(prep.ordersDF,oma = c(8,5,5,3), col=c( "#E69F00", "#56B4E9"),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,combined = TRUE,
                   labels=names(prep.ordersDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
@@ -26,21 +26,21 @@ gg_miss_var(prep.ordersDF)
 
 
 # 3.3 roosterdiensten
-aggr_plot <- aggr(prep.roosterdienstenDF,oma = c(8,5,5,3), col=c('lightblue','red'),
+aggr_plot <- aggr(prep.roosterdienstenDF,oma = c(8,5,5,3), col=c( "#E69F00", "#56B4E9"),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(prep.roosterdienstenDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Roosterdiensten","Combinatie"))
 
 # 3.4 tijdschrijven
-aggr_plot <- aggr(prep.tijdschrijvenDF,oma = c(8,5,5,3), col=c('lightblue','red'),
+aggr_plot <- aggr(prep.tijdschrijvenDF,oma = c(8,5,5,3), col=c( "#E69F00", "#56B4E9"),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(prep.tijdschrijvenDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Tijdschrijven","Combinatie"))
 
 # 3.5 workflow
-aggr_plot <- aggr(prep.workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'),
+aggr_plot <- aggr(prep.workflowDF,oma = c(8,5,5,3), col=c( "#E69F00", "#56B4E9"),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(prep.workflowDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
@@ -133,34 +133,41 @@ addScoreToDQFramework(CONSISTENTIE, waarde=4, weging=2)
 
 # 4. Bevinden de begintijd en eindtijd van het tijdschrijven zich 
 #    binnen de begintijd en eindtijd van het rooster
-dq.tijdschrijvenBuitenRooster <- join.tijdschrijvenDienstMedewerkersDF %>%
+dq.tijdschrijvenVoorRoosterDF <- join.tijdschrijvenDienstMedewerkersDF %>%
   filter(is.na(ERPID) == FALSE) %>%
-  filter( StartDate < Starttijd | EndDate> Eindtijd)%>%
-  #filter(Type == "Werk")%>%
+  filter( StartDate < Starttijd)%>%
+  #filter( Type == "Werk")%>%
   mutate(periodeTeVroeg = case_when(Starttijd > StartDate~ StartDate-Starttijd)) %>%
-  mutate(periodeTelaat = case_when(Eindtijd < EndDate~ Eindtijd-EndDate)) %>%
-  select(ERPID, periodeTeVroeg, Starttijd, StartDate, EndDate, Eindtijd, periodeTelaat)%>%
+  select(ERPID, Type, periodeTeVroeg, Starttijd, StartDate, EndDate, Eindtijd)%>%
   arrange(StartDate)
 
-ggplot(dq.tijdschrijvenBuitenRooster, aes(x=Starttijd))+ 
-  geom_histogram()
+ggplot(dq.tijdschrijvenVoorRoosterDF, aes(x=Starttijd, fill=Type, color=Type))+ 
+  geom_histogram(position = "identity")+
+  scale_color_manual(values=c( "#E69F00", "#56B4E9"))+
+  scale_fill_manual(values=c( "#E69F00", "#56B4E9"))+
+  labs(title="Aantal tijdschrijven voor rooster")
+
 # voorral midden 2017 worden de roostertijden overschreden
 
-dq.tijdschrijvenBuitenRooster <- join.tijdschrijvenDienstMedewerkersDF %>%
+dq.tijdschrijvenNaRoosterDF <- join.tijdschrijvenDienstMedewerkersDF %>%
   filter(is.na(ERPID) == FALSE) %>%
-  #filter(Starttijd < StartDate  )%>%
   filter(Eindtijd < EndDate)%>%
-  filter(Type == "Werk")%>%
-  mutate(periodeTeVroeg = case_when(Starttijd < StartDate~ Starttijd-StartDate)) %>%
+  #filter(Type == "Werk")%>%
   mutate(periodeTelaat = case_when(Eindtijd < EndDate~ EndDate- Eindtijd)) %>%
-  select(ERPID, periodeTeVroeg, Starttijd, StartDate, EndDate, Eindtijd, periodeTelaat)%>%
+  select(ERPID, Type, Starttijd, StartDate, EndDate, Eindtijd, periodeTelaat)%>%
   arrange(StartDate)
 
-ggplot(dq.tijdschrijvenBuitenRooster, aes(x=as.numeric(periodeTelaat, units="hours")))+ 
-  geom_histogram(bins=50)
+ggplot(dq.tijdschrijvenNaRoosterDF, aes(x=Starttijd, fill=Type, color=Type))+ 
+  geom_histogram(position = "identity")+
+  scale_color_manual(values=c( "#E69F00", "#56B4E9"))+
+  scale_fill_manual(values=c( "#E69F00", "#56B4E9"))+
+  labs(title="Aantal tijdschrijven na rooster")
 
-ggplot(prep.roosterdienstenDF, aes(x=Starttijd))+ 
-  geom_histogram()
+ggplot(prep.roosterdienstenDF, aes(x=Starttijd, fill=Beoordeeld))+ 
+  geom_histogram(position = "identity")+
+  scale_color_manual(values=c( "#E69F00","#56B4E9"))+
+  scale_fill_manual(values=c( "#E69F00", "#56B4E9"))+
+  labs(title="Aantal roosterdiensten")
 
 # roosterdiensten zijn niet gelijjk verdeeld 
 
