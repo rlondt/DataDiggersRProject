@@ -1,7 +1,7 @@
 source('./init.R')
 library(DataDiggersPackage)
 flog.threshold(DEBUG)
-startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE, rebuild = TRUE)
+startPreparation(workdir = "C:/Users/louis/OneDrive/studie/vakken/applied big data/datafiles", dataframesToGlobalEnvironment = TRUE, rebuild = TRUE)
 
 # Compleetheid
 # 1. Mogelijkheden voor kruistellingen
@@ -298,21 +298,58 @@ t1DF <- prep.tijdschrijvenDF %>%
   #addScoreToDQFramework(COMPLEETHEID, waarde=2, weging=4) wat hier invullen?
   #Resultaat: er zijn 3107 vervallen orders waarin in totaal 9188 tijdschrijf records voor geregistreerd staan
 
-# 3. Anomaly detection/outlier verklaring..TODO Louis: bepalen welke attributen interessant zijn voor anomoly detection
-dfAnomalize <- summarized.OrderTijdschrijvenByOrderDF[,c("OverschreidingUitersteHersteltijd", "EindtijdTijdschrijven")]
-dfAnomalizeCompleteCases <- dfAnomalize[complete.cases(dfAnomalize), ] %>%
-  arrange(EindtijdTijdschrijven) %>%
-  mutate(OverschreidingUitersteHersteltijdInUren = OverschreidingUitersteHersteltijd/3600)
+# 3. Anomaly detection/outlier verklaring
+  #https://www.datacamp.com/community/tutorials/detect-anomalies-anomalize-r
+  anomalyDF <- left_join(summarized.OrderTijdschrijvenByOrderDF, prep.ordersDF, by=c("Ordernummer" = "Ordernummer"))%>%
+    arrange(StarttijdTijdschrijven) %>%
+    filter(is.na(Ordernummer)==FALSE)%>%
+    filter(is.na(Categorie)==FALSE)%>%
+    group_by(Ordernummer, Categorie, StarttijdTijdschrijven) %>%
+    summarise(werktijd = sum(TotaleSchrijftijdWerk)/3600)
+  
+  # sorteer op startdatum tijdschrijven
+  anomalyDF <- anomalyDF[order(anomalyDF$StarttijdTijdschrijven),]
+  
+  # prepareer anomaly data frames
+  anomalyNLSDF <- anomalyDF %>% filter(Categorie=="NLS")
+  anomalyNLSDF <- anomalyNLSDF[,c("StarttijdTijdschrijven", "werktijd")]
+  anomalySchadeDF <- anomalyDF %>% filter(Categorie=="Schade")
+  anomalySchadeDF <- anomalySchadeDF[,c("StarttijdTijdschrijven", "werktijd")]
+  anomalyStoringDF <- anomalyDF %>% filter(Categorie=="Storing")
+  anomalyStoringDF <- anomalyStoringDF[,c("StarttijdTijdschrijven", "werktijd")]
 
-# implement the “anomalize” (anomaly detection) workflow
-dfAnomalizeCompleteCases %>%
-  time_decompose(OverschreidingUitersteHersteltijdInUren, method = "stl", frequency = "auto", trend = "auto") %>%
-  anomalize(remainder, method = "iqr", alpha = 0.05, max_anoms = 0.2) %>%
+# anomalies werktijd NLS
+  anomalyNLSDF %>%
+  time_decompose(werktijd, method = "stl", frequency = "auto", trend = "auto") %>%
+  anomalize(remainder, method = "iqr", alpha = 0.05, max_anoms = 0.05) %>%
   time_recompose() %>%
-  # Plot Anomaly Decomposition
   plot_anomalies(time_recomposed = TRUE) +
-  ggtitle("Anomalies gedetecteerd in UitersteHersteltijd")
+  xlab("Starttijd tijdschrijven") +
+  ylab("Uren") +
+  ggtitle("Anomalies werktijd NLS")
 
+  # anomalies werktijd Schade
+  anomalySchadeDF %>%
+    time_decompose(werktijd, method = "stl", frequency = "auto", trend = "auto") %>%
+    anomalize(remainder, method = "iqr", alpha = 0.05, max_anoms = 0.05) %>%
+    time_recompose() %>%
+    plot_anomalies(time_recomposed = TRUE) +
+    xlab("Starttijd tijdschrijven") +
+    ylab("Uren") +
+    ggtitle("Anomalies werktijd Schade")
+
+  
+  # anomalies werktijd Storing
+  anomalyStoringDF %>%
+    time_decompose(werktijd, method = "stl", frequency = "auto", trend = "auto") %>%
+    anomalize(remainder, method = "iqr", alpha = 0.05, max_anoms = 0.02) %>%
+    time_recompose() %>%
+    plot_anomalies(time_recomposed = TRUE) +
+    xlab("Starttijd tijdschrijven") +
+    ylab("Uren") +
+    ggtitle("Anomalies werktijd Storing")
+  
+  
 # 4. Inventarisatie business rules
 # 5. Heeft elke order een plaats
 
