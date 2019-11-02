@@ -29,7 +29,8 @@ norm.summary.totaalDF <- summarized.OrderTijdschrijvenByOrderDF %>%
   mutate(spreidingWerktijdPerOrder = as.double(spreidingWerktijdPerOrder)/(60*60))
 
 dumpRDS(norm.summary.totaalDF, "norm_summary_totaalDF.rds")  
-
+norm.summary.totaalDF <- readRDSdd("norm_summary_totaalDF.rds")  
+norm.summary.totaalDF
 
 ##
 # per categorie
@@ -47,7 +48,8 @@ norm.summary.perCategorieDF <- left_join(summarized.OrderTijdschrijvenByOrderDF,
   mutate(gemiddeldeWerktijdPerOrder = as.double(gemiddeldeWerktijdPerOrder, units="hours"))%>%
   mutate(spreidingWerktijdPerOrder = as.double(spreidingWerktijdPerOrder)/(60*60))
 dumpRDS(norm.summary.perCategorieDF, "norm_summary_perCategorieDF.rds")  
-
+norm.summary.perCategorieDF <- readRDSdd( "norm_summary_perCategorieDF.rds")  
+norm.summary.perCategorieDF
 
 ##
 # per categorie per maand
@@ -67,10 +69,12 @@ norm.summary.perCategoriePerMaandDF <- left_join(summarized.OrderTijdschrijvenBy
   mutate(gemiddeldeWerktijdPerOrder = as.double(gemiddeldeWerktijdPerOrder, units="hours"))%>%
   mutate(spreidingWerktijdPerOrder = as.double(spreidingWerktijdPerOrder)/(60*60))
 dumpRDS(norm.summary.perCategoriePerMaandDF, "norm_summary_perCategoriePerMaandDF.rds")  
+norm.summary.perCategoriePerMaandDF <- readRDSdd( "norm_summary_perCategoriePerMaandDF.rds")  
+norm.summary.perCategoriePerMaandDF
 
 ##
 # per categorie per klantteam per maand
-norm.summary.perCategoriePerPerKlantteamMaandDF <- left_join(summarized.OrderTijdschrijvenByOrderDF, prep.ordersDF, by=c("Ordernummer" = "Ordernummer"))%>%
+norm.summary.perCategoriePerKlantteamPerMaandDF <- left_join(summarized.OrderTijdschrijvenByOrderDF, prep.ordersDF, by=c("Ordernummer" = "Ordernummer"))%>%
   filter(is.na(Ordernummer)==FALSE)%>%
   filter(is.na(Categorie)==FALSE)%>%
   mutate(maand = format(CreationDate, "%Y-%m")) %>%
@@ -85,7 +89,8 @@ norm.summary.perCategoriePerPerKlantteamMaandDF <- left_join(summarized.OrderTij
              , aantal = n())%>%
   mutate(gemiddeldeWerktijdPerOrder = as.double(gemiddeldeWerktijdPerOrder, units="hours"))%>%
   mutate(spreidingWerktijdPerOrder = as.double(spreidingWerktijdPerOrder)/(60*60))
-dumpRDS(norm.summary.perCategoriePerKlantteamPerMaandDF, "norm_summary_perCategoriePerKlantenteamPerMaandDF.rds")  
+dumpRDS(norm.summary.perCategoriePerKlantteamPerMaandDF, "norm_summary_perCategoriePerKlantteamPerMaandDF.rds")  
+norm.summary.perCategoriePerKlantteamPerMaandDF <- readRDSdd( "norm_summary_perCategoriePerKlantteamPerMaandDF.rds")  
 
 
 
@@ -119,7 +124,7 @@ theme_minimal()
 
 
 # Multiple plot per category
-ggplot(norm.summary.perCategoriePerPerKlantteamMaandDF%>% filter(str_count(maand,"2017")== 0), aes(x = maand, y = gemiddeldAantalMedewerkersPerOrder, fill = Klantteam)) +
+ggplot(norm.summary.perCategoriePerKlantteamPerMaandDF%>% filter(str_count(maand,"2017")== 0), aes(x = maand, y = gemiddeldAantalMedewerkersPerOrder, fill = Klantteam)) +
   geom_bar(stat="identity",position = position_dodge()) +
   scale_y_continuous(limits = c(0,4))+
   #scale_color_manual(values = c("#00AFBB", "#E7B800")) +
@@ -165,16 +170,16 @@ norm.categoryDF <- left_join(summarized.OrderTijdschrijvenByOrderDF, prep.orders
 # boxplot
 ggplot(data = norm.categoryDF, aes(x = Categorie, y=werktijd)) +
   scale_y_continuous(limits = c(0, 150)) +
-  geom_boxplot(fill = "blue", alpha = .2) +
-  stat_summary(aes(group = Categorie), fun.y=mean, colour="darkred", geom="point") +
+  geom_boxplot(fill = kleuren) +
+  stat_summary(aes(group = Categorie), fun.y=mean, colour=kleuren, geom="point") +
   labs(title="Verdeling werktijd per order categorie", y="Uren")
 
 # histogram
 ggplot(norm.categoryDF, aes(x=werktijd, color=Categorie, fill=Categorie)) +
   geom_histogram(binwidth=1, position="dodge") +
   scale_x_continuous(limits = c(0, 200)) +
-  scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
-  scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
+  scale_color_manual(values=kleuren)+
+  scale_fill_manual(values=kleuren)+
   labs(title="Verdeling werktijd per order categorie", x="Werktijd", y="Count")
 
 
@@ -192,3 +197,14 @@ ggplot(norm.categoryDF, aes(x=werktijd, fill=Categorie))+
     xlab("Werktijd (uren)") +
     ggtitle("Verdeling werktijd per order categorie")
   + theme(legend.position="none")
+
+
+summarized.OrderTijdschrijvenByOrderDF%>%
+  left_join(prep.ordersDF, by=c("Ordernummer" = "Ordernummer"))%>%
+  group_by(Categorie)%>%
+  summarize(s_werktijd = sum(TotaleSchrijftijdWerk)
+            , s_reistijd = sum(TotaleSchrijftijdReis)
+            , n_werktijd = sum(TotaleSchrijftijdWerk)/n()
+            , n_reistijd = sum(TotaleSchrijftijdReis)/n()
+            , p = sum(as.numeric(TotaleSchrijftijdReis))/sum(as.numeric(TotaleSchrijftijdWerk))
+            )

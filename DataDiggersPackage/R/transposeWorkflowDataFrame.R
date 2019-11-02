@@ -1,9 +1,9 @@
 #'  A Function to transpose a data based on some parameters
 #'
-#' This function blablablabla
-#' @param data the dataframe that has to be transposed
-#' @param measureVars a list of measured values
-#' @param dcastFormula the formula that is used to transpose via dcast
+#' Deze functie kantel het ingegeven dataframe en bewaard hierbij de ingegeven meetwaarden.
+#' @param data het dataframe dat bewerkt wordt
+#' @param measureVars lijst met variabelen die worden gemeten
+#' @param dcastFormula de formule die gebruikt wordt voor het transponeren van het dataframe
 #' @keywords melt dcast transposed
 #' @export
 #' @importFrom futile.logger flog.debug flog.info
@@ -33,6 +33,7 @@ transposeWorkflowDataFrame <- function (data, measureVars, dcastFormula){
   # converteren naar posix
   for (i in names(tempDF)){
     if(is.numeric(tempDF[,i])){
+      # van alle numerieke kolommen datums maken m.u.v. Normdoorlooptijd
       if(!str_detect(i, "NormDoorlooptijd")){
         flog.debug(i)
         tempDF[,i] = as.POSIXct(tempDF[,i], origin="1970-01-01")
