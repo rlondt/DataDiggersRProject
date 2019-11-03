@@ -92,6 +92,6 @@ addScoreToDQFramework(VALIDITEIT, weging=10	, waarde = 5);
 #1. Verdeling aantal orders per over de tijd uitgezet.(Heatmap timeline ) 
 addScoreToDQFramework(ACCURAATHEID, weging=5	, waarde = 4);
 #2. Spreiding / Standaarddeviatie (NEW 16-10-2019 JV) -> Gemiddelde afwijking tov normtijd
-addScoreToDQFramework(ACCURAATHEID, weging=10	, waarde = 5);
+#addScoreToDQFramework(ACCURAATHEID, weging=10	, waarde = 5);
 
 plotDQ()
