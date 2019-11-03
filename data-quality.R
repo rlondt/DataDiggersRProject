@@ -1,21 +1,23 @@
 source('./init.R')
 library(DataDiggersPackage)
 flog.threshold(DEBUG)
-startPreparation(workdir = "C:/Users/louis/OneDrive/studie/vakken/applied big data/datafiles", dataframesToGlobalEnvironment = TRUE, rebuild = TRUE)
+startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE, rebuild = FALSE)
+
+kleuren <- c("#ff6633", "#66ccff", "#ffcc33")
 
 # Compleetheid
 # 1. Mogelijkheden voor kruistellingen
 # 2. Zijn alle onderdelen van VWT-data vertegenwoordigd
 # 3. Missing values analyse
 # 3.1 Medewerker
-aggr_plot <- aggr(prep.medewerkersDF,oma = c(8,5,5,3), col=c("#66ccff", "#ff6633"),
+aggr_plot <- aggr(prep.medewerkersDF,oma = c(8,5,5,3), col=kleuren,
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(prep.medewerkersDF), cex.axis=.8,
                   gap=2,
                   ylab=c("Missing values Medewerker","Combinatie"))
 
 # 3.2 Order
-aggr_plot <- aggr(prep.ordersDF,oma = c(8,5,5,3), col=c("#66ccff", "#ff6633"),
+aggr_plot <- aggr(prep.ordersDF,oma = c(8,5,5,3), col=kleuren,
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,combined = TRUE,
                   labels=names(prep.ordersDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
@@ -26,21 +28,21 @@ gg_miss_var(prep.ordersDF)
 
 
 # 3.3 roosterdiensten
-aggr_plot <- aggr(prep.roosterdienstenDF,oma = c(8,5,5,3), col=c("#66ccff", "#ff6633"),
+aggr_plot <- aggr(prep.roosterdienstenDF,oma = c(8,5,5,3), col=kleuren,
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(prep.roosterdienstenDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Roosterdiensten","Combinatie"))
 
 # 3.4 tijdschrijven
-aggr_plot <- aggr(prep.tijdschrijvenDF,oma = c(8,5,5,3), col=c("#66ccff", "#ff6633"),
+aggr_plot <- aggr(prep.tijdschrijvenDF,oma = c(8,5,5,3), col=kleuren,
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(prep.tijdschrijvenDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Tijdschrijven","Combinatie"))
 
 # 3.5 workflow
-aggr_plot <- aggr(prep.workflowDF,oma = c(8,5,5,3), col=c("#66ccff", "#ff6633"),
+aggr_plot <- aggr(prep.workflowDF,oma = c(8,5,5,3), col=kleuren,
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(prep.workflowDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
@@ -71,7 +73,8 @@ ggplot(data=dataPie)+
   scale_fill_manual(values=c("#66ccff", "#ff6633")) + #colors for geom_histogram
   coord_polar("y", start=0)+
   theme_void()+
-  geom_text(aes(x=1, y = cumsum(per) - per/2, label=label))
+  geom_text(aes(x=1, y = cumsum(per) - per/2, label=label))+
+  scale_fill_manual(values=kleuren)
 
 addScoreToDQFramework(COMPLEETHEID, waarde=2, weging=4)
 # Resultaat: 444 medewerker zonder plaats, 324 met
@@ -80,7 +83,7 @@ addScoreToDQFramework(COMPLEETHEID, waarde=2, weging=4)
 # 5. Overcompleetheid, dataoverload
 # 6. Komen alle features voor die nodig zijn om een analyse te doen
 # ..
-# Consistentie
+## Consistentie
 # 1. Komt elke ordernummer van het tijdschrijven voor in de workflowDF, en vice versa
 
 OrdersZonderTijdschrijvenZonderWorkflowDF <- prep.ordersDF %>%
@@ -114,6 +117,20 @@ dumpRDS(TijdschrijvenZonderWorkflowDF, "dq_consistentie_1b.rds")
 addScoreToDQFramework(COMPLEETHEID, waarde=1, weging=1)
 addScoreToDQFramework(CONSISTENTIE, waarde=4, weging=5)
 
+tFactor <- as.factor(c("Orders (147441)", "Workflows (140349)", "Tijdschrijven (90663)"))
+
+circles <- data.frame(
+  names = factor(tFactor, levels = tFactor)
+)
+
+ggplot(circles, aes(x = 1, fill = names)) +
+  geom_bar(width = 1) +
+  coord_polar() +
+  xlab("") + ylab("") +
+  theme_void() +
+  theme(legend.title = element_blank()) +
+  guides(fill = guide_legend(reverse = FALSE))+
+  scale_fill_manual(values=kleuren)
 
 
 # 2. Alle relaties twee kanten op
@@ -133,46 +150,64 @@ dftijdschrijvenEindatumGroterDanBegindatum <- prep.tijdschrijvenDF %>%
 addScoreToDQFramework(CONSISTENTIE, waarde=4, weging=2)
 # resultaat: komt niet voor. Wel is het zo dat er 3 tijdschrijf records zijn waar de startdatum en eindddatum gelijk zijn.
 
-# 4. Bevinden de begintijd en eindtijd van het tijdschrijven zich 
+# 4. Bevinden de begintijd en eindtijd van het tijdschrijven zich
 #    binnen de begintijd en eindtijd van het rooster
-dq.tijdschrijvenBuitenRooster <- join.tijdschrijvenDienstMedewerkersDF %>%
+dq.tijdschrijvenVoorRoosterDF <- join.tijdschrijvenDienstMedewerkersDF %>%
   filter(is.na(ERPID) == FALSE) %>%
-  filter( StartDate < Starttijd | EndDate> Eindtijd)%>%
-  #filter(Type == "Werk")%>%
+  filter( StartDate < Starttijd)%>%
+  #filter( Type == "Werk")%>%
   mutate(periodeTeVroeg = case_when(Starttijd > StartDate~ StartDate-Starttijd)) %>%
-  mutate(periodeTelaat = case_when(Eindtijd < EndDate~ Eindtijd-EndDate)) %>%
-  select(ERPID, periodeTeVroeg, Starttijd, StartDate, EndDate, Eindtijd, periodeTelaat)%>%
+  select(ERPID, Type, periodeTeVroeg, Starttijd, StartDate, EndDate, Eindtijd)%>%
   arrange(StartDate)
 
-ggplot(dq.tijdschrijvenBuitenRooster, aes(x=Starttijd))+ 
-  geom_histogram()
+ggplot(dq.tijdschrijvenVoorRoosterDF, aes(x=Starttijd, fill=Type, color=Type))+
+  geom_histogram(position = "stack")+
+  scale_color_manual(values=kleuren)+
+  scale_fill_manual(values=kleuren)+
+  ylab("Aantal")+
+  labs(title="Aantal tijdschrijven voor starttijd rooster")
+
 # voorral midden 2017 worden de roostertijden overschreden
 
-dq.tijdschrijvenBuitenRooster <- join.tijdschrijvenDienstMedewerkersDF %>%
+dq.tijdschrijvenNaRoosterDF <- join.tijdschrijvenDienstMedewerkersDF %>%
   filter(is.na(ERPID) == FALSE) %>%
-  #filter(Starttijd < StartDate  )%>%
   filter(Eindtijd < EndDate)%>%
-  filter(Type == "Werk")%>%
-  mutate(periodeTeVroeg = case_when(Starttijd < StartDate~ Starttijd-StartDate)) %>%
   mutate(periodeTelaat = case_when(Eindtijd < EndDate~ EndDate- Eindtijd)) %>%
-  select(ERPID, periodeTeVroeg, Starttijd, StartDate, EndDate, Eindtijd, periodeTelaat)%>%
+  select(ERPID, Type, Starttijd, StartDate, EndDate, Eindtijd, periodeTelaat)%>%
   arrange(StartDate)
 
-ggplot(dq.tijdschrijvenBuitenRooster, aes(x=as.numeric(periodeTelaat, units="hours")))+ 
-  geom_histogram(bins=50)
+ggplot(dq.tijdschrijvenNaRoosterDF, aes(x=Starttijd, fill=Type, color=Type))+
+  geom_histogram(position = "stack")+
+  scale_color_manual(values=kleuren)+
+  scale_fill_manual(values=kleuren)+
+  ylab("Aantal")+
+  labs(title="Aantal tijdschrijven na eindtijd rooster")
 
-ggplot(prep.roosterdienstenDF, aes(x=Starttijd))+ 
-  geom_histogram()
 
-# roosterdiensten zijn niet gelijjk verdeeld 
+ggplot(prep.roosterdienstenDF, aes(x=Starttijd))+
+  geom_histogram( color = kleuren[1], fill=kleuren[1])+
+  scale_color_manual(values=kleuren)+
+  scale_fill_manual(values=kleuren)+
+  ylab("Aantal")+
+  labs(title="Aantal roosterdiensten per starttijd")
+
+ggplot(prep.tijdschrijvenDF, aes(x=StartDate))+
+  geom_histogram(color = kleuren[1], fill=kleuren[1])+
+  scale_color_manual(values=kleuren)+
+  scale_fill_manual(values=kleuren)+
+  ylab("Aantal")+
+  labs(title="Aantal Tijdschrijven per starttijd")
+
+
+# roosterdiensten zijn niet gelijjk verdeeld
 
 ## 5. De relatie tussen rooster en medewerker en tijdschrijven en medewerker loopt "dubbel". Komen daar inconsistenties in voor
 t1DF <- prep.tijdschrijvenDF %>%
   anti_join(prep.roosterdienstenDF)
 # 1391 veel maar niet alle roosterdiensten leeg.
 
-ggplot(t1DF, aes(x=StartDate))+ 
-  geom_histogram()
+ggplot(t1DF, aes(x=StartDate))+
+  geom_histogram(color = kleuren[1], fill=kleuren[1])
 # over het algemeen redelijk verdeeld maar uitschieter aan het einde van de data
 
 
@@ -254,7 +289,14 @@ ggplot(t1DF, aes(x=StartDate))+
 
 
   dumpRDS(overlappendeWorkflowstappenDF, "dq_unique_4a.rds")
-  dumpRDS(summarized.wfDubbelDF, "dq_unique_4b.rds")
+  summarized.wfDubbelDF <-readRDSdd( "dq_unique_4b.rds")
+
+  summarized.wfDubbelDF<- summarized.wfDubbelDF%>%
+    arrange(aantal*-1)
+  library(grid)
+  library(gridExtra)
+
+  grid.table(summarized.wfDubbelDF[1:10,])
 
   # 397654 voorkomens
 
@@ -266,8 +308,8 @@ ggplot(t1DF, aes(x=StartDate))+
   # join tijdschrijven en roosterdienst
   tijdRoosterDF <-  left_join(prep.tijdschrijvenDF, prep.roosterdienstenDF, by=c("DienstID" = "DienstID", "MDWID" = "MDWID")) %>%
   select(MDWID, StartDate, EndDate, Type)
-    
-    
+
+
   urenPerDagTotaal <- prep.tijdschrijvenDF %>%
     select(MDWID, StartDate, EndDate, Type) %>%
     filter(as.Date(StartDate) == as.Date(EndDate)) %>%
@@ -321,10 +363,10 @@ ggplot(t1DF, aes(x=StartDate))+
     filter(is.na(Categorie)==FALSE)%>%
     group_by(Ordernummer, Categorie, StarttijdTijdschrijven) %>%
     summarise(werktijd = sum(TotaleSchrijftijdWerk)/3600)
-  
+
   # sorteer op startdatum tijdschrijven
   anomalyDF <- anomalyDF[order(anomalyDF$StarttijdTijdschrijven),]
-  
+
   # prepareer anomaly data frames
   anomalyNLSDF <- anomalyDF %>% filter(Categorie=="NLS")
   anomalyNLSDF <- anomalyNLSDF[,c("StarttijdTijdschrijven", "werktijd")]
@@ -355,7 +397,7 @@ ggplot(t1DF, aes(x=StartDate))+
     ylab("Uren") +
     ggtitle("Anomalies werktijd Schade")
 
-  
+
   # anomalies werktijd Storing
   anomalyStoringDF %>%
     time_decompose(werktijd, method = "stl", frequency = "auto", trend = "auto") %>%
@@ -365,9 +407,9 @@ ggplot(t1DF, aes(x=StartDate))+
     xlab("Starttijd tijdschrijven") +
     ylab("Uren") +
     ggtitle("Anomalies werktijd Storing")
-  
+
   addScoreToDQFramework(VALIDITEIT, waarde=2, weging=3) # veel uitschieters die wrs niet valide zijn, met name bij storing
-  
+
 # 4. Inventarisatie business rules
 # 5. Heeft elke order een plaats
 
@@ -455,17 +497,17 @@ heatmapEindtijdDF <- summarized.WorkflowDF%>%
 dumpRDS(heatmapEindtijdDF, "dq_accuraatheid_1b.rds")
 
 #r2g <- c("#D61818", "#FFAE63", "#FFFFBD", "#B5E384")
-calendarHeat(tempDF$Uitvoering_Starttijd
-             , tempDF$aantal
+calendarHeat(heatmapStarttijdDF$Uitvoering_Starttijd
+             , heatmapStarttijdDF$aantal
              , ncolors = 99
-             , color = "w2b"
+             , color = "kleuren"
              , varname="Starttijd orders uitvoering")
 
 #r2g <- c("#D61818", "#FFAE63", "#FFFFBD", "#B5E384")
-calendarHeat(tempDF$Uitvoering_WerkelijkeEindtijd
-             , tempDF$aantal
+calendarHeat(heatmapEindtijdDF$Uitvoering_WerkelijkeEindtijd
+             , heatmapEindtijdDF$aantal
              , ncolors = 99
-             , color = "w2b"
+             , color = "kleuren"
              , varname="Werkelijke eindtijd uitvoering")
 
 hist(summarized.WorkflowDF$Uitvoering_Starttijd
@@ -473,5 +515,3 @@ hist(summarized.WorkflowDF$Uitvoering_Starttijd
 , "days"
           )
 plotDQ()
-
-

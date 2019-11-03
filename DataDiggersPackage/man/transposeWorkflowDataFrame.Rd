@@ -7,14 +7,14 @@
 transposeWorkflowDataFrame(data, measureVars, dcastFormula)
 }
 \arguments{
-\item{data}{the dataframe that has to be transposed}
+\item{data}{het dataframe dat bewerkt wordt}
 
-\item{measureVars}{a list of measured values}
+\item{measureVars}{lijst met variabelen die worden gemeten}
 
-\item{dcastFormula}{the formula that is used to transpose via dcast}
+\item{dcastFormula}{de formule die gebruikt wordt voor het transponeren van het dataframe}
 }
 \description{
-This function blablablabla
+Deze functie kantel het ingegeven dataframe en bewaard hierbij de ingegeven meetwaarden.
 }
 \keyword{dcast}
 \keyword{melt}
