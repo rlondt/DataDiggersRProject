@@ -4,6 +4,7 @@ flog.threshold(DEBUG)
 startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE, rebuild = FALSE)
 
 kleuren <- c("#ff6633", "#66ccff", "#ffcc33")
+kleuren2Items <- c("#ff6633", "#66ccff")
 
 # Compleetheid
 # 1. Mogelijkheden voor kruistellingen
@@ -47,8 +48,6 @@ aggr_plot <- aggr(prep.workflowDF,oma = c(8,5,5,3), col=kleuren,
                   labels=names(prep.workflowDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Workflow","Combinatie"))
-
-addScoreToDQFramework(COMPLEETHEID, waarde=2, weging=4)
 
 # 4. heeft medewerker altijd een woonplaats?
 # Score: 2 (met name door ontbreken van plaatsnaam bij medewerker) !!!Ook al geteld bij 3.
@@ -227,6 +226,7 @@ ggplot(t1DF, aes(x=StartDate))+
     filter(Type == "Werk")%>%
     select(MDWID, ERPID, StartDate, EndDate)
 
+
   t2DF <- sqldf("select *
                 from t1DF t1
                 ,    t1DF t2
@@ -306,30 +306,30 @@ ggplot(t1DF, aes(x=StartDate))+
 # Validiteit (plausibiliteit/business rules)
 # 1. Is er daarbinnen nog verschil tussen werk en reistijd? Hoe gaan we om met overwerk?
   # join tijdschrijven en roosterdienst
-  tijdRoosterDF <-  left_join(prep.tijdschrijvenDF, prep.roosterdienstenDF, by=c("DienstID" = "DienstID", "MDWID" = "MDWID")) %>%
-  select(MDWID, StartDate, EndDate, Type)
+  # tijdRoosterDF <-  left_join(prep.tijdschrijvenDF, prep.roosterdienstenDF, by=c("DienstID" = "DienstID", "MDWID" = "MDWID")) %>%
+  # select(MDWID, StartDate, EndDate, Type)
 
+  # urenPerDagTotaal <- prep.tijdschrijvenDF %>%
+  #   select(MDWID, StartDate, EndDate, Type, Approved) %>%
+  #   filter(Approved == "WAAR") %>%
+  #   filter(as.Date(StartDate) == as.Date(EndDate)) %>%
+  # mutate(DuurTijdschrijvenInUren = round((EndDate - StartDate),-1)/3600) # round to nearest 10
 
-  urenPerDagTotaal <- prep.tijdschrijvenDF %>%
-    select(MDWID, StartDate, EndDate, Type) %>%
-    filter(as.Date(StartDate) == as.Date(EndDate)) %>%
-  mutate(DuurTijdschrijvenInUren = round((EndDate - StartDate),-1)/3600) # round to nearest 10
-
-  urenPerDagWerk <- urenPerDagTotaal %>%
-    filter(Type=="Werk")
+  # urenPerDagWerk <- urenPerDagTotaal %>%
+  #   filter(Type=="Werk")
 
   # aggregeer uren op MDW, startdatum, Type
   aggUrenPerDagWerk <- setNames(aggregate(urenPerDagWerk[,c("DuurTijdschrijvenInUren")], by=list(urenPerDag$MDWID, as.Date(urenPerDag$StartDate), urenPerDag$Type), "sum"), c("MDWID", "Datum", "Type", "Duur"))
 
   # Spreiding tijdschrijf uren medewerkers
-   ggplot(data=aggUrenPerDagWerk, aes(aggUrenPerDagWerk$Duur)) + geom_histogram(binwidth=.5, boundary = 0, color = "black", fill = "lightblue") +
-     scale_x_continuous(breaks=0:20) +
-   xlab("Tijdschrijf uren medewerkers per dag")
+   # ggplot(data=aggUrenPerDagWerk, aes(aggUrenPerDagWerk$Duur)) + geom_histogram(binwidth=.5, boundary = 0, color = "black", fill = "lightblue") +
+   #   scale_x_continuous(breaks=0:20) +
+   # xlab("Tijdschrijf uren medewerkers per dag")
 
   # filter overwerk (overwerk=urenPerDag>9)
   # TODO: overwerk=overschreiding van roostertijd
-  urenOverwerk <- aggUrenPerDag %>%
-    filter(Duur > 9)
+  # urenOverwerk <- aggUrenPerDag %>%
+  #   filter(Duur > 9)
 
   # Spreiding overwerk uren medewerkers per dag
   ggplot(data=urenOverwerk, aes(urenOverwerk$Duur)) + geom_histogram(binwidth=.5, boundary = 0, color = "black", fill = "lightblue") +
@@ -359,6 +359,7 @@ ggplot(t1DF, aes(x=StartDate))+
   #https://www.datacamp.com/community/tutorials/detect-anomalies-anomalize-r
   anomalyDF <- left_join(summarized.OrderTijdschrijvenByOrderDF, prep.ordersDF, by=c("Ordernummer" = "Ordernummer"))%>%
     arrange(StarttijdTijdschrijven) %>%
+    filter(Approved == "WAAR")
     filter(is.na(Ordernummer)==FALSE)%>%
     filter(is.na(Categorie)==FALSE)%>%
     group_by(Ordernummer, Categorie, StarttijdTijdschrijven) %>%
@@ -431,19 +432,26 @@ addScoreToDQFramework(VALIDITEIT, waarde=5, weging=1)
 
 # 7. Verdeling van de reis- en werktijd over de medewerkers
 
+# geaccordeerde uren per dag per medewerker per type
+urenPerDagTotaal <- prep.tijdschrijvenDF %>%
+  select(MDWID, StartDate, EndDate, Type, Approved) %>%
+  filter(Approved == "WAAR") %>%
+  filter(as.Date(StartDate) == as.Date(EndDate)) %>%
+  mutate(DuurTijdschrijvenInUren = round((EndDate - StartDate),-1)/3600) # round to nearest 10
+
 # aggregeer uren op MDW, startdatum, Type
 aggUrenPerDagTotaal <- setNames(aggregate(urenPerDagTotaal[,c("DuurTijdschrijvenInUren")], by=list(urenPerDagTotaal$MDWID, as.Date(urenPerDagTotaal$StartDate), urenPerDagTotaal$Type), "sum"), c("MDWID", "Datum", "Type", "Duur"))
 
 # boxplot
 ggplot(data = aggUrenPerDagTotaal, aes(x = Type, y=Duur)) +
-  geom_boxplot(fill = "blue", alpha = .2) +
+  geom_boxplot(fill = kleuren2Items) +
   scale_y_continuous(breaks=0:25) +
-  stat_summary(aes(group = Type), fun.y=mean, colour="darkred", geom="point") +
+  stat_summary(aes(group = Type), fun.y=mean, colour=kleuren2Items, geom="point") +
   labs(title="Verdeling van tijdschrijf uren van medewerkers per Type tijd per dag", y="Uren")
 
-# check medewerker with mean 12 hours 'Reis' tijd
-checkMDW <- subset(prep.medewerkersDF , MDWID == 'c7990d76-898a-4811-9fca-faa32ffc8386') # Medewerker is 'Uit dienst'
-checkTijdMDW <- subset(prep.tijdschrijvenDF , MDWID == 'c7990d76-898a-4811-9fca-faa32ffc8386' & Type =="Reis")
+# check medewerker with mean 15 hours 'Reis' tijd
+checkMDW <- subset(prep.medewerkersDF , MDWID == '87b43ab6-2322-4f21-8ff1-ac74b3dc28de') 
+checkTijdMDW <- subset(prep.tijdschrijvenDF , MDWID == '87b43ab6-2322-4f21-8ff1-ac74b3dc28de' & Type =="Reis")
 checkOrder <- subset(prep.ordersDF , Ordernummer == 'B0050110') #Plaats=Utrecht
 
 # calculate mean per Type
