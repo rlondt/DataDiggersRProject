@@ -169,7 +169,7 @@ norm.categoryDF <- left_join(summarized.OrderTijdschrijvenByOrderDF, prep.orders
 
 # boxplot
 ggplot(data = norm.categoryDF, aes(x = Categorie, y=werktijd)) +
-  scale_y_continuous(limits = c(0, 150)) +
+  scale_y_continuous(limits = c(0, 500)) +
   geom_boxplot(fill = kleuren) +
   stat_summary(aes(group = Categorie), fun.y=mean, colour=kleuren, geom="point") +
   labs(title="Verdeling werktijd per order categorie", y="Uren")
