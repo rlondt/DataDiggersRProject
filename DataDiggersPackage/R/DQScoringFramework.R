@@ -80,7 +80,7 @@ plotDQ <- function(){
                   , '5' = "Accuraatheid"))
   futile.logger::flog.debug(plotDF)
   plotDF <- plotDF %>% mutate(group=ifelse(percentage <0.25, "red",
-               ifelse(percentage>=0.25 & percentage<0.7, "orange","green")),
+               ifelse(percentage>=0.25 & percentage<0.8, "orange","green")),
               label=paste0(percentage*100, "%"),
                       title=categorie)
 
