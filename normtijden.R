@@ -172,9 +172,9 @@ ggplot(data = norm.categoryDF, aes(x = Categorie, y=werktijd)) +
 # histogram
 ggplot(norm.categoryDF, aes(x=werktijd, color=Categorie, fill=Categorie)) +
   geom_histogram(binwidth=1, position="dodge") +
-  scale_x_continuous(limits = c(0, 200)) +
-  scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
-  scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
+  scale_x_continuous(breaks = seq(0, 80, 10), limits = c(0, 250000/3600)) +
+  scale_color_manual(values=c("#ff6633", "#66ccff", "#ffcc33")) + #colors for geom_vline
+  scale_fill_manual(values=c("#ff6633", "#66ccff", "#ffcc33")) + #colors for geom_histogram
   labs(title="Verdeling werktijd per order categorie", x="Werktijd", y="Count")
 
 
@@ -182,13 +182,14 @@ ggplot(norm.categoryDF, aes(x=werktijd, color=Categorie, fill=Categorie)) +
 meanTypes <- norm.summary.perCategorieDF %>%
   filter(Categorie != 'NA')
 
-
   # single chart with deviation chart 
-ggplot(norm.categoryDF, aes(x=werktijd, fill=Categorie))+ 
-    geom_histogram(bins=50)+
-    scale_x_continuous(limits = c(0, 250000/3600)) +
-    facet_grid(. ~ Categorie)+
+ggplot(norm.categoryDF, aes(x=werktijd, fill=Categorie)) + 
+    geom_histogram(bins=50) +
+    scale_x_continuous(breaks = seq(0, 80, 10), limits = c(0, 250000/3600)) +
+    facet_grid(. ~ Categorie) +
+    scale_color_manual(values=c("#ff6633", "#66ccff", "#ffcc33")) + #colors for geom_vline
+    scale_fill_manual(values=c("#ff6633", "#66ccff", "#ffcc33")) + #colors for geom_histogram
     geom_vline(data=meanTypes, aes(xintercept=meanTypes$gemiddeldeWerktijdPerOrder, color=meanTypes$Categorie), show.legend = FALSE,linetype="dashed") +
     xlab("Werktijd (uren)") +
-    ggtitle("Verdeling werktijd per order categorie")
-  + theme(legend.position="none")
+    ggtitle("Verdeling werktijd per order categorie") +
+    theme(legend.position="none")

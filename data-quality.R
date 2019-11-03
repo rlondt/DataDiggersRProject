@@ -8,14 +8,14 @@ startPreparation(workdir = "C:/Users/louis/OneDrive/studie/vakken/applied big da
 # 2. Zijn alle onderdelen van VWT-data vertegenwoordigd
 # 3. Missing values analyse
 # 3.1 Medewerker
-aggr_plot <- aggr(prep.medewerkersDF,oma = c(8,5,5,3), col=c('lightblue','red'),
+aggr_plot <- aggr(prep.medewerkersDF,oma = c(8,5,5,3), col=c("#66ccff", "#ff6633"),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(prep.medewerkersDF), cex.axis=.8,
                   gap=2,
                   ylab=c("Missing values Medewerker","Combinatie"))
 
 # 3.2 Order
-aggr_plot <- aggr(prep.ordersDF,oma = c(8,5,5,3), col=c('lightblue','red'),
+aggr_plot <- aggr(prep.ordersDF,oma = c(8,5,5,3), col=c("#66ccff", "#ff6633"),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,combined = TRUE,
                   labels=names(prep.ordersDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
@@ -26,21 +26,21 @@ gg_miss_var(prep.ordersDF)
 
 
 # 3.3 roosterdiensten
-aggr_plot <- aggr(prep.roosterdienstenDF,oma = c(8,5,5,3), col=c('lightblue','red'),
+aggr_plot <- aggr(prep.roosterdienstenDF,oma = c(8,5,5,3), col=c("#66ccff", "#ff6633"),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(prep.roosterdienstenDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Roosterdiensten","Combinatie"))
 
 # 3.4 tijdschrijven
-aggr_plot <- aggr(prep.tijdschrijvenDF,oma = c(8,5,5,3), col=c('lightblue','red'),
+aggr_plot <- aggr(prep.tijdschrijvenDF,oma = c(8,5,5,3), col=c("#66ccff", "#ff6633"),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(prep.tijdschrijvenDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
                   ylab=c("Missing values Tijdschrijven","Combinatie"))
 
 # 3.5 workflow
-aggr_plot <- aggr(prep.workflowDF,oma = c(8,5,5,3), col=c('lightblue','red'),
+aggr_plot <- aggr(prep.workflowDF,oma = c(8,5,5,3), col=c("#66ccff", "#ff6633"),
                   numbers=TRUE, sortVars=TRUE, prop=FALSE,
                   labels=names(prep.workflowDF), cex.axis=.8,
                   gap=2, cex.numbers=.5,
@@ -67,6 +67,8 @@ dataPie$label <- scales::percent(dataPie$per)
 ggplot(data=dataPie)+
   geom_bar(aes(x="", y=per, fill=PlaatsEmpty), stat="identity", width = 1)+
   labs(title="Plaats Medewerker leeg vs gevuld", fill="Plaats leeg") +
+  scale_color_manual(values=c("#66ccff","#ff6633")) + #colors for geom_vline
+  scale_fill_manual(values=c("#66ccff", "#ff6633")) + #colors for geom_histogram
   coord_polar("y", start=0)+
   theme_void()+
   geom_text(aes(x=1, y = cumsum(per) - per/2, label=label))
@@ -261,6 +263,11 @@ ggplot(t1DF, aes(x=StartDate))+
 # ..
 # Validiteit (plausibiliteit/business rules)
 # 1. Is er daarbinnen nog verschil tussen werk en reistijd? Hoe gaan we om met overwerk?
+  # join tijdschrijven en roosterdienst
+  tijdRoosterDF <-  left_join(prep.tijdschrijvenDF, prep.roosterdienstenDF, by=c("DienstID" = "DienstID", "MDWID" = "MDWID")) %>%
+  select(MDWID, StartDate, EndDate, Type)
+    
+    
   urenPerDagTotaal <- prep.tijdschrijvenDF %>%
     select(MDWID, StartDate, EndDate, Type) %>%
     filter(as.Date(StartDate) == as.Date(EndDate)) %>%
@@ -332,9 +339,11 @@ ggplot(t1DF, aes(x=StartDate))+
   anomalize(remainder, method = "iqr", alpha = 0.05, max_anoms = 0.05) %>%
   time_recompose() %>%
   plot_anomalies(time_recomposed = TRUE) +
+    #scale_color_manual(values=c("#66ccff", "#ff6633")) + #colors for geom_vline
+    #scale_fill_manual(values=c("#ff6633", "#66ccff", "#ffcc33")) + #colors for geom_histogram
   xlab("Starttijd tijdschrijven") +
   ylab("Uren") +
-  ggtitle("Anomalies werktijd NLS")
+  ggtitle("Anomalies werktijd NLS ")
 
   # anomalies werktijd Schade
   anomalySchadeDF %>%
@@ -357,6 +366,7 @@ ggplot(t1DF, aes(x=StartDate))+
     ylab("Uren") +
     ggtitle("Anomalies werktijd Storing")
   
+  addScoreToDQFramework(VALIDITEIT, waarde=2, weging=3) # veel uitschieters die wrs niet valide zijn, met name bij storing
   
 # 4. Inventarisatie business rules
 # 5. Heeft elke order een plaats
@@ -404,8 +414,8 @@ ggplot(aggUrenPerDagTotaal, aes(x=Duur, color=Type, fill=Type)) +
   scale_x_continuous(breaks=0:25) +
   geom_vline(data=meanTypes, aes(xintercept=grp.mean, color=Type),
              linetype="dashed")+
-  scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
-  scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
+  scale_color_manual(values=c("#ff6633", "#66ccff", "#ffcc33")) + #colors for geom_vline
+  scale_fill_manual(values=c("#ff6633", "#66ccff", "#ffcc33")) + #colors for geom_histogram
   labs(title="Verdeling van tijdschrijf uren van medewerkers per Type tijd per dag", x="Uren", y="Count")
 
 # 8. Aantal tijdschrijvers per order
