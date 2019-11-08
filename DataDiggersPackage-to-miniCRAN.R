@@ -1,31 +1,31 @@
 ##
-# Executing this file will update the local cran repository with 
-# our own DataDigersPackage
-# be sure to upgrade the version number 
+# Met dit script wordt de DataDiggersPackage opnieuw gebouwd en in de locale repo verwerkt
+# Zorg voor een nieuw versienummer!!
+
 source("./init.R")
-install.packages("miniCRAN")
-install.packages("roxygen2", repos = 'file:///D:/minicran' )
-
-
-library(roxygen2)
-library(devtools)
-library(miniCRAN)
-
 
 org_repo <- c(CRAN = "http://cran.us.r-project.org")
 pkgTypes <- c("source", "win.binary")
 pth <- "D://miniCRAN"
 
+# verwijderen package uit het environment/sessie
 detach(package:DataDiggersPackage, unload=TRUE)
 remove.packages("DataDiggersPackage")
 
-# delete package in minicran
+# verwijder package in minicran
 pkgFile <- dir(path = paste(pth,"/src/contrib/", sep = ""), pattern = "DataDiggers*")
 file.remove(pkgFile)
 
+# compileren en bouwen package
 document("DataDiggersPackage")
 build("DataDiggersPackage")
+
+# toevoegen package aan minicran
 addLocalPackage(c("DataDiggersPackage"), ".", "D:/miniCRAN", build = FALSE)
+
+# verwijderen package uit sessie
 detach(package:DataDiggersPackage, unload=TRUE)
+
+# installeren package vanuit cran
 install.packages("DataDiggersPackage", repos = 'file:///D:/minicran' )
 

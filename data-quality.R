@@ -1,8 +1,12 @@
 source('./init.R')
 library(DataDiggersPackage)
+
+# zet logging op debug
 flog.threshold(DEBUG)
+
 startPreparation(workdir = "D:/datafiles2", dataframesToGlobalEnvironment = TRUE, rebuild = FALSE)
 
+# gebruik uniforme kleuren
 kleuren <- c("#ff6633", "#66ccff", "#ffcc33")
 kleuren2Items <- c("#ff6633", "#66ccff")
 
@@ -52,11 +56,11 @@ aggr_plot <- aggr(prep.workflowDF,oma = c(8,5,5,3), col=kleuren,
 # 4. heeft medewerker altijd een woonplaats?
 # Score: 2 (met name door ontbreken van plaatsnaam bij medewerker) !!!Ook al geteld bij 3.
 # add field for distincting 'plaats' filled or empty
-MDWPie <- prep.medewerkersDF %>%
+medewerkersPieDF <- prep.medewerkersDF %>%
   mutate(PlaatsEmpty = ifelse(is.na(MDWPlaats), TRUE, FALSE))
 
 # create dataframe for pie chart
-dataPie <- MDWPie %>%
+dataPie <- medewerkersPieDF %>%
   group_by(PlaatsEmpty) %>%
   count() %>%
   ungroup() %>%
@@ -503,22 +507,17 @@ heatmapEindtijdDF <- summarized.WorkflowDF%>%
   summarise(aantal = n())
 dumpRDS(heatmapEindtijdDF, "dq_accuraatheid_1b.rds")
 
-#r2g <- c("#D61818", "#FFAE63", "#FFFFBD", "#B5E384")
 calendarHeat(heatmapStarttijdDF$Uitvoering_Starttijd
              , heatmapStarttijdDF$aantal
              , ncolors = 99
              , color = "kleuren"
              , varname="Starttijd orders uitvoering")
 
-#r2g <- c("#D61818", "#FFAE63", "#FFFFBD", "#B5E384")
 calendarHeat(heatmapEindtijdDF$Uitvoering_WerkelijkeEindtijd
              , heatmapEindtijdDF$aantal
              , ncolors = 99
              , color = "kleuren"
              , varname="Werkelijke eindtijd uitvoering")
 
-hist(summarized.WorkflowDF$Uitvoering_Starttijd
-#          , tempDF$aantal
-, "days"
-          )
+# uitvoer dashboard
 plotDQ()

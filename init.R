@@ -1,5 +1,50 @@
 ## 
 # setup of dataframes
+#flog.threshold(DEBUG)
+
+packages <- c("DataDiggersPackage"
+              ,"tidyverse"
+              ,"naniar"
+              ,"dplyr"
+              ,"caret"
+              ,"doSNOW"
+              ,"sf"
+              ,"futile.logger"
+              ,"lubridate"
+              ,"openxlsx"
+              #              ,"RJDBC"
+              ,"anomalize"
+              ,"VIM"
+              , "reshape2"
+              ,"shiny"
+              ,"naniar"
+              , "ggplot2"
+              , "tidyquant"
+              , "sqldf"
+              , "devtools"
+              , "roxygen2"
+              , "miniCRAN"
+)
+
+# Installeer packages
+for (p in packages) {
+  if (p %in% rownames(installed.packages()) == FALSE) {
+    install.packages(p, dependencies = TRUE, repos = 'file:///D:/minicran', )
+  }
+}
+
+# Laad the packages
+for (p in packages){
+  suppressPackageStartupMessages(
+    library(p, quietly = TRUE, character.only = TRUE )
+  )
+}
+
+# laad heatmap
+if (exists("calendarHeat")){
+  source("https://raw.githubusercontent.com/iascchen/VisHealth/master/R/calendarHeat.R")
+}
+
 
 # install.packages("broom", dependencies = TRUE, repos = 'file:///D:/miniCRAN' )
 # if ("devtools" %in% rownames(installed.packages()) == FALSE) {
@@ -39,49 +84,9 @@ library(DataDiggersPackage)
 #     
 #     setwd('D:/datafiles')
 #     
-#     #flog.threshold(DEBUG)
-#     
-#     packages <- c("tidyverse"
-#                   ,"naniar"
-#                   ,"dplyr"
-#                   ,"caret"
-#                   ,"doSNOW"
-#                   ,"sf"
-#                   ,"futile.logger"
-#                   ,"lubridate"
-#                   ,"openxlsx"
-#                   #              ,"RJDBC"
-#                   ,"anomalize"
-#                   ,"VIM"
-#                   , "reshape2"
-#                   ,"shiny"
-#                   ,"naniar"
-#                   , "ggplot2"
-#                   , "tidyquant"
-#                   , "sqldf"
-#                   , "devtools"
-#                   , "roxygen2"
-#                   , "crul"
-#     )
-#     
-#     ## Installeer packages
-#     for (p in packages) {
-#       if (p %in% rownames(installed.packages()) == FALSE) {
-#         install.packages(p, dependencies = TRUE, repos = 'file:///D:/minicran', )
-#       }
-#     }
 #     
 #   
 #     
-#     ## Laad the packages
-#     for (p in packages){
-#       suppressPackageStartupMessages(
-#         library(p, quietly = TRUE, character.only = TRUE ) 
-#       )
-#     }
-#     if (exists("calendarHeat")){
-#       source("https://raw.githubusercontent.com/iascchen/VisHealth/master/R/calendarHeat.R")
-#     }
 #     
 #     # Gebruik meerdere CPU's
 #     cl <- makeCluster(4, type = "SOCK")
