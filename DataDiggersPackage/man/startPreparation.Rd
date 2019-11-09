@@ -2,20 +2,22 @@
 % Please edit documentation in R/data-preparation.R
 \name{startPreparation}
 \alias{startPreparation}
-\title{A Function to initialize dataframes to the datadiggers project}
+\title{Een functie die de ruwe bestanden verwerkt tot basis dataframes}
 \usage{
 startPreparation(workdir, rebuild = FALSE,
   dataframesToGlobalEnvironment = FALSE)
 }
 \arguments{
-\item{workdir}{directory where the sourcefiles are located}
+\item{workdir}{Directory waar de data-bestanden zich bevinden}
 
-\item{rebuild}{indication of dataframes have to be rebuild when not available}
+\item{rebuild}{Indicatie of alles opnieuw gebouwd dient te worden}
 
-\item{dataframesToGlobalEnvironment}{infication of dataframes to global enironment}
+\item{dataframesToGlobalEnvironment}{indicatie of de dataframes in het global environment beschikbaar gemaakt moeten worden}
 }
 \description{
-This function
+Deze functie maakt van de ruwe bestanden dataframes.
+Indien mogelijk wordt hier gebruik gemaakt van reeds bestaande dumps
+Indien aangegeven worden de bestaande dumps juist niet gebruikt maar alles opnieuw bepaald.
 }
 \keyword{eda}
 \keyword{import}

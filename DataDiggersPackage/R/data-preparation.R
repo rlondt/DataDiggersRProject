@@ -1,10 +1,12 @@
-#'  A Function to initialize dataframes to the datadiggers project
+#'  Een functie die de ruwe bestanden verwerkt tot basis dataframes
 #'
-#' This function 
-#' @param workdir directory where the sourcefiles are located
-#' @param rebuild indication of dataframes have to be rebuild when not available
-#' @param dataframesToGlobalEnvironment infication of dataframes to global enironment
-#' @keywords import prepare eda
+#' Deze functie maakt van de ruwe bestanden dataframes.
+#' Indien mogelijk wordt hier gebruik gemaakt van reeds bestaande dumps
+#' Indien aangegeven worden de bestaande dumps juist niet gebruikt maar alles opnieuw bepaald.
+#' @param workdir Directory waar de data-bestanden zich bevinden
+#' @param rebuild Indicatie of alles opnieuw gebouwd dient te worden
+#' @param dataframesToGlobalEnvironment indicatie of de dataframes in het global environment beschikbaar gemaakt moeten worden
+#' @keywords import prepare eda 
 #' @import sqldf
 #' @import tidyverse
 #' @importFrom futile.logger flog.debug
@@ -16,6 +18,9 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
   stopifnot(is.logical(dataframesToGlobalEnvironment))
   
   flog.info(msg = "Inlezen bronbestanden")
+  ##
+  # medewerkers
+  flog.debug(msg = "medewerkers")
   if(!file.exists(getLocationNaam("prep_medewerkers.rds", FALSE))|rebuild){
     
     flog.debug(msg = ".Lees medewerkers.csv")
@@ -41,8 +46,12 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     org.medewerkersDF <- readRDSdd( "org_medewerkers.rds")
     prep.medewerkersDF <- readRDSdd( "prep_medewerkers.rds")
   }
+  
+  ##
+  # orders
+  flog.debug(msg = "orders")
   if(!file.exists(getLocationNaam("prep_orders.rds", FALSE))|rebuild){
-    flog.debug(msg = "Build medewerkers")
+    flog.debug(msg = "Build orders")
     org.ordersDF      <- readCSV("Orders.csv")
     
     # eerste bewerking
@@ -85,6 +94,9 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     prep.ordersDF <- readRDSdd( "prep_orders.rds")
   }  
   
+  ##
+  # Roosterdiensten
+  flog.debug(msg = "roosterdiensten")
   if(!file.exists(getLocationNaam("prep_roosterdiensten.rds", FALSE))|rebuild){
     flog.debug(msg = ".Lees Roosterdiensten.csv")
     org.roosterdienstenDF <- readCSV("Roosterdiensten.csv")
@@ -113,6 +125,10 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     prep.roosterdienstenDF <- readRDSdd( "prep_roosterdiensten.rds")
   }
   
+  
+  ##
+  # tijdschrijven
+  flog.debug(msg = "tijdschrijven")
   if(!file.exists(getLocationNaam("prep_tijdschrijven.rds", FALSE))|rebuild){
     flog.debug(msg = ".Lees Tijdschrijven.csv")
     org.tijdschrijvenDF <- readCSV("Tijdschrijven.csv") 
@@ -144,6 +160,10 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     prep.tijdschrijvenDF <- readRDSdd( "prep_tijdschrijven.rds")
   }  
   
+  
+  ##
+  # workflow
+  flog.debug(msg = "workflow")
   if(!file.exists(getLocationNaam("prep_workflow.rds", FALSE))|rebuild){
     flog.debug(msg = ".Lees workflow 1+2.csv")
     org.workflowDF <- rbind(readCSV("Workflow 1.csv"),readCSV("Workflow 2.csv"))
@@ -173,6 +193,10 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
   }  
   
   ##
+  # Start joins
+  flog.info(msg = "start joins")
+  
+  ##
   # Backoffice data = workflow 
   # workflow actifiteiten met orders
   if(!file.exists(getLocationNaam("join_ordersWorkflow.rds", FALSE))|rebuild){
@@ -188,7 +212,6 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
   # joins operations = tijdschrijven
   # Diensten met medewerkers
   flog.info(msg = "Combineren dienst, medewerkers en tijdschrijven")
-  
   if (!file.exists(getLocationNaam("join_ordersTijdschrijven.rds", FALSE))
       |!file.exists(getLocationNaam("join_dienstMedewerkers.rds", FALSE))
       |!file.exists(getLocationNaam("join_tijdschrijvenDienstMedewerkers.rds", FALSE))
@@ -353,9 +376,9 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
                                       , "NormDoorlooptijd"
                                       , "GeplandeEindtijd"
                                       , "WerkelijkeEindtijd"
-      )
-      ,  Ordernummer ~ Taakomschrijving
-      )
+                                    )
+                                ,  Ordernummer ~ Taakomschrijving
+                                )
     flog.debug("opslaan summarizedWorkflowDF")
     dumpRDS(summarized.WorkflowDF, "summarized_Workflow.rds")
   } else {
@@ -374,6 +397,10 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     flog.debug("lees summarizedWorkflowDF")
     summarized.WorflowTijdschrijvenDF <- readRDSdd("summarized_WorflowTijdschrijven.rds")
   }
+  
+  ##
+  # link naar globalEnvironment
+  
   if(dataframesToGlobalEnvironment){
     assign("org.medewerkersDF", org.medewerkersDF, envir = globalenv())  
     assign("prep.medewerkersDF", prep.medewerkersDF, envir = globalenv())  

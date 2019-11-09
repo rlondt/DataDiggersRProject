@@ -24,15 +24,17 @@ procesMining.init <- function(pStartTijd, pEindTijd, pThresholds){
   for (categorie in (levels(join.ordersWorkflowDF$Categorie))){
     eventLogRDS <- paste("eventlog", format(pStartTijd, "%y-%m-%d-%H-%M"), format(pEindTijd, "%y-%m-%d-%H-%M"),categorie, ".rds", sep = "_")
     locatie = paste(werkdir, eventLogRDS, sep = "/")
+    
+    # Bepalen eventlog
     if(file.exists(locatie)){
       eventlog <- readRDSdd(eventLogRDS)
     } else{
-      df <- join.ordersWorkflowDF%>%
+      totaalDF <- join.ordersWorkflowDF%>%
         filter(Status!="Geannuleerd") %>%
         filter(Ordernummer %in% ordersInDF$Ordernummer) %>%
         filter(as.character(Categorie) == categorie)
       
-      df_start <- df %>%
+      startDF <- totaalDF %>%
         mutate(lifecycle_id="start")%>%
         mutate(timestamp=Starttijd)%>%
         mutate(case_id=Ordernummer)%>%
@@ -40,7 +42,7 @@ procesMining.init <- function(pStartTijd, pEindTijd, pThresholds){
         mutate(resource_id=Klantteam)%>%
         select(lifecycle_id, activity_id, timestamp, case_id, resource_id )
       
-      df_einde <- df %>%
+      eindeDF <- totaalDF %>%
         mutate(lifecycle_id="complete")%>%
         mutate(timestamp=WerkelijkeEindtijd)%>%
         mutate(case_id=Ordernummer)%>%
@@ -48,13 +50,13 @@ procesMining.init <- function(pStartTijd, pEindTijd, pThresholds){
         mutate(resource_id=Klantteam)%>%
         select(lifecycle_id, activity_id, timestamp, case_id, resource_id )
       
-      df_eventlog <- rbind(df_start, df_einde)  
+      eventlogDF <- rbind(startDF, eindeDF)  
       
-      df_eventlog <- df_eventlog%>%
+      eventlogDF <- eventlogDF%>%
         arrange(timestamp)%>%
         mutate(activity_instance_id = 1:nrow(.))#row_number())
       
-      eventlog <- eventlog(df_eventlog
+      eventlog <- eventlog(eventlogDF
                            , case_id="case_id"
                            , activity_id = "activity_id"
                            , activity_instance_id = "activity_instance_id"
@@ -65,10 +67,12 @@ procesMining.init <- function(pStartTijd, pEindTijd, pThresholds){
       dumpRDS(eventlog, eventLogRDS)
     }
     
+    #eventlog per categorie naar global environment
     assign(paste("eventlog",categorie, sep = ".")
            , eventlog
            , globalenv())
     
+    #precedence_matrix bepalen en naar global env
     precedence_matrix <- precedence_matrix(eventlog, type="absolute") 
     assign(paste("precedence_matrix",categorie, sep = ".")
            , precedence_matrix
@@ -78,6 +82,7 @@ procesMining.init <- function(pStartTijd, pEindTijd, pThresholds){
            , globalenv())
     
     
+    #dependency_matrix bepalen en naar global env
     depMatrix <- dependency_matrix(eventlog) 
     assign(paste("dependency_matrix",categorie,"object", sep = ".")
            , dependency_matrix
@@ -86,6 +91,7 @@ procesMining.init <- function(pStartTijd, pEindTijd, pThresholds){
            , render_dependency_matrix(depMatrix)
            , globalenv())
     
+    # per drempel een causal-net bepalen
     for(threshold in pThresholds){
       if(!is.null(threshold)){
       cNet <- causal_net(eventlog, threshold = threshold) 

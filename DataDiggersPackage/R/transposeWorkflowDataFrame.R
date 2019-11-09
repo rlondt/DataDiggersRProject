@@ -1,7 +1,7 @@
 #'  A Function to transpose a data based on some parameters
 #'
 #' Deze functie kantel het ingegeven dataframe en bewaard hierbij de ingegeven meetwaarden.
-#' @param data het dataframe dat bewerkt wordt
+#' @param data het dataframe dat als input dient
 #' @param measureVars lijst met variabelen die worden gemeten
 #' @param dcastFormula de formule die gebruikt wordt voor het transponeren van het dataframe
 #' @keywords melt dcast transposed

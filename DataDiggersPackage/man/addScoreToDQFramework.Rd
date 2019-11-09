@@ -2,7 +2,7 @@
 % Please edit documentation in R/DQScoringFramework.R
 \name{addScoreToDQFramework}
 \alias{addScoreToDQFramework}
-\title{A Function to add a score to the data-quality-framework}
+\title{Een functie om een score aan het framework toe te voegen}
 \usage{
 addScoreToDQFramework(categorie, waarde, weging)
 }
@@ -14,7 +14,7 @@ addScoreToDQFramework(categorie, waarde, weging)
 \item{weging}{weging van het item}
 }
 \description{
-This function adds a score to the data-quality-framework
+Een functie om een score aan het framework toe te voegen
 }
 \examples{
 addScoreToDQFramework(COMPLEETHEID, 3, 5)

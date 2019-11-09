@@ -1,6 +1,6 @@
-#' A Function to initialize the data-quality-framework
+#' Initialisatie van het data-quality-framework
 #'
-#' This function blablablabla
+#' Deze funtie initaliseert het framework om datakwaliteit te scoren.
 #' @keywords init DQ Scoring
 #' @export
 #' @examples
@@ -17,9 +17,9 @@ initializeDQScoringFramework <- function(){
   invisible()
 }
 
-#' A Function to add a score to the data-quality-framework
+#' Een functie om een score aan het framework toe te voegen
 #'
-#' This function adds a score to the data-quality-framework
+#' Een functie om een score aan het framework toe te voegen
 #' @param categorie categorie; één van de volgende opties: COMPLEETHEID, CONSISTENTIE, UNICITEIT, VALIDITEIT, ACCURAATHEID
 #' @param waarde waarde 1-5
 #' @param weging weging van het item
@@ -33,9 +33,12 @@ addScoreToDQFramework <- function(categorie, waarde, weging){
   stopifnot(categorie %in% c(COMPLEETHEID, CONSISTENTIE, UNICITEIT, VALIDITEIT, ACCURAATHEID))
   stopifnot(waarde >= 0)
   stopifnot(waarde <= 5)
+  
+  # maken nieuw dataframe met nieuwe score
   df <- data.frame(categorie, waarde, weging)
   names(df) <- c ("categorie", "waarde", "weging")
   
+  # ophalen huidige dataframe of initaliseren indien het niet bestaat
   DQScoringDF <- tryCatch({get("DQScoringDF", envir=.DataDiggersPackageOptions)}
                           , warning = function(w){
                             initializeDQScoringFramework()
@@ -46,19 +49,19 @@ addScoreToDQFramework <- function(categorie, waarde, weging){
                             return (get("DQScoringDF", envir=.DataDiggersPackageOptions))
                           }
   )
-  # if (is.null(DQScoringDF)){
-  #   initializeDQScoringFramework()
-  #   DQScoringDF <- get("DQScoringDF", envir=.DataDiggersPackageOptions)
-  # }
+
+  # combineren huidige en nieuwe dataframe
   DQScoringDF <- rbind(DQScoringDF, df)
+  
+  # opslaan nieuwe dataframe
   assign("DQScoringDF", DQScoringDF,  envir=.DataDiggersPackageOptions)
   futile.logger::flog.debug(DQScoringDF)
   invisible()
 }
 
-#' A Function display the results of the DQF
+#' Een functie die het dataframe resultaat in een dashboard toont
 #'
-#' This function plots the marvelous DataQuality-dashboard 
+#' Een functie die het dataframe resultaat in een super cool dashboard toont
 #' @keywords DQFramework dashboard
 #' @import ggplot2
 #' @import tidyverse
@@ -67,8 +70,6 @@ addScoreToDQFramework <- function(categorie, waarde, weging){
 plotDQ <- function(){
   
   DQScoringDF <- get("DQScoringDF", envir=.DataDiggersPackageOptions)
-  utils::globalVariables(names(DQScoringDF))
-  utils::globalVariables(c("percentage", "group","label", "title"))
   
   plotDF <- DQScoringDF %>%
     group_by(categorie)%>%
@@ -78,7 +79,9 @@ plotDQ <- function(){
                   , '3' = "Uniciteit"
                   , '4' = "Validiteit"
                   , '5' = "Accuraatheid"))
+  
   futile.logger::flog.debug(plotDF)
+  
   plotDF <- plotDF %>% mutate(group=ifelse(percentage <0.25, "red",
                ifelse(percentage>=0.25 & percentage<0.7, "orange","green")),
               label=paste0(percentage*100, "%"),

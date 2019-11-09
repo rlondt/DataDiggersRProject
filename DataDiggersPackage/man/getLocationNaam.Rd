@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{getLocationNaam}
 \alias{getLocationNaam}
-\title{A Function to get the filename on the local pc.}
+\title{Bepalen bestandsnaam en controleren of het bestand bestaat}
 \usage{
 getLocationNaam(naam, checkExists = TRUE)
 }
@@ -12,7 +12,7 @@ getLocationNaam(naam, checkExists = TRUE)
 \item{checkExists}{is er controle nodig om te kijken of het bestand bestaat}
 }
 \description{
-This function om de exacte locatie te achterhalen
+Bepalen bestandsnaam en controleren of het bestand bestaat
 }
 \keyword{file}
 \keyword{local}

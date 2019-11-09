@@ -2,12 +2,12 @@
 % Please edit documentation in R/DQScoringFramework.R
 \name{plotDQ}
 \alias{plotDQ}
-\title{A Function display the results of the DQF}
+\title{Een functie die het dataframe resultaat in een dashboard toont}
 \usage{
 plotDQ()
 }
 \description{
-This function plots the marvelous DataQuality-dashboard
+Een functie die het dataframe resultaat in een super cool dashboard toont
 }
 \keyword{DQFramework}
 \keyword{dashboard}

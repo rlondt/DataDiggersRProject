@@ -2,12 +2,12 @@
 % Please edit documentation in R/DQScoringFramework.R
 \name{initializeDQScoringFramework}
 \alias{initializeDQScoringFramework}
-\title{A Function to initialize the data-quality-framework}
+\title{Initialisatie van het data-quality-framework}
 \usage{
 initializeDQScoringFramework()
 }
 \description{
-This function blablablabla
+Deze funtie initaliseert het framework om datakwaliteit te scoren.
 }
 \examples{
 initializeDQScoringFramework()

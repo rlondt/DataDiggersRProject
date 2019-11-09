@@ -1,8 +1,8 @@
 ## Utils
 
-#' A Function to get the filename on the local pc.
+#' Bepalen bestandsnaam en controleren of het bestand bestaat
 #'
-#' This function om de exacte locatie te achterhalen
+#' Bepalen bestandsnaam en controleren of het bestand bestaat
 #' @param naam naam van het bestand
 #' @param checkExists is er controle nodig om te kijken of het bestand bestaat
 #' @keywords file local location

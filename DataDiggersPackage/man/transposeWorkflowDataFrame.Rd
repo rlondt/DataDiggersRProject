@@ -7,7 +7,7 @@
 transposeWorkflowDataFrame(data, measureVars, dcastFormula)
 }
 \arguments{
-\item{data}{het dataframe dat bewerkt wordt}
+\item{data}{het dataframe dat als input dient}
 
 \item{measureVars}{lijst met variabelen die worden gemeten}
 
