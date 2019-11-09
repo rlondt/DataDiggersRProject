@@ -13,6 +13,7 @@ kleuren2Items <- c("#ff6633", "#66ccff")
 # Compleetheid
 # 1. Mogelijkheden voor kruistellingen
 # 2. Zijn alle onderdelen van VWT-data vertegenwoordigd
+
 # 3. Missing values analyse
 # 3.1 Medewerker
 aggr_plot <- aggr(prep.medewerkersDF,oma = c(8,5,5,3), col=kleuren,
@@ -54,12 +55,11 @@ aggr_plot <- aggr(prep.workflowDF,oma = c(8,5,5,3), col=kleuren,
                   ylab=c("Missing values Workflow","Combinatie"))
 
 # 4. heeft medewerker altijd een woonplaats?
-# Score: 2 (met name door ontbreken van plaatsnaam bij medewerker) !!!Ook al geteld bij 3.
-# add field for distincting 'plaats' filled or empty
+# voeg boolean veld toe dat aangeeft op de plaatsnaam leeg is
 medewerkersPieDF <- prep.medewerkersDF %>%
   mutate(PlaatsEmpty = ifelse(is.na(MDWPlaats), TRUE, FALSE))
 
-# create dataframe for pie chart
+# # creëer dataframe voor pie chart
 dataPie <- medewerkersPieDF %>%
   group_by(PlaatsEmpty) %>%
   count() %>%
@@ -68,7 +68,7 @@ dataPie <- medewerkersPieDF %>%
   arrange(desc(PlaatsEmpty))
 dataPie$label <- scales::percent(dataPie$per)
 
-# create pie chart
+# # creëer  pie chart
 ggplot(data=dataPie)+
   geom_bar(aes(x="", y=per, fill=PlaatsEmpty), stat="identity", width = 1)+
   labs(title="Plaats Medewerker leeg vs gevuld", fill="Plaats leeg") +
@@ -80,15 +80,13 @@ ggplot(data=dataPie)+
   scale_fill_manual(values=kleuren)
 
 addScoreToDQFramework(COMPLEETHEID, waarde=2, weging=4)
-# Resultaat: 444 medewerker zonder plaats, 324 met
-
 
 # 5. Overcompleetheid, dataoverload
 # 6. Komen alle features voor die nodig zijn om een analyse te doen
 # ..
+
 ## Consistentie
 # 1. Komt elke ordernummer van het tijdschrijven voor in de workflowDF, en vice versa
-
 OrdersZonderTijdschrijvenZonderWorkflowDF <- prep.ordersDF %>%
   filter(!Ordernummer %in% prep.tijdschrijvenDF$ERPID)%>%
   filter(!Ordernummer %in% prep.workflowDF$Ordernummer)%>%
@@ -158,7 +156,6 @@ addScoreToDQFramework(CONSISTENTIE, waarde=4, weging=2)
 dq.tijdschrijvenVoorRoosterDF <- join.tijdschrijvenDienstMedewerkersDF %>%
   filter(is.na(ERPID) == FALSE) %>%
   filter( StartDate < Starttijd)%>%
-  #filter( Type == "Werk")%>%
   mutate(periodeTeVroeg = case_when(Starttijd > StartDate~ StartDate-Starttijd)) %>%
   select(ERPID, Type, periodeTeVroeg, Starttijd, StartDate, EndDate, Eindtijd)%>%
   arrange(StartDate)
@@ -202,7 +199,7 @@ ggplot(prep.tijdschrijvenDF, aes(x=StartDate))+
   labs(title="Aantal Tijdschrijven per starttijd")
 
 
-# roosterdiensten zijn niet gelijjk verdeeld
+# roosterdiensten zijn niet gelijk verdeeld
 
 ## 5. De relatie tussen rooster en medewerker en tijdschrijven en medewerker loopt "dubbel". Komen daar inconsistenties in voor
 t1DF <- prep.tijdschrijvenDF %>%
@@ -219,6 +216,7 @@ ggplot(t1DF, aes(x=StartDate))+
 # 8. Naamgeving kolommen
 # 9. Controle postcode-plaatsnaam zowel voor persoon als order
 # ..
+
 # Uniqueness
 # 1. Geen dubbele records, functioneel en obv primary key
   addScoreToDQFramework(UNICITEIT, waarde=4.5, weging=3)
@@ -229,7 +227,6 @@ ggplot(t1DF, aes(x=StartDate))+
     mutate(EndDate = unclass(EndDate))%>%
     filter(Type == "Werk")%>%
     select(MDWID, ERPID, StartDate, EndDate)
-
 
   t2DF <- sqldf("select *
                 from t1DF t1
@@ -309,39 +306,7 @@ ggplot(t1DF, aes(x=StartDate))+
 # ..
 # Validiteit (plausibiliteit/business rules)
 # 1. Is er daarbinnen nog verschil tussen werk en reistijd? Hoe gaan we om met overwerk?
-  # join tijdschrijven en roosterdienst
-  # tijdRoosterDF <-  left_join(prep.tijdschrijvenDF, prep.roosterdienstenDF, by=c("DienstID" = "DienstID", "MDWID" = "MDWID")) %>%
-  # select(MDWID, StartDate, EndDate, Type)
-
-  # urenPerDagTotaal <- prep.tijdschrijvenDF %>%
-  #   select(MDWID, StartDate, EndDate, Type, Approved) %>%
-  #   filter(Approved == "WAAR") %>%
-  #   filter(as.Date(StartDate) == as.Date(EndDate)) %>%
-  # mutate(DuurTijdschrijvenInUren = round((EndDate - StartDate),-1)/3600) # round to nearest 10
-
-  # urenPerDagWerk <- urenPerDagTotaal %>%
-  #   filter(Type=="Werk")
-
-  # aggregeer uren op MDW, startdatum, Type
-  aggUrenPerDagWerk <- setNames(aggregate(urenPerDagWerk[,c("DuurTijdschrijvenInUren")], by=list(urenPerDag$MDWID, as.Date(urenPerDag$StartDate), urenPerDag$Type), "sum"), c("MDWID", "Datum", "Type", "Duur"))
-
-  # Spreiding tijdschrijf uren medewerkers
-   # ggplot(data=aggUrenPerDagWerk, aes(aggUrenPerDagWerk$Duur)) + geom_histogram(binwidth=.5, boundary = 0, color = "black", fill = "lightblue") +
-   #   scale_x_continuous(breaks=0:20) +
-   # xlab("Tijdschrijf uren medewerkers per dag")
-
-  # filter overwerk (overwerk=urenPerDag>9)
-  # TODO: overwerk=overschreiding van roostertijd
-  # urenOverwerk <- aggUrenPerDag %>%
-  #   filter(Duur > 9)
-
-  # Spreiding overwerk uren medewerkers per dag
-  ggplot(data=urenOverwerk, aes(urenOverwerk$Duur)) + geom_histogram(binwidth=.5, boundary = 0, color = "black", fill = "lightblue") +
-    scale_x_continuous(breaks=0:20) +
-    xlab("Overwerk uren medewerkers per dag")
-
-  #addScoreToDQFramework(COMPLEETHEID, waarde=2, weging=4) wat hier invullen?
-  #Resultaat/conclusie: overwerk: uitschieters in aantal uren per dag vooral 10 en 12 uur. Max is 19 uur.
+  # vervallen, overwerk al bij 'Consistentie' onderzocht
 
 # 2. Vervallen orders waar wel geakkoordeerd is tijdgeschreven
   vervallenOrdersMetTijdschrijvenDF <- left_join(prep.ordersDF, join.tijdschrijvenDienstMedewerkersDF, by=c("Ordernummer" = "ERPID")) %>%
@@ -355,12 +320,9 @@ ggplot(t1DF, aes(x=StartDate))+
   vervallenOrdersMetTijdschrijvenDF %>%
     group_by(Ordernummer) %>%
     summarise(n_distinct(Ordernummer))
-
-  #addScoreToDQFramework(COMPLEETHEID, waarde=2, weging=4) wat hier invullen?
   #Resultaat: er zijn 3107 vervallen orders waarin in totaal 9188 tijdschrijf records voor geregistreerd staan
 
-# 3. Anomaly detection/outlier verklaring
-  #https://www.datacamp.com/community/tutorials/detect-anomalies-anomalize-r
+# 3. Anomaly detection (outliers)
   anomalyDF <- left_join(summarized.OrderTijdschrijvenByOrderDF, prep.ordersDF, by=c("Ordernummer" = "Ordernummer"))%>%
     arrange(StarttijdTijdschrijven) %>%
     filter(Approved == "WAAR")
@@ -386,8 +348,6 @@ ggplot(t1DF, aes(x=StartDate))+
   anomalize(remainder, method = "iqr", alpha = 0.05, max_anoms = 0.05) %>%
   time_recompose() %>%
   plot_anomalies(time_recomposed = TRUE) +
-    #scale_color_manual(values=c("#66ccff", "#ff6633")) + #colors for geom_vline
-    #scale_fill_manual(values=c("#ff6633", "#66ccff", "#ffcc33")) + #colors for geom_histogram
   xlab("Starttijd tijdschrijven") +
   ylab("Uren") +
   ggtitle("Anomalies werktijd NLS ")
@@ -402,7 +362,6 @@ ggplot(t1DF, aes(x=StartDate))+
     ylab("Uren") +
     ggtitle("Anomalies werktijd Schade")
 
-
   # anomalies werktijd Storing
   anomalyStoringDF %>%
     time_decompose(werktijd, method = "stl", frequency = "auto", trend = "auto") %>%
@@ -413,57 +372,40 @@ ggplot(t1DF, aes(x=StartDate))+
     ylab("Uren") +
     ggtitle("Anomalies werktijd Storing")
 
-  addScoreToDQFramework(VALIDITEIT, waarde=2, weging=3) # veel uitschieters die wrs niet valide zijn, met name bij storing
-
 # 4. Inventarisatie business rules
 # 5. Heeft elke order een plaats
 
 # 6. Orders die binnen een periode 'x' (vb een minuut) zijn uitgevoerd
-orderBinnenMinuut <- summarized.OrderTijdschrijvenByOrderDF %>%
+orderBinnenMinuutDF <- summarized.OrderTijdschrijvenByOrderDF %>%
   filter(difftime(EindtijdTijdschrijven, StarttijdTijdschrijven,units="min")< 1)
 
-# testWF <- prep.workflowDF %>%
-#   filter(Ordernummer=='B0036800')
-#
-# testTijd <- prep.tijdschrijvenDF %>%
-#   filter(ERPID=='B0036800')
-
-addScoreToDQFramework(VALIDITEIT, waarde=5, weging=1)
 #Resultaat: er wordt altijd minimaal 15 minuten tijdgeschreven. Orders duren op basis van tijdschrijven dus nooit korter dan
 #           15 minuten.
-# TODO: nog iets doen met doorlooptijd van order (op basis van workflowstappen) vs tijdschrijf tijd?
-
 
 # 7. Verdeling van de reis- en werktijd over de medewerkers
-
 # geaccordeerde uren per dag per medewerker per type
-urenPerDagTotaal <- prep.tijdschrijvenDF %>%
+urenPerDagTotaalDF <- prep.tijdschrijvenDF %>%
   select(MDWID, StartDate, EndDate, Type, Approved) %>%
   filter(Approved == "WAAR") %>%
   filter(as.Date(StartDate) == as.Date(EndDate)) %>%
   mutate(DuurTijdschrijvenInUren = round((EndDate - StartDate),-1)/3600) # round to nearest 10
 
 # aggregeer uren op MDW, startdatum, Type
-aggUrenPerDagTotaal <- setNames(aggregate(urenPerDagTotaal[,c("DuurTijdschrijvenInUren")], by=list(urenPerDagTotaal$MDWID, as.Date(urenPerDagTotaal$StartDate), urenPerDagTotaal$Type), "sum"), c("MDWID", "Datum", "Type", "Duur"))
+aggUrenPerDagTotaalDF <- setNames(aggregate(urenPerDagTotaalDF[,c("DuurTijdschrijvenInUren")], by=list(urenPerDagTotaalDF$MDWID, as.Date(urenPerDagTotaalDF$StartDate), urenPerDagTotaalDF$Type), "sum"), c("MDWID", "Datum", "Type", "Duur"))
 
 # boxplot
-ggplot(data = aggUrenPerDagTotaal, aes(x = Type, y=Duur)) +
+ggplot(data = aggUrenPerDagTotaalDF, aes(x = Type, y=Duur)) +
   geom_boxplot(fill = kleuren2Items) +
   scale_y_continuous(breaks=0:25) +
   stat_summary(aes(group = Type), fun.y=mean, colour=kleuren2Items, geom="point") +
   labs(title="Verdeling van tijdschrijf uren van medewerkers per Type tijd per dag", y="Uren")
 
-# check medewerker with mean 15 hours 'Reis' tijd
-checkMDW <- subset(prep.medewerkersDF , MDWID == '87b43ab6-2322-4f21-8ff1-ac74b3dc28de')
-checkTijdMDW <- subset(prep.tijdschrijvenDF , MDWID == '87b43ab6-2322-4f21-8ff1-ac74b3dc28de' & Type =="Reis")
-checkOrder <- subset(prep.ordersDF , Ordernummer == 'B0050110') #Plaats=Utrecht
-
-# calculate mean per Type
+# bereken gemiddelde per Type
 library(plyr)
-meanTypes <- ddply(aggUrenPerDagTotaal, "Type", summarise, grp.mean=mean(Duur))
+meanTypes <- ddply(aggUrenPerDagTotaalDF, "Type", summarise, grp.mean=mean(Duur))
 
-# show histogram
-ggplot(aggUrenPerDagTotaal, aes(x=Duur, color=Type, fill=Type)) +
+# toon histogram
+ggplot(aggUrenPerDagTotaalDF, aes(x=Duur, color=Type, fill=Type)) +
   geom_histogram(binwidth=.5, position="dodge") +
   scale_x_continuous(breaks=0:25) +
   geom_vline(data=meanTypes, aes(xintercept=grp.mean, color=Type),
