@@ -8,3 +8,7 @@ latest build status : [![Build Status](https://travis-ci.org/rlondt/DataDiggersR
 2. dataframe variabelen eindigen op DF
 3. commentaar in het Nederlands
 4. uitlijning middels twee spaties
+5. voor zover mogelijk worden de packaged functies ge-unittest
+6. alle herbruikbare functies worden naar de package verplaatst
+7. alle analyse vindt plaats buiten de package
+8. package-code wordt gedocumenteerd
