@@ -1,5 +1,5 @@
-library(testthat)
-library(DataDiggersPackage)
+# library(testthat)
+# library(DataDiggersPackage)
 # test-utils.R
 context("Utils")
 test_that("setWorkdir sets the working directory", {
