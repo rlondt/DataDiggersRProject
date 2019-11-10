@@ -375,37 +375,6 @@ cons.output$Kwaliteit <- 100-(cons.output$aantal/cons.output$Totaal_aantal)*100
 cons.output$Kwaliteit <- round(cons.output$Kwaliteit, digits = 2)
 cons.output$nr. <- substr(cons.output$Vergelijking, 1, 1)
 
-#### totaal Score tabel relaties ####
-# Normering score
-Totaal_score <- data.frame(Categorie = c(5, 4, 3, 2, 1),
-                           Score = c("Uitstekend", "Goed", "Voldoende", "Zwak", "Slecht"),
-                           Getal = c(100, 90, 75, 50, 0),
-                           Bij = c("100%",">90%", "> 75%", ">50%", "<50%")
-)
-Totaal_score
-
-# Score tabel per vergelijking
-Tabel_score <- rbind(cons.output$Kwaliteit==Totaal_score$Getal[1], 
-                     cons.output$Kwaliteit>Totaal_score$Getal[2],
-                     cons.output$Kwaliteit>Totaal_score$Getal[3],
-                     cons.output$Kwaliteit>Totaal_score$Getal[4],
-                     cons.output$Kwaliteit>Totaal_score$Getal[5]
-)
-
-Tabel_score <- t(Tabel_score)
-Tabel_score <- 1*Tabel_score
-Tabel_score <- as.data.frame(Tabel_score)
-Tabel_score$score <- rowSums(Tabel_score[1:5])
-Tabel_score$nr. <- 1:nrow(Tabel_score)
-
-# Join Output & score
-
-cons.output$nr. <- as.numeric(cons.output$nr.)
-
-Tabel_score <- Tabel_score %>%
-  select(nr., score)
-cons.output <- left_join(cons.output, Tabel_score, by =  c("nr." = "nr."))
-
 
 # 3. Is bij tijdschrijven, de begintijd altijd kleiner dan de eindtijd
 dftijdschrijvenEindatumGroterDanBegindatum <- prep.tijdschrijvenDF %>%
@@ -574,25 +543,9 @@ cons.output_missingorders$Kwaliteit <- 100-(cons.output_missingorders$aantal/con
 cons.output_missingorders$Kwaliteit <- round(cons.output_missingorders$Kwaliteit, digits = 2)
 cons.output_missingorders <- cons.output_missingorders %>%
   select(Vergelijking, aantal, Totaal_aantal, Omschrijving, Kwaliteit)
+
 cons.output_missingorders$nr <- 1
 
-# Score tabel voor vergelijking
-
-Tabel_score4 <- rbind(cons.output_missingorders$Kwaliteit==Totaal_score$Getal[1], 
-                      cons.output_missingorders$Kwaliteit>Totaal_score$Getal[2],
-                      cons.output_missingorders$Kwaliteit>Totaal_score$Getal[3],
-                      cons.output_missingorders$Kwaliteit>Totaal_score$Getal[4],
-                      cons.output_missingorders$Kwaliteit>Totaal_score$Getal[5]
-)
-
-Tabel_score4 <- t(Tabel_score4)
-Tabel_score4 <- 1*Tabel_score4
-Tabel_score4 <- as.data.frame(Tabel_score4)
-Tabel_score4$score <- rowSums(Tabel_score4[1:5])
-Tabel_score4$nr <- 1:nrow(Tabel_score4)
-
-cons.output_missingorders <- left_join(cons.output_missingorders, Tabel_score4, by =  c("nr" = "nr")) %>%
-  select(1,2,3,4,5,6,12)
 
 
 
@@ -676,24 +629,6 @@ cons.output_postcodeplaats$Kwaliteit <- round(cons.output_postcodeplaats$Kwalite
 cons.output_postcodeplaats <- cons.output_postcodeplaats %>%
   select(Vergelijking, aantal, Totaal_aantal, Omschrijving, Kwaliteit)
 cons.output_postcodeplaats$nr <- 1
-
-# Score tabel voor vergelijking
-
-Tabel_score3 <- rbind(cons.output_postcodeplaats$Kwaliteit==Totaal_score$Getal[1], 
-                      cons.output_postcodeplaats$Kwaliteit>Totaal_score$Getal[2],
-                      cons.output_postcodeplaats$Kwaliteit>Totaal_score$Getal[3],
-                      cons.output_postcodeplaats$Kwaliteit>Totaal_score$Getal[4],
-                      cons.output_postcodeplaats$Kwaliteit>Totaal_score$Getal[5]
-)
-
-Tabel_score3 <- t(Tabel_score3)
-Tabel_score3 <- 1*Tabel_score3
-Tabel_score3 <- as.data.frame(Tabel_score3)
-Tabel_score3$score <- rowSums(Tabel_score3[1:5])
-Tabel_score3$nr <- 1:nrow(Tabel_score3)
-
-cons.output_postcodeplaats <- left_join(cons.output_postcodeplaats, Tabel_score3, by =  c("nr" = "nr")) %>%
-  select(1,2,3,4,5,6,12)
 
 
 # Uniqueness
