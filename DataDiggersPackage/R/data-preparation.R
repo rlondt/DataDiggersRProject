@@ -193,6 +193,46 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
   }  
   
   ##
+  # postcodeplaats
+  # is al geprepareerd
+  flog.info(msg = "postcodeplaats")
+  if(!file.exists(getLocationNaam("postcodeplaats.rds", FALSE))|rebuild){
+    org.postcodeplaatsDF <- readCSV("PostcodeTabelNLDataOverheid.csv")%>%
+      select(pc4, woonplaatsnaam)
+    
+    org.postcodeplaatsDF$woonplaatsnaam <- casefold(org.postcodeplaatsDF$woonplaatsnaam, upper = FALSE)
+    org.postcodeplaatsDF$woonplaatsnaam[org.postcodeplaatsDF$woonplaatsnaam=="'s-gravenhage"] <- "den haag"
+
+    # vervangen in dataoverheid
+    org.postcodeplaatsDF$woonplaatsnaam <- trimws(org.postcodeplaatsDF$woonplaatsnaam)
+    
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub("'", "", org.postcodeplaatsDF$woonplaatsnaam)
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub("-", " ", org.postcodeplaatsDF$woonplaatsnaam)
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub("y", "ij", org.postcodeplaatsDF$woonplaatsnaam)
+    
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub(" (gld)", "", org.postcodeplaatsDF$woonplaatsnaam)
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub(" (nh)", "", org.postcodeplaatsDF$woonplaatsnaam)
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub(" (nb)", "", org.postcodeplaatsDF$woonplaatsnaam)
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub(" rotterdam", "", org.postcodeplaatsDF$woonplaatsnaam)
+    
+    # provincie afkortingen verwijderen
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub(" gld", "", org.postcodeplaatsDF$woonplaatsnaam)
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub(" nb", "", org.postcodeplaatsDF$woonplaatsnaam)
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub(" zh", "", org.postcodeplaatsDF$woonplaatsnaam)
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub(" ov", "", org.postcodeplaatsDF$woonplaatsnaam)
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub(" ut", "", org.postcodeplaatsDF$woonplaatsnaam)
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub(" lb", "", org.postcodeplaatsDF$woonplaatsnaam)
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub(" fr", "", org.postcodeplaatsDF$woonplaatsnaam)
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub(" dr", "", org.postcodeplaatsDF$woonplaatsnaam)
+    org.postcodeplaatsDF$woonplaatsnaam <- gsub(" gn", "", org.postcodeplaatsDF$woonplaatsnaam)
+    
+    org.postcodeplaatsDF$sleutel <- paste0(org.postcodeplaatsDF$pc4, org.postcodeplaatsDF$woonplaatsnaam)
+    dumpRDS(org.postcodeplaatsDF, "postcodeplaats.rds")
+  } else {
+    org.postcodeplaatsDF <- readRDSdd( "postcodeplaats.rds")
+  }
+  
+  ##
   # Start joins
   flog.info(msg = "start joins")
   
@@ -421,6 +461,7 @@ startPreparation <- function(workdir, rebuild=FALSE, dataframesToGlobalEnvironme
     assign("summarized.WorflowTijdschrijvenDF", summarized.WorflowTijdschrijvenDF, envir = globalenv())  
     assign("summarized.WorkflowDF", summarized.WorkflowDF, envir = globalenv())  
     assign("summarized.OrderTijdschrijvenByOrderDF", summarized.OrderTijdschrijvenByOrderDF, envir = globalenv())  
+    assign("org.postcodeplaatsDF", org.postcodeplaatsDF, envir = globalenv())
   }
   invisible()
 }
