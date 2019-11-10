@@ -23,5 +23,9 @@ test_that("Framework accepts new scores", {
   expect_error(
     addScoreToDQFramework(COMPLEETHEID, -1, 1)
   )
+  # zomaar een fout verwacht die niet fout gaat :)
+  expect_error(
+    addScoreToDQFramework(COMPLEETHEID, 1, 1)
+  )
 })
 
