@@ -6,6 +6,8 @@
                   ,"naniar"
                   ,"dplyr"
                   ,"miniCRAN"
+                  ,"timelineS"
+                  ,"varhandle"
                   ,"doSNOW"
                   ,"sf"
                   ,"futile.logger"
@@ -21,6 +23,8 @@
                   ,"sqldf"
                   ,"devtools"
                   ,"roxygen2"
+                  ,"grid"
+                  ,"gridExtra"
     )
 
     ## Installeer packages
