@@ -136,13 +136,276 @@ ggplot(circles, aes(x = 1, fill = names)) +
 
 # 2. Alle relaties twee kanten op
 #   a. order zonder workflow
+
+cons.order_workflow <- anti_join(prep.ordersDF, prep.workflowDF, by =  c("Ordernummer" = "Ordernummer")) %>%
+  filter(OrderStatus != "Gesloten") %>%
+  group_by(Afmeldcode) %>%
+  summarize(aantal = n())
+
+# Antwoord 92 van de 147.441 orders kennen geen workflow (0,062%), mogelijk "Zwevende orders" indien niet gesloten...
+# <> Gesloten orders
+
+cons.order_workflow$Vergelijking      <- c("1. order_workflow")
+cons.order_workflow <- cons.order_workflow %>%
+  select(Vergelijking, aantal)
+
+TotaalDF <- prep.ordersDF %>%
+  group_by(Ordernummer) %>%
+  summarize(aantal = n()) %>%
+  count(aantal)
+
+totaal <- TotaalDF$n
+
+cons.order_workflow$Totaal_aantal <- c(totaal)
+cons.order_workflow$Omschrijving  <- c("Orders kennen geen workflow en zijn niet gesloten, mogelijk zwevende orders")
+
 #   b. workflow zonder order
+
+cons.workflow_order <- anti_join(prep.workflowDF, prep.ordersDF, by =  c("Ordernummer" = "Ordernummer")) %>%
+  group_by(Ordernummer) %>%
+  summarize(aantal = n())
+
+totaal <- cons.workflow_order$aantal
+if (is_empty(totaal) == TRUE) cons.workflow_order<-data.frame(Ordernummer="Onbekend",aantal=0) else totaal
+
+totaal <- prep.workflowDF %>%
+  summarize(aantal = n()) %>%
+  count(aantal)
+
+
+totaal <- totaal$aantal
+
+cons.workflow_order$Totaal_aantal      <- c(totaal)
+cons.workflow_order$Vergelijking      <- c("2. workflow_order")
+cons.workflow_order$Omschrijving      <- c("Alle workflows hebben een order")
+
+cons.workflow_order <- cons.workflow_order %>%
+  select(Vergelijking, aantal, Totaal_aantal, Omschrijving)
+
+cons.output <- rbind(cons.order_workflow, cons.workflow_order)
+
+
 #   c. tijdschrijven zonder medewerker
+cons.tijdschrijven_medewerkers <- anti_join(prep.tijdschrijvenDF, prep.medewerkersDF, by =  c("MDWID" = "MDWID")) %>%
+  group_by(MDWID) %>%
+  summarize(aantal = n()) %>%
+  arrange(desc(MDWID))
+
+totaal <- cons.tijdschrijven_medewerkers$aantal
+if (is_empty(totaal) == TRUE) cons.tijdschrijven_medewerkers<-data.frame(MDWID="Onbekend",aantal=0) else totaal
+
+totaal <- prep.tijdschrijvenDF %>%
+  summarize(aantal = n()) %>%
+  count(aantal)
+
+totaal <- totaal$aantal
+
+cons.tijdschrijven_medewerkers$Totaal_aantal      <- c(totaal)
+cons.tijdschrijven_medewerkers$Vergelijking      <- c("3. tijdschrijven_medewerkers")
+cons.tijdschrijven_medewerkers$Omschrijving      <- c("7 tijdschrijven van 1 medewerker die niet voorkomst in medewerkers")
+
+cons.tijdschrijven_medewerkers <- cons.tijdschrijven_medewerkers %>%
+  select(Vergelijking, aantal, Totaal_aantal, Omschrijving)
+
+cons.output <- rbind(cons.output, cons.tijdschrijven_medewerkers)
+
+# Antwoord: 7 tijdschrijven van 1 medewerker die niet voorkomst in medewerkers
+
+
 #   d. medewerker zonder tijdschrijven
+cons.medewerkers_tijdschrijven <- anti_join(prep.medewerkersDF, prep.tijdschrijvenDF, by =  c("MDWID" = "MDWID")) %>%
+  group_by(MoetUrenSchrijven) %>%
+  summarize(aantal = n()) %>%
+  arrange(desc(MoetUrenSchrijven)) %>%
+  filter(MoetUrenSchrijven == "WAAR")
+
+totaal <- cons.medewerkers_tijdschrijven$aantal
+if (is_empty(totaal) == TRUE) cons.medewerkers_tijdschrijven<-data.frame(MDWID="Onbekend",aantal=0) else totaal
+
+totaal <- prep.medewerkersDF %>%
+  summarize(aantal = n()) %>%
+  count(aantal)
+
+totaal <- totaal$aantal
+
+cons.medewerkers_tijdschrijven$Totaal_aantal      <- c(totaal)
+cons.medewerkers_tijdschrijven$Vergelijking      <- c("4. medewerkers_tijdschrijven")
+cons.medewerkers_tijdschrijven$Omschrijving      <- c("Niet alle medewerkers hebben tijdgeschreven die dit wil zouden moeten")
+
+cons.medewerkers_tijdschrijven <- cons.medewerkers_tijdschrijven %>%
+  select(Vergelijking, aantal, Totaal_aantal, Omschrijving)
+
+cons.output <- rbind(cons.output, cons.medewerkers_tijdschrijven)
+
+# Antwoord 379 komen niet voor in tijdschrijven, maar een deel hoeft ook geen tijd te schrijven (363 MDWID). 16 moeten dit wel maar komen er niet in voor
+
 #   e. tijdschrijven zonder dienst
+cons.tijdschrijven_roosterdienst <- anti_join(prep.tijdschrijvenDF, prep.roosterdienstenDF, by =  c("DienstID" = "DienstID")) %>%
+  summarize(aantal = n())
+
+totaal <- cons.tijdschrijven_roosterdienst$aantal
+if (is_empty(totaal) == TRUE) cons.tijdschrijven_roosterdienst <-data.frame(MDWID="Onbekend",aantal=0) else totaal
+
+totaal <- prep.tijdschrijvenDF %>%
+  summarize(aantal = n()) %>%
+  count(aantal)
+
+totaal <- totaal$aantal
+
+cons.tijdschrijven_roosterdienst$Totaal_aantal      <- c(totaal)
+cons.tijdschrijven_roosterdienst$Vergelijking      <- c("5. tijdschrijven_roosterdienst")
+cons.tijdschrijven_roosterdienst$Omschrijving      <- c("Tijdschrijven zonder roosterdienst en betreft niet alleen verlof ook orders...")
+
+cons.tijdschrijven_roosterdienst <- cons.tijdschrijven_roosterdienst %>%
+  select(Vergelijking, aantal, Totaal_aantal, Omschrijving)
+
+cons.output <- rbind(cons.output, cons.tijdschrijven_roosterdienst)
+
+# Antwoord 1391 tijdschrijven zonder roosterdienst en betreft niet alleen verlof ook orders...tw
+
 #   f. dienst zonder tijdschrijven
+cons.roosterdienst_tijdschrijven <- anti_join(prep.roosterdienstenDF, prep.tijdschrijvenDF , by =  c("DienstID" = "DienstID")) %>%
+  summarize(aantal = n())
+
+# Antwoord 43.729 roosterdiensten zonder tijdschrijven...
+# Mogelijk komt dit doordat er een deel op ETL worden verrekend, zie ook orders zonder tijdschrijven
+
+cons.roosterdienst_tijdschrijven2 <- anti_join(prep.roosterdienstenDF, prep.tijdschrijvenDF , by =  c("DienstID" = "DienstID"))
+cons.roosterdienst_tijdschrijven2 <- left_join(cons.roosterdienst_tijdschrijven2, prep.medewerkersDF, by =  c("MDWID" = "MDWID"))
+
+cons.roosterdienst_tijdschrijven2$EPAP <-as.character(cons.roosterdienst_tijdschrijven2$EPAP)
+
+cons.roosterdienst_tijdschrijven2$EPAP <- cons.roosterdienst_tijdschrijven2$EPAP %>% 
+  replace_na("Onbekend")
+
+cons.roosterdienst_tijdschrijven2 <- cons.roosterdienst_tijdschrijven2 %>%
+  filter(EPAP != "AP")
+
+cons.roosterdienst_tijdschrijven2 <- cons.roosterdienst_tijdschrijven2 %>%
+  summarize(aantal = n())
+
+totaal <- sum(cons.roosterdienst_tijdschrijven2$aantal)
+if (is_empty(totaal) == TRUE){
+  cons.roosterdienst_tijdschrijven <-data.frame(MDWID="Onbekend",aantal=0)
+}  else {
+  totaal
+}
+
+totaal <- prep.roosterdienstenDF %>%
+  summarize(aantal = n()) %>%
+  count(aantal)
+
+totaal <- totaal$aantal
+
+cons.roosterdienst_tijdschrijven2$Totaal_aantal <- c(totaal)
+cons.roosterdienst_tijdschrijven2$Vergelijking  <- c("6. roosterdienst_tijdschrijven")
+cons.roosterdienst_tijdschrijven2$Omschrijving  <- c("Roosterdiensten zonder tijdschrijven")
+
+cons.roosterdienst_tijdschrijven2 <- cons.roosterdienst_tijdschrijven2 %>%
+  select(Vergelijking, aantal, Totaal_aantal, Omschrijving)
+
+cons.output <- rbind(cons.output, cons.roosterdienst_tijdschrijven2)
+
 #   g. tijdschrijven zonder order
+cons.tijdschrijven_orders <- anti_join(prep.tijdschrijvenDF, prep.ordersDF, by =  c("ERPID" = "Ordernummer")) %>%
+  filter(ERPID != "") %>%
+  group_by(Afspraak) %>%
+  summarize(aantal = n()) %>%
+  arrange(desc(Afspraak))
+
+
+# Antwoord wel tijdschrijven zonder order maar dit allemaal algemeen (Zie tabel). Tijdschrijven met ordernummer die niet voor komt in order is 0
+
+
+totaal <- cons.tijdschrijven_orders$aantal
+if (is_empty(totaal) == TRUE) cons.tijdschrijven_orders <-data.frame(ERPID="Onbekend",aantal=0) else totaal
+
+totaal <- prep.tijdschrijvenDF %>%
+  summarize(aantal = n()) %>%
+  count(aantal)
+
+totaal <- totaal$aantal
+
+cons.tijdschrijven_orders$Totaal_aantal      <- c(totaal)
+cons.tijdschrijven_orders$Vergelijking      <- c("7. tijdschrijven_orders")
+cons.tijdschrijven_orders$Omschrijving      <- c("Tijdschrijven (anders dan algemeen, verlof etc..) op order waarbij de order niet gevonden kan worden")
+
+cons.tijdschrijven_orders <- cons.tijdschrijven_orders %>%
+  select(Vergelijking, aantal, Totaal_aantal, Omschrijving)
+
+cons.output <- rbind(cons.output, cons.tijdschrijven_orders)
+
+
 #   h. order zonder tijdschrijven
+
+cons.orders_tijdschrijven <- anti_join(prep.ordersDF, prep.tijdschrijvenDF, by =  c("Ordernummer" = "ERPID")) %>%
+  filter(Ordernummer != "")
+
+# Antwoord er zijn 56.778 orders zonder tijdschrijven, dit kan echter omdat er ook op ETL wordt ingekocht. 
+# Zie ook ook Roosterdiensten zonder tijdschrijven
+# Kijken of van deze 56.778 orders het allemaal AP zijn
+
+cons.orders_tijdschrijven <- anti_join(prep.ordersDF, prep.tijdschrijvenDF, by =  c("Ordernummer" = "ERPID")) %>%
+  group_by(OpdrachtVervalt) %>%
+  summarize(aantal = n()) %>%
+  arrange(desc(OpdrachtVervalt)) %>%
+  # Vanuitgaande dat op vervallen opdrachten geen tijd hoeft te worden geschreven...
+  filter(OpdrachtVervalt == "ONWAAR")
+
+
+totaal <- cons.orders_tijdschrijven$aantal
+if (is_empty(totaal) == TRUE) cons.orders_tijdschrijven <-data.frame(OpdrachtVervalt="Onbekend",aantal=0) else totaal
+
+totaal <- prep.ordersDF %>%
+  summarize(aantal = n()) %>%
+  count(aantal)
+
+totaal <- totaal$aantal
+
+cons.orders_tijdschrijven$Totaal_aantal      <- c(totaal)
+cons.orders_tijdschrijven$Vergelijking      <- c("8. orders_tijdschrijven")
+cons.orders_tijdschrijven$Omschrijving      <- c("Orders waarvoor geen tijd geschreven is")
+
+cons.orders_tijdschrijven <- cons.orders_tijdschrijven %>%
+  select(Vergelijking, aantal, Totaal_aantal, Omschrijving)
+
+cons.output <- rbind(cons.output, cons.orders_tijdschrijven)
+
+cons.output$Kwaliteit <- 100-(cons.output$aantal/cons.output$Totaal_aantal)*100
+cons.output$Kwaliteit <- round(cons.output$Kwaliteit, digits = 2)
+cons.output$nr. <- substr(cons.output$Vergelijking, 1, 1)
+
+#### totaal Score tabel relaties ####
+# Normering score
+Totaal_score <- data.frame(Categorie = c(5, 4, 3, 2, 1),
+                           Score = c("Uitstekend", "Goed", "Voldoende", "Zwak", "Slecht"),
+                           Getal = c(100, 90, 75, 50, 0),
+                           Bij = c("100%",">90%", "> 75%", ">50%", "<50%")
+)
+Totaal_score
+
+# Score tabel per vergelijking
+Tabel_score <- rbind(cons.output$Kwaliteit==Totaal_score$Getal[1], 
+                     cons.output$Kwaliteit>Totaal_score$Getal[2],
+                     cons.output$Kwaliteit>Totaal_score$Getal[3],
+                     cons.output$Kwaliteit>Totaal_score$Getal[4],
+                     cons.output$Kwaliteit>Totaal_score$Getal[5]
+)
+
+Tabel_score <- t(Tabel_score)
+Tabel_score <- 1*Tabel_score
+Tabel_score <- as.data.frame(Tabel_score)
+Tabel_score$score <- rowSums(Tabel_score[1:5])
+Tabel_score$nr. <- 1:nrow(Tabel_score)
+
+# Join Output & score
+
+cons.output$nr. <- as.numeric(cons.output$nr.)
+
+Tabel_score <- Tabel_score %>%
+  select(nr., score)
+cons.output <- left_join(cons.output, Tabel_score, by =  c("nr." = "nr."))
+
 
 # 3. Is bij tijdschrijven, de begintijd altijd kleiner dan de eindtijd
 dftijdschrijvenEindatumGroterDanBegindatum <- prep.tijdschrijvenDF %>%
@@ -213,9 +476,225 @@ ggplot(t1DF, aes(x=StartDate))+
 
 # 6. Datumvelden als datum te behandelen ⇒ OK
 # 7. Zijn de order oplopend
+cons.orders_nummering <- prep.ordersDF %>%
+  select(Ordernummer)%>%
+  arrange(Ordernummer)
+
+cons.orders_nummering$nr <- substr(cons.orders_nummering$Ordernummer, 2, 8)
+cons.orders_nummering$nr <- as.numeric(cons.orders_nummering$nr)
+
+order_range <- data.frame(c(min(cons.orders_nummering$nr):max(cons.orders_nummering$nr)))
+colnames(order_range)[1] <- "nr"
+
+missing_orders <- anti_join(order_range, cons.orders_nummering, by =  c("nr" = "nr"))
+
+#### Tijdframe van de missing_orders ####
+
+# Dichtsbijzijnde order van missende orders
+a <- missing_orders$nr
+b <- cons.orders_nummering$nr
+cuts <- c(-Inf, b[-1]-diff(b)/2, Inf)
+
+match <- cut(a, breaks=cuts, labels=b)
+match <- unfactor(match)
+match <- unname(match)
+missing_orders$match <- match
+
+# Creatiedatum van dichtsbijzijnde order
+orders <- prep.ordersDF %>%
+  select(Ordernummer, CreationDate)%>%
+  arrange(Ordernummer)
+orders$nr <- substr(orders$Ordernummer, 2, 8)
+orders$nr <- as.numeric(orders$nr)
+colnames(orders)[1] <- "match.ordernummer"
+
+missing_orders <- left_join(missing_orders, orders, by =  c("match" = "nr"))
+missing_orders[4] <- as.Date(missing_orders$CreationDate)
+missing_orders$text_length <- nchar(missing_orders$nr)
+
+toevoeging <- data.frame(text_length = c(0, 1, 2, 3, 4, 5, 6, 7, 8),
+                         toevoeging = c("NB", "B000000", "B00000", "B0000", "B000","B00","B0", "B", ""))
+
+missing_orders <- left_join(missing_orders, toevoeging, by =  c("text_length" = "text_length"))
+missing_orders$ordernummer <- paste0(unfactor(missing_orders$toevoeging),as.character(missing_orders$nr))
+missing_orders <- missing_orders %>%
+  select(ordernummer, match.ordernummer, CreationDate)
+
+
+# Tijdlijn missende orders 
+library(timelineS)
+
+graphic <- missing_orders %>%
+  select(ordernummer, CreationDate) %>% 
+  group_by(CreationDate) %>%
+  summarize(aantal = n()) 
+
+colnames(graphic)[2] <- "Events"
+colnames(graphic)[1] <- "Event_Dates"
+
+levels <- graphic %>%
+  select(Events) %>% 
+  group_by(Events) %>%
+  summarize(aantal = n()) 
+levels$join <- levels$Events
+levels$Events <- factor(levels$Events, levels = (levels$Events), ordered = TRUE)
+levels$Events <- paste0("",levels$Events)
+
+colnames(graphic)[2] <- "join"
+graphic <- left_join(graphic, levels, by =  c("join" = "join"))
+graphic <- graphic %>%
+  select(Events, Event_Dates)
+
+timelineS(graphic, main = "# Missende orders", xlab = NA, buffer.days = 56.2,
+          line.width = 2, line.color = "black",
+          scale = "year", scale.format = "%Y", scale.font = 2, scale.orient = 1,
+          scale.above = FALSE, scale.cex = 1, scale.tickwidth = 2,
+          labels = paste(graphic[[1]]), label.direction = "downup",
+          label.length = c(0.5,0.5,0.8,0.8), label.position = c(1,3),
+          label.color = "gray44", label.cex = 0.8, label.font = 2, label.angle = 0,
+          pch = 20, point.cex = 1, point.color = "gray44")
+
+#### totaal Score missende orders ####
+
+# Missende orders = aantal
+cons.missing_orders <- missing_orders %>%
+  summarize(aantal = n()) %>%
+  count(aantal)
+
+# totaal orders = Totaal_aantal
+cons.output_missingorders <- prep.ordersDF %>%
+  summarize(Totaal_aantal = n()) %>%
+  count(Totaal_aantal)
+
+cons.output_missingorders$Vergelijking      <- c("7. Missing_Orders")
+cons.output_missingorders$Omschrijving      <- c("Zijn de orders oplopend")
+cons.output_missingorders$aantal <- cons.missing_orders$aantal
+
+cons.output_missingorders$Kwaliteit <- 100-(cons.output_missingorders$aantal/cons.output_missingorders$Totaal_aantal)*100
+cons.output_missingorders$Kwaliteit <- round(cons.output_missingorders$Kwaliteit, digits = 2)
+cons.output_missingorders <- cons.output_missingorders %>%
+  select(Vergelijking, aantal, Totaal_aantal, Omschrijving, Kwaliteit)
+cons.output_missingorders$nr <- 1
+
+# Score tabel voor vergelijking
+
+Tabel_score4 <- rbind(cons.output_missingorders$Kwaliteit==Totaal_score$Getal[1], 
+                      cons.output_missingorders$Kwaliteit>Totaal_score$Getal[2],
+                      cons.output_missingorders$Kwaliteit>Totaal_score$Getal[3],
+                      cons.output_missingorders$Kwaliteit>Totaal_score$Getal[4],
+                      cons.output_missingorders$Kwaliteit>Totaal_score$Getal[5]
+)
+
+Tabel_score4 <- t(Tabel_score4)
+Tabel_score4 <- 1*Tabel_score4
+Tabel_score4 <- as.data.frame(Tabel_score4)
+Tabel_score4$score <- rowSums(Tabel_score4[1:5])
+Tabel_score4$nr <- 1:nrow(Tabel_score4)
+
+cons.output_missingorders <- left_join(cons.output_missingorders, Tabel_score4, by =  c("nr" = "nr")) %>%
+  select(1,2,3,4,5,6,12)
+
+
+
 # 8. Naamgeving kolommen
 # 9. Controle postcode-plaatsnaam zowel voor persoon als order
-# ..
+cons.order_postcodeplaats <- prep.ordersDF %>%
+  select(Ordernummer, Postcode4, Plaats)
+cons.order_postcodeplaats$Plaats <- casefold(cons.order_postcodeplaats$Plaats, upper = FALSE)
+cons.order_postcodeplaats$Postcode4 <- as.numeric(unfactor(cons.order_postcodeplaats$Postcode4))
+
+# vervangen in orders
+cons.order_postcodeplaats$Plaats <- trimws(cons.order_postcodeplaats$Plaats)
+
+# tekensvervangen
+cons.order_postcodeplaats$Plaats <- gsub("y", "ij", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub("'", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub("'", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub("-", " ", cons.order_postcodeplaats$Plaats)
+
+# provincie afkortingen verwijderen
+cons.order_postcodeplaats$Plaats <- gsub(" gld", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub(" nb", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub(" zh", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub(" nh", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub(" ov", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub(" ut", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub(" lb", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub(" fr", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub(" dr", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub(" gn", "", cons.order_postcodeplaats$Plaats)
+
+# plaatsafhankelijke toevoegingen verwijderen
+cons.order_postcodeplaats$Plaats[cons.order_postcodeplaats$Plaats=="'s-gravenhage"] <- "den haag"
+cons.order_postcodeplaats$Plaats[cons.order_postcodeplaats$Plaats=="'s gravenhage"] <- "den haag"
+cons.order_postcodeplaats$Plaats[cons.order_postcodeplaats$Plaats=="s gravenhage"] <- "den haag"
+cons.order_postcodeplaats$Plaats[cons.order_postcodeplaats$Plaats=="'s gravenhage"] <- "den haag"
+cons.order_postcodeplaats$Plaats[cons.order_postcodeplaats$Plaats=="sgravenhage"] <- "den haag"
+cons.order_postcodeplaats$Plaats <- gsub(" ( limburg )", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub(" texel", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub(" gem asten", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub(" rt", "", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub(" ad ", " aan den ", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub("st o", "sint o", cons.order_postcodeplaats$Plaats)
+cons.order_postcodeplaats$Plaats <- gsub("st w", "sint w", cons.order_postcodeplaats$Plaats)
+
+cons.order_postcodeplaats$sleutel <- paste0(cons.order_postcodeplaats$Postcode4, cons.order_postcodeplaats$Plaats)
+
+# join
+cons.order_postcodeplaats <- left_join(cons.order_postcodeplaats, org.postcodeplaatsDF, by =  c("sleutel"="sleutel"))
+cons.order_postcodeplaats[is.na(cons.order_postcodeplaats)] <- ""
+
+# verschil
+cons.order_postcodeplaats$verschil <- ifelse(cons.order_postcodeplaats$Plaats == cons.order_postcodeplaats$woonplaatsnaam,"Nee", "Ja")
+cons.order_postcodeplaats <- cons.order_postcodeplaats %>%
+  filter(verschil == "Ja")
+
+# Op te lossen verschillen
+verschillen <- cons.order_postcodeplaats %>%
+  select(Postcode4, Plaats, verschil) %>%
+  group_by(Postcode4, Plaats) %>%
+  summarize(aantal = n())
+
+#### totaal Score postcode/plaats ####
+
+# Geen match = aantal
+cons.order_postcodeplaats <- cons.order_postcodeplaats %>%
+  summarize(aantal = n()) %>%
+  count(aantal)
+
+# totaal orders = Totaal_aantal
+cons.output_postcodeplaats <- prep.ordersDF %>%
+  summarize(Totaal_aantal = n()) %>%
+  count(Totaal_aantal)
+
+cons.output_postcodeplaats$Vergelijking      <- c("9. postcode_plaats_match")
+cons.output_postcodeplaats$Omschrijving      <- c("Kan er bij de postcode dezelfde plaast gevonden worden")
+cons.output_postcodeplaats$aantal <- cons.order_postcodeplaats$aantal
+
+cons.output_postcodeplaats$Kwaliteit <- 100-(cons.output_postcodeplaats$aantal/cons.output_postcodeplaats$Totaal_aantal)*100
+cons.output_postcodeplaats$Kwaliteit <- round(cons.output_postcodeplaats$Kwaliteit, digits = 2)
+cons.output_postcodeplaats <- cons.output_postcodeplaats %>%
+  select(Vergelijking, aantal, Totaal_aantal, Omschrijving, Kwaliteit)
+cons.output_postcodeplaats$nr <- 1
+
+# Score tabel voor vergelijking
+
+Tabel_score3 <- rbind(cons.output_postcodeplaats$Kwaliteit==Totaal_score$Getal[1], 
+                      cons.output_postcodeplaats$Kwaliteit>Totaal_score$Getal[2],
+                      cons.output_postcodeplaats$Kwaliteit>Totaal_score$Getal[3],
+                      cons.output_postcodeplaats$Kwaliteit>Totaal_score$Getal[4],
+                      cons.output_postcodeplaats$Kwaliteit>Totaal_score$Getal[5]
+)
+
+Tabel_score3 <- t(Tabel_score3)
+Tabel_score3 <- 1*Tabel_score3
+Tabel_score3 <- as.data.frame(Tabel_score3)
+Tabel_score3$score <- rowSums(Tabel_score3[1:5])
+Tabel_score3$nr <- 1:nrow(Tabel_score3)
+
+cons.output_postcodeplaats <- left_join(cons.output_postcodeplaats, Tabel_score3, by =  c("nr" = "nr")) %>%
+  select(1,2,3,4,5,6,12)
+
 
 # Uniqueness
 # 1. Geen dubbele records, functioneel en obv primary key
@@ -294,8 +773,6 @@ ggplot(t1DF, aes(x=StartDate))+
 
   summarized.wfDubbelDF<- summarized.wfDubbelDF%>%
     arrange(aantal*-1)
-  library(grid)
-  library(gridExtra)
 
   grid.table(summarized.wfDubbelDF[1:10,])
 
