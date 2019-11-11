@@ -28,3 +28,4 @@ rsconnect/
 # lost rds files
 *.rds
 Process1.png
+.RDataTmp
